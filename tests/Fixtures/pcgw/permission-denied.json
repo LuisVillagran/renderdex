@@ -1,0 +1,7 @@
+{
+    "error": {
+        "code": "permissiondenied",
+        "info": "You don't have permission to run arbitrary Cargo queries.",
+        "*": "See https://www.pcgamingwiki.com/w/api.php for API usage."
+    }
+}

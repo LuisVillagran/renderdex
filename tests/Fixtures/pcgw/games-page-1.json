@@ -1,0 +1,24 @@
+{
+    "cargoquery": [
+        {
+            "title": {
+                "PageID": "45",
+                "Page": "Mirror's Edge",
+                "SteamAppID": "17410",
+                "Upscaling": "DLSS 4.5,NIS,TAAU,XeSS 2.1",
+                "FrameGen": "DLSS Frame Generation,DLSS Multi-Frame Generation",
+                "RayTracing": "hackable"
+            }
+        },
+        {
+            "title": {
+                "PageID": "5",
+                "Page": "Titan Quest",
+                "SteamAppID": "4540,4550",
+                "Upscaling": "",
+                "FrameGen": "",
+                "RayTracing": "false"
+            }
+        }
+    ]
+}

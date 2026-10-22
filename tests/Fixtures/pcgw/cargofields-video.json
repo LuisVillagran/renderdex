@@ -1,0 +1,74 @@
+{
+    "cargofields": {
+        "WSGF_Link": {
+            "type": "URL"
+        },
+        "Widescreen_WSGF_award": {
+            "type": "String"
+        },
+        "Multimonitor_WSGF_award": {
+            "type": "String"
+        },
+        "Ultrawidescreen_WSGF_award": {
+            "type": "String"
+        },
+        "4K_Ultra_HD_WSGF_award": {
+            "type": "String"
+        },
+        "Widescreen_resolution": {
+            "type": "String"
+        },
+        "Multimonitor": {
+            "type": "String"
+        },
+        "Ultrawidescreen": {
+            "type": "String"
+        },
+        "4K_Ultra_HD": {
+            "type": "String"
+        },
+        "Field_of_view": {
+            "type": "String"
+        },
+        "Windowed": {
+            "type": "String"
+        },
+        "Borderless_fullscreen_windowed": {
+            "type": "String"
+        },
+        "Anisotropic_filtering": {
+            "type": "String"
+        },
+        "Antialiasing": {
+            "type": "String"
+        },
+        "Upscaling": {
+            "type": "String",
+            "isList": "",
+            "delimiter": ","
+        },
+        "Frame_gen": {
+            "type": "String",
+            "isList": "",
+            "delimiter": ","
+        },
+        "Vsync": {
+            "type": "String"
+        },
+        "60_FPS": {
+            "type": "String"
+        },
+        "120_FPS": {
+            "type": "String"
+        },
+        "HDR": {
+            "type": "String"
+        },
+        "Ray_tracing": {
+            "type": "String"
+        },
+        "Color_blind": {
+            "type": "String"
+        }
+    }
+}

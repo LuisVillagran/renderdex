@@ -44,7 +44,12 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Decodifica un fixture JSON de tests/Fixtures, p. ej. jsonFixture('pcgw/login-token').
+ *
+ * @return array<mixed>
+ */
+function jsonFixture(string $name): array
 {
-    // ..
+    return json_decode(file_get_contents(fixture("{$name}.json")), associative: true, flags: JSON_THROW_ON_ERROR);
 }

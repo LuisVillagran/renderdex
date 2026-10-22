@@ -1,0 +1,24 @@
+{
+    "cargoquery": [
+        {
+            "title": {
+                "PageID": "195",
+                "Page": "Dota 2",
+                "SteamAppID": "570,1241930, 652720",
+                "Upscaling": "FSR 1",
+                "FrameGen": "",
+                "RayTracing": ""
+            }
+        },
+        {
+            "title": {
+                "PageID": "5623",
+                "Page": "War Thunder",
+                "SteamAppID": "236390",
+                "Upscaling": "DLSS 4.5,XeSS 2,FSR 3.1,TSR",
+                "FrameGen": "DLSS Frame Generation,DLSS Multi-Frame Generation,FSR Frame Generation,XeSS Frame Generation",
+                "RayTracing": "limited"
+            }
+        }
+    ]
+}
