@@ -44,6 +44,26 @@ class SteamClient
     }
 
     /**
+     * Nombre visible y avatar del perfil, o null si Steam no lo encuentra.
+     *
+     * @throws SteamUnavailableException
+     */
+    public function playerSummary(string $steamId): ?PlayerSummary
+    {
+        $player = $this->get('ISteamUser/GetPlayerSummaries/v2/', ['steamids' => $steamId])['response']['players'][0] ?? null;
+
+        if (! is_array($player) || blank($player['personaname'] ?? null)) {
+            return null;
+        }
+
+        return new PlayerSummary(
+            steamId: (string) $player['steamid'],
+            name: (string) $player['personaname'],
+            avatarUrl: $player['avatarmedium'] ?? null,
+        );
+    }
+
+    /**
      * Biblioteca del usuario, en caché durante una hora. Los errores no se guardan en caché.
      *
      * @return list<OwnedGame>

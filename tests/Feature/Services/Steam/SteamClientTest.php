@@ -173,6 +173,31 @@ it('reports a profile as not found when the custom URL does not exist', function
     (new SteamClient)->resolveSteamId(ProfileInput::vanity('this-profile-does-not-exist'));
 })->throws(ProfileNotFoundException::class);
 
+it('returns the display name and avatar of a profile', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/*' => Http::response(jsonFixture('steam/player-summaries')),
+    ]);
+
+    $summary = (new SteamClient)->playerSummary(TEST_STEAM_ID);
+
+    expect($summary)
+        ->steamId->toBe(TEST_STEAM_ID)
+        ->name->toBe('Rabscuttle')
+        ->avatarUrl->toBe('https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg');
+    Http::assertSent(fn (Request $request) => str_starts_with($request->url(), 'https://')
+        && $request['steamids'] === TEST_STEAM_ID);
+});
+
+it('returns no summary when Steam does not know the profile', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/*' => Http::response(jsonFixture('steam/player-summaries-empty')),
+    ]);
+
+    expect((new SteamClient)->playerSummary(TEST_STEAM_ID))->toBeNull();
+});
+
 it('uses a SteamID64 as is without calling Steam', function () {
     Http::preventStrayRequests();
     Http::fake();

@@ -31,7 +31,15 @@ return [
     'steam' => [
         'api_url' => 'https://api.steampowered.com',
         'key' => env('STEAM_API_KEY'),
+
+        // "Sign in through Steam" (OpenID 2.0) con socialiteproviders/steam.
+        'client_id' => null,
+        // Vacío a propósito: el proveedor pediría el perfil por http:// con la API key en la URL.
+        // El nombre y el avatar se obtienen con App\Services\Steam\SteamClient, por HTTPS.
+        'client_secret' => null,
         'redirect' => env('STEAM_REDIRECT_URI'),
+        // Rechaza respuestas de Steam cuyo return_to apunte a otro dominio.
+        'allowed_hosts' => [parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)],
     ],
 
     'slack' => [
