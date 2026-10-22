@@ -21,6 +21,7 @@ class Game extends Model
     protected $fillable = [
         'pcgw_page_id',
         'title',
+        'normalized_title',
         'dlss',
         'dlss_fg',
         'dlss_mfg',

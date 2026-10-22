@@ -66,7 +66,9 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
    Las vanity se resuelven con `ISteamUser/ResolveVanityURL`.
 2. Pedir los juegos con `IPlayerService/GetOwnedGames` (`include_appinfo=1`, `include_played_free_games=1`).
 3. Cachear el resultado por SteamID64 durante 1 hora.
-4. Cruzar los AppIDs con la base de datos local y clasificar.
+4. Cruzar la biblioteca con la base de datos local (`App\Services\Library\LibraryMatcher`):
+   - Primero por Steam AppID (`game_steam_appids`).
+   - **Respaldo por nombre** para los que no coinciden: título exacto normalizado (`App\Services\TitleNormalizer`: minúsculas, sin ™ ® ©, apóstrofes/guiones unificados, espacios colapsados) contra `games.normalized_title`, **solo** entre juegos sin ningún AppID en la wiki y **solo** si hay un único candidato. Nunca coincidencias parciales ("Cyberpunk 2077" ≠ "Cyberpunk 2077: Ultimate Edition"). Cubre vacíos de la wiki como Euro Truck Simulator 2.
 5. Las portadas se cargan desde el CDN de Steam, con `loading="lazy"` y un fallback si fallan.
 
 ### 2b. Inicio de sesión con Steam
@@ -141,7 +143,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
 
 ### Modelo de datos (inicial)
 - `games`
-  - Identificación: id, pcgw_page_id (unique), title.
+  - Identificación: id, pcgw_page_id (unique), title, normalized_title (index, para el respaldo por nombre).
   - Clasificación (enum `Support`): dlss, dlss_fg, dlss_mfg, fsr, fsr_fg, xess, xess_fg, ray_tracing.
   - Texto crudo: upscaling_tech (text), frame_gen_tech (text).
   - Control: synced_at.

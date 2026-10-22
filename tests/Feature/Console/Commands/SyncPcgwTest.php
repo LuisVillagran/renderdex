@@ -86,6 +86,7 @@ it('stores the precomputed classification and the raw technology text', function
 
     expect(Game::firstWhere('pcgw_page_id', 45))
         ->title->toBe("Mirror's Edge")
+        ->normalized_title->toBe("mirror's edge")
         ->dlss->toBe(Support::Yes)
         ->dlss_fg->toBe(Support::Yes)
         ->dlss_mfg->toBe(Support::Yes)
