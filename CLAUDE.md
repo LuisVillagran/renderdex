@@ -54,7 +54,7 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
   - Límite oficial: **60 requests/minuto**. Si se excede, responde 429 y bloquea la IP 60 s. Pausa entre requests y reintentos con backoff.
   - **Nunca** consultar la wiki durante una visita de usuario.
   - Contacto con el equipo de PCGW: su Discord.
-- **Desarrollo local:** Cloudflare bloquea la API desde la máquina de desarrollo (casa y red móvil), pero responde desde IPs de data center. Para obtener datos reales se usa el workflow manual `.github/workflows/pcgw-sample.yml`, que publica muestras en la rama `pcgw-samples` usando los secrets `PCGW_BOT_USERNAME`/`PCGW_BOT_PASSWORD` del repositorio. Es un puente temporal.
+- **Desarrollo local:** Cloudflare bloquea la API desde la máquina de desarrollo (casa y red móvil), pero responde desde IPs de data center. Para obtener datos reales se usa el workflow manual `.github/workflows/pcgw-sync.yml` ("Run workflow" en GitHub), que corre `php artisan pcgw:sync` con los secrets `PCGW_BOT_USERNAME`/`PCGW_BOT_PASSWORD` del repositorio y publica estadísticas y un volcado (`renderdex-pcgw.sql.gz`) en la rama `pcgw-data`. Para importarlo en local: `php artisan migrate:fresh` y luego `gunzip -c renderdex-pcgw.sql.gz | psql -U postgres -d renderdex`.
 
 ### 2. Consulta del usuario
 1. Normalizar el input. Formatos aceptados:

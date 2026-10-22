@@ -1,0 +1,112 @@
+# Corre `php artisan pcgw:sync` contra la wiki real desde GitHub Actions.
+# La wiki bloquea la máquina de desarrollo, pero responde desde IPs de data center.
+# Publica estadísticas y un volcado de los datos en la rama `pcgw-data` (no en main).
+name: PCGW sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/pcgw-sync.yml
+
+permissions:
+  contents: write
+
+concurrency: pcgw-sync
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: renderdex
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: renderdex
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      PCGW_BOT_USERNAME: ${{ secrets.PCGW_BOT_USERNAME }}
+      PCGW_BOT_PASSWORD: ${{ secrets.PCGW_BOT_PASSWORD }}
+      PSQL: docker exec ${{ job.services.postgres.id }} psql -U postgres -d renderdex -tA
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+
+      - name: Sync PCGamingWiki
+        run: php artisan pcgw:sync
+
+      - name: Summarize synced data
+        if: always()
+        run: |
+          mkdir -p out
+          {
+            echo "# Datos de PCGamingWiki para Renderdex"
+            echo
+            echo "Generado por \`.github/workflows/pcgw-sync.yml\` (run ${{ github.run_id }})."
+            echo "Datos de [PCGamingWiki](https://www.pcgamingwiki.com/), licencia [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/)."
+            echo
+            echo "## Último sync"
+            echo '```'
+            $PSQL -c "SELECT status, pages_processed, last_offset, started_at, finished_at, coalesce(error, '') FROM sync_runs ORDER BY id DESC LIMIT 1"
+            echo '```'
+            echo "## Totales"
+            echo '```'
+            $PSQL -c "SELECT 'games', count(*) FROM games UNION ALL SELECT 'steam appids', count(*) FROM game_steam_appids"
+            echo '```'
+            echo "## Soporte por tecnología (yes / no / unknown)"
+            echo '```'
+            for column in dlss dlss_fg dlss_mfg fsr fsr_fg xess xess_fg ray_tracing; do
+              $PSQL -c "SELECT '$column', count(*) FILTER (WHERE $column = 'yes'), count(*) FILTER (WHERE $column = 'no'), count(*) FILTER (WHERE $column = 'unknown') FROM games"
+            done
+            echo '```'
+          } > out/README.md
+          cat out/README.md
+          while IFS= read -r line; do echo "::notice title=pcgw-sync::$line"; done < <(sed -n '/## Último sync/,$p' out/README.md | grep -v '^```' | grep -v '^$')
+
+      - name: Dump synced data
+        run: |
+          docker exec ${{ job.services.postgres.id }} pg_dump -U postgres -d renderdex --data-only --no-owner \
+            -t games -t game_steam_appids -t sync_runs | gzip -9 > out/renderdex-pcgw.sql.gz
+          ls -lh out
+
+      - name: Publish to pcgw-data branch
+        if: always()
+        run: |
+          cd out
+          git init -q -b pcgw-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "PCGamingWiki data from run ${{ github.run_id }}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pcgw-data
