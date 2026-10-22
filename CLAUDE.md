@@ -296,7 +296,10 @@ php artisan test
 
 ## Estado actual
 
-- [ ] Etapa 1: Setup
+- [x] Etapa 1: Setup
+  - Repositorio: https://github.com/LuisVillagran/renderdex (CI en verde).
+  - Local: Herd (`http://renderdex.test`) + PostgreSQL 18 (bases `renderdex` y `renderdex_test`).
+  - Sin tabla `users`: solo `sessions`, `cache` y `jobs`.
 - [ ] Etapa 2: Sync PCGW
 - [ ] Etapa 3: Steam
 - [ ] Etapa 4: UI
