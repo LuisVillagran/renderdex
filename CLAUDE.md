@@ -80,6 +80,8 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
   - Botón "Cerrar sesión" que destruye la sesión.
   - Al iniciar sesión, redirigir a `/u/{steamid64}`.
 - Validar siempre la respuesta OpenID en el servidor: que venga de `steamcommunity.com` y que el `claimed_id` tenga el formato correcto.
+  - Implementado en `App\Services\Steam\SteamOpenIdVerifier`: exige `op_endpoint` de Steam, `claimed_id` estricto (`https://steamcommunity.com/openid/id/<SteamID64>`) y firmado, y `return_to` hacia nuestro dominio (`allowed_hosts`). Recién entonces el paquete verifica la firma con Steam (`check_authentication`).
+  - **No usar `Socialite::driver('steam')->user()`:** el paquete pide el perfil por `http://` con la API key en la URL. Por eso `services.steam.client_secret` queda en `null`, y el nombre y el avatar se obtienen con `SteamClient::playerSummary()` por HTTPS. Si Steam no responde, se inicia sesión igual, sin nombre ni avatar.
 - El botón usa el diseño oficial de "Sign in through Steam" que Valve permite. Es la única excepción a la regla de no usar logos de terceros.
 - Ambas opciones conviven en la página de inicio: **"Iniciar sesión con Steam"** como opción principal y el campo de URL/SteamID como alternativa, para quien no quiera iniciar sesión.
 
@@ -312,7 +314,7 @@ php artisan test
 - [x] Etapa 2: Sync PCGW
   - `pcgw:sync` probado contra la wiki real desde GitHub Actions: 55.717 páginas en ~3 min, 55.715 juegos y 62.318 AppIDs (octubre de 2026). Volcado importable en la rama `pcgw-data`.
   - ~12% de los juegos no tiene `Steam_AppID` en la wiki (algunos no están en Steam; otros son vacíos de la wiki, como Euro Truck Simulator 2).
-- [ ] Etapa 3: Steam
+- [ ] Etapa 3: Steam (código y tests listos; falta la prueba manual con `STEAM_API_KEY` y el login real)
 - [ ] Etapa 4: UI
 - [ ] Etapa 5: Pulido
 - [ ] Etapa 6: Publicación
