@@ -29,6 +29,7 @@ return [
     ],
 
     'steam' => [
+        'api_url' => 'https://api.steampowered.com',
         'key' => env('STEAM_API_KEY'),
         'redirect' => env('STEAM_REDIRECT_URI'),
     ],

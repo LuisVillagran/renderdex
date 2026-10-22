@@ -1,0 +1,59 @@
+{
+    "response": {
+        "game_count": 4,
+        "games": [
+            {
+                "appid": 570,
+                "name": "Dota 2",
+                "playtime_forever": 125430,
+                "img_icon_url": "0bbb630d63262dd66d2fdd0f7d37e8661a410075",
+                "has_community_visible_stats": true,
+                "playtime_windows_forever": 125430,
+                "playtime_mac_forever": 0,
+                "playtime_linux_forever": 0,
+                "playtime_deck_forever": 0,
+                "rtime_last_played": 1760000000,
+                "playtime_disconnected": 0
+            },
+            {
+                "appid": 1091500,
+                "name": "Cyberpunk 2077",
+                "playtime_forever": 5410,
+                "img_icon_url": "15ba5ea5a0b6bd9ba8bd61bb7c6a1d5fd4b0b6b0",
+                "has_community_visible_stats": true,
+                "playtime_windows_forever": 5410,
+                "playtime_mac_forever": 0,
+                "playtime_linux_forever": 0,
+                "playtime_deck_forever": 0,
+                "rtime_last_played": 1760000000,
+                "playtime_disconnected": 0
+            },
+            {
+                "appid": 227300,
+                "name": "Euro Truck Simulator 2",
+                "playtime_forever": 2875,
+                "img_icon_url": "6f2a8f3b5d5b2b0fb1d1d5a5c1a0e9b1a8c9d2f1",
+                "has_community_visible_stats": true,
+                "playtime_windows_forever": 2875,
+                "playtime_mac_forever": 0,
+                "playtime_linux_forever": 0,
+                "playtime_deck_forever": 0,
+                "rtime_last_played": 1760000000,
+                "playtime_disconnected": 0
+            },
+            {
+                "appid": 413150,
+                "name": "Stardew Valley",
+                "playtime_forever": 0,
+                "img_icon_url": "35d12f3f7b7a8b6c9c2b1e0a9f8e7d6c5b4a3f21",
+                "has_community_visible_stats": true,
+                "playtime_windows_forever": 0,
+                "playtime_mac_forever": 0,
+                "playtime_linux_forever": 0,
+                "playtime_deck_forever": 0,
+                "rtime_last_played": 1760000000,
+                "playtime_disconnected": 0
+            }
+        ]
+    }
+}

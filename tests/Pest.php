@@ -44,6 +44,9 @@ expect()->extend('toBeOne', function () {
 |
 */
 
+/** SteamID64 de ejemplo de la documentación de Valve, usado en los fixtures de Steam. */
+const TEST_STEAM_ID = '76561197960287930';
+
 /**
  * Decodifica un fixture JSON de tests/Fixtures, p. ej. jsonFixture('pcgw/login-token').
  *
