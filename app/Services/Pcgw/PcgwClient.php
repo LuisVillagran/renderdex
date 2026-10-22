@@ -23,6 +23,21 @@ class PcgwClient
         $this->cookies = new CookieJar;
     }
 
+    public function countGames(): int
+    {
+        $game = config('pcgw.tables.game');
+        $video = config('pcgw.tables.video');
+
+        $response = $this->cargo([
+            'action' => 'cargoquery',
+            'tables' => "{$game},{$video}",
+            'join_on' => "{$game}._pageID={$video}._pageID",
+            'fields' => 'COUNT(*)=Total',
+        ]);
+
+        return (int) ($response['cargoquery'][0]['title']['Total'] ?? 0);
+    }
+
     /**
      * Devuelve una página del join Game + Video, ordenada por ID de página.
      *

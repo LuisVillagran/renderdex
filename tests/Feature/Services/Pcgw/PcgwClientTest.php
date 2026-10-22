@@ -50,6 +50,24 @@ it('logs in with the bot password and returns parsed games', function () {
         && str_contains($request['fields'], 'Video.Frame_gen=FrameGen'));
 });
 
+it('counts the pages available in the game and video join', function () {
+    Http::preventStrayRequests();
+    Sleep::fake();
+    Http::fake([
+        'www.pcgamingwiki.com/w/api.php*' => Http::sequence()
+            ->push(jsonFixture('pcgw/login-token'))
+            ->push(jsonFixture('pcgw/login-success'))
+            ->push(jsonFixture('pcgw/games-count')),
+    ]);
+
+    $total = (new PcgwClient)->countGames();
+
+    expect($total)->toBe(5);
+    Http::assertSent(fn (Request $request) => $request['action'] === 'cargoquery'
+        && $request['fields'] === 'COUNT(*)=Total'
+        && $request['join_on'] === 'Game._pageID=Video._pageID');
+});
+
 it('identifies itself with a descriptive user agent on every request', function () {
     Http::preventStrayRequests();
     Sleep::fake();
