@@ -37,20 +37,24 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 
 ### 1. Sincronización con PCGamingWiki (job diario)
 - **Comando:** `php artisan pcgw:sync`, agendado a diario en `routes/console.php`.
+- **Autenticación (desde agosto de 2026):** `cargoquery` exige login con un **bot password** (`action=query&meta=tokens&type=login` + `action=login`), con el permiso *"Create, query and delete data through the Cargo extension"*. Credenciales en `.env` (`PCGW_BOT_USERNAME`, `PCGW_BOT_PASSWORD`); la sesión vive en una cookie y se reintenta el login una vez si expira.
 - **Consulta:**
   - Usa la API Cargo (`https://www.pcgamingwiki.com/w/api.php`, `action=cargoquery`).
-  - Hace un join de `Infobox_game` con `Video` por `_pageID` y pagina con `limit` + `offset`.
-- **Campos:** los nombres de campos de `Video` (upscaling, frame gen, ray tracing) se detectan con `action=cargofields&table=Video`. Hay respaldo en `config/pcgw.php`.
-- **Guardado:** hace upsert en `games` y `game_steam_appids`. `Steam_AppID` es un campo lista: una página puede tener varios AppIDs.
+  - Hace un join de `Game` (antes `Infobox_game`) con `Video` por `_pageID` y pagina con `limit=500` + `offset`. ~55.700 filas ≈ 112 requests.
+  - Los campos que empiezan con `_` deben llevar alias (`Game._pageID=PageID`).
+- **Campos:** `Video.Upscaling` y `Video.Frame_gen` son listas (delimitador `,`) de tecnologías con versión; `Video.Ray_tracing` es un estado. Se verifican con `action=cargofields&table=Video`. Hay respaldo en `config/pcgw.php`.
+- **Guardado:** hace upsert en `games` y `game_steam_appids`. `Steam_AppID` es un campo lista (`115300,42680,42690`): una página puede tener varios AppIDs, y ~20% no tiene ninguno. Si un AppID aparece en dos páginas, gana la última sincronizada.
 - **Sync inicial grande:** la wiki tiene decenas de miles de páginas.
   - El sync debe ser **reanudable**: guarda el último offset procesado en la tabla `sync_runs`.
   - Muestra avance en consola (barra de progreso).
   - Acepta `--limit` para desarrollo y `--fresh` para empezar desde cero.
 - **Registro de cada ejecución:** inicio, fin, páginas procesadas, errores y estado. La fecha del último sync exitoso se muestra en la UI.
 - **Respeto con la wiki:**
-  - `User-Agent` propio y descriptivo (`Renderdex/1.0 (+URL del repo)`).
-  - Pausa entre requests y reintentos con backoff.
+  - `User-Agent` con contacto, como pide la wiki: `Renderdex/1.0 (https://github.com/LuisVillagran/renderdex; LuisVillagran) Laravel/13`.
+  - Límite oficial: **60 requests/minuto**. Si se excede, responde 429 y bloquea la IP 60 s. Pausa entre requests y reintentos con backoff.
   - **Nunca** consultar la wiki durante una visita de usuario.
+  - Contacto con el equipo de PCGW: su Discord.
+- **Desarrollo local:** Cloudflare bloquea la API desde la máquina de desarrollo (casa y red móvil), pero responde desde IPs de data center. Para obtener datos reales se usa el workflow manual `.github/workflows/pcgw-sample.yml`, que publica muestras en la rama `pcgw-samples` usando los secrets `PCGW_BOT_USERNAME`/`PCGW_BOT_PASSWORD` del repositorio. Es un puente temporal.
 
 ### 2. Consulta del usuario
 1. Normalizar el input. Formatos aceptados:
@@ -90,26 +94,28 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 ### 4. Clasificación
 - Toda la lógica va en `App\Services\FeatureClassifier`, una clase pura sin HTTP ni base de datos, fácil de testear.
 - Cada tecnología devuelve un enum `Support`: `Yes`, `No` o `Unknown`.
-- Las reglas buscan texto (sin distinguir mayúsculas) en los campos *tech* y *notes* de cada grupo:
+- Las listas se separan por `,` y se compara **cada valor completo** (sin distinguir mayúsculas ni espacios sobrantes), nunca subcadenas sueltas:
 
-| Tecnología | Grupo | Se marca `Yes` si aparece |
+| Tecnología | Campo | Se marca `Yes` si la lista contiene |
 |---|---|---|
-| DLSS | upscaling | `dlss` |
-| DLSS FG | frame gen | `dlss` (o `dlss frame gen` / `dlss-fg` en upscaling) |
-| DLSS MFG | frame gen | `multi-frame`, `multi frame`, `mfg` |
-| FSR | upscaling | `fsr` |
-| FSR FG | frame gen | `fsr` (o `fsr frame gen` / `fsr-fg` en upscaling) |
-| XeSS | upscaling | `xess` |
-| XeSS FG | frame gen | `xess` (o `xess-fg` / `xess frame gen` en upscaling) |
-| Ray Tracing | ray tracing | estado `true`, `limited` o `hackable` |
+| DLSS | `Upscaling` | un valor `DLSS <versión>` (p. ej. `DLSS 4.5`) |
+| DLSS FG | `Frame_gen` | `DLSS Frame Generation` **o** `DLSS Multi-Frame Generation` (MFG incluye FG) |
+| DLSS MFG | `Frame_gen` | `DLSS Multi-Frame Generation` |
+| FSR | `Upscaling` | un valor `FSR <versión>` (incluye FSR 1, que es upscaling) |
+| FSR FG | `Frame_gen` | `FSR Frame Generation` |
+| XeSS | `Upscaling` | un valor `XeSS <versión>` |
+| XeSS FG | `Frame_gen` | `XeSS Frame Generation` |
+| Ray Tracing | `Ray_tracing` | estado `true`, `limited`, `hackable` o `always on` |
 
+- Valores conocidos que no corresponden a ninguna tecnología de la tabla (`TSR`, `TAAU`, `NIS`, `MetalFX`, `MetalFX Frame Interpolation`) se ignoran para clasificar, pero cuentan para decidir `No`.
 - **Cuándo queda `No`:**
-  - Upscaling y frame gen: el estado del grupo es `false` o `n/a`, o el estado es `true` y el texto de tecnologías no menciona esa tecnología.
+  - Upscaling y frame gen: la lista **de ese mismo campo** tiene valores, pero ninguno es esa tecnología (p. ej. `Upscaling = FSR 1` → DLSS `No`).
   - Ray tracing: el estado es `false` o `n/a`.
-- **Cuándo queda `Unknown`:** en cualquier otro caso.
-- **Cuidado con los falsos positivos:** "FSR 1" es upscaling espacial y no frame gen; que un juego tenga "FSR 3" no implica que tenga FSR FG. Esto se cubre con tests.
+- **Cuándo queda `Unknown`:** en cualquier otro caso. En particular: lista vacía (la wiki no guarda un estado aparte, así que vacío no significa "no"), RT vacío o `unknown`, sin fila en `Video`, o sin página en la wiki. Un juego con `Upscaling` documentado y `Frame_gen` vacío queda con frame gen `Unknown`, no `No` (decisión tomada: preferir honestidad a menos "?").
+- **Cuidado con los falsos positivos:** "FSR 1" o "FSR 3" en `Upscaling` nunca implican FSR FG; frame gen solo sale de `Frame_gen`. Esto se cubre con tests.
 - La clasificación se calcula en el sync y se guarda en columnas. No se recalcula en cada request.
 - El texto crudo de tecnologías (por ejemplo "DLSS 4, FSR 3.1, XeSS 2") también se guarda, para mostrar versiones en la UI.
+- **Mejora futura (no implementar todavía):** una fuente de respaldo para contrastar los juegos que quedan en `Unknown` (por ejemplo, las listas oficiales de NVIDIA, AMD e Intel). Solo como complemento de PCGamingWiki, nunca como fuente principal: no traen Steam AppID y el cruce sería por nombre. Revisar licencia y términos antes de usarlas.
 
 ### Estructura sugerida
 ```
@@ -219,7 +225,8 @@ Requisitos, sea cual sea:
 - Cron cada minuto para `schedule:run`.
 - Un worker de colas permanente.
 - HTTPS.
-- Variables de entorno: `STEAM_API_KEY`, `APP_URL` y base de datos.
+- Variables de entorno: `STEAM_API_KEY`, `PCGW_BOT_USERNAME`, `PCGW_BOT_PASSWORD`, `APP_URL` y base de datos.
+- Una IP de salida que PCGamingWiki no bloquee (las de data center funcionan; verificado desde GitHub Actions).
 - Ejecutar el sync inicial completo una vez, antes de abrir el sitio.
 
 ---
