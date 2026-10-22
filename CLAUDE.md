@@ -307,7 +307,9 @@ php artisan test
   - Repositorio: https://github.com/LuisVillagran/renderdex (CI en verde).
   - Local: Herd (`http://renderdex.test`) + PostgreSQL 18 (bases `renderdex` y `renderdex_test`).
   - Sin tabla `users`: solo `sessions`, `cache` y `jobs`.
-- [ ] Etapa 2: Sync PCGW
+- [x] Etapa 2: Sync PCGW
+  - `pcgw:sync` probado contra la wiki real desde GitHub Actions: 55.717 páginas en ~3 min, 55.715 juegos y 62.318 AppIDs (octubre de 2026). Volcado importable en la rama `pcgw-data`.
+  - ~12% de los juegos no tiene `Steam_AppID` en la wiki (algunos no están en Steam; otros son vacíos de la wiki, como Euro Truck Simulator 2).
 - [ ] Etapa 3: Steam
 - [ ] Etapa 4: UI
 - [ ] Etapa 5: Pulido
