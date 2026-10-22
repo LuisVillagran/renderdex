@@ -43,7 +43,6 @@ jobs:
       DB_PASSWORD: postgres
       PCGW_BOT_USERNAME: ${{ secrets.PCGW_BOT_USERNAME }}
       PCGW_BOT_PASSWORD: ${{ secrets.PCGW_BOT_PASSWORD }}
-      PSQL: docker exec ${{ job.services.postgres.id }} psql -U postgres -d renderdex -tA
 
     steps:
       - uses: actions/checkout@v4
@@ -68,6 +67,8 @@ jobs:
 
       - name: Summarize synced data
         if: always()
+        env:
+          PSQL: docker exec ${{ job.services.postgres.id }} psql -U postgres -d renderdex -tA
         run: |
           mkdir -p out
           {
