@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Support;
+use App\Enums\Technology;
 use App\Services\FeatureClassifier;
 
 // Los valores de entrada vienen de filas reales de PCGamingWiki (octubre de 2026).
@@ -95,4 +96,17 @@ it('classifies ray tracing from its state', function (?string $state, Support $e
     'vacío' => ['', Support::Unknown],
     'null' => [null, Support::Unknown],
     'mayúsculas' => ['TRUE', Support::Yes],
+]);
+
+it('finds the latest version of each upscaler', function (?string $upscaling, Technology $technology, ?string $expected) {
+    expect((new FeatureClassifier)->latestVersion($upscaling, $technology))->toBe($expected);
+})->with([
+    'Cyberpunk 2077, FSR' => ['DLSS 4,FSR 2.1,FSR 3,FSR 3.1,FSR 4,XeSS 1.3,XeSS 2', Technology::Fsr, '4'],
+    'Cyberpunk 2077, XeSS' => ['DLSS 4,FSR 2.1,FSR 3,FSR 3.1,FSR 4,XeSS 1.3,XeSS 2', Technology::Xess, '2'],
+    'orden numérico, no alfabético' => ['DLSS 3.10,DLSS 3.9', Technology::Dlss, '3.10'],
+    'mayúsculas y espacios' => [' dlss 4.5 ', Technology::Dlss, '4.5'],
+    'sin versión' => ['DLSS', Technology::Dlss, null],
+    'no aparece' => ['FSR 1', Technology::Dlss, null],
+    'lista vacía' => [null, Technology::Fsr, null],
+    'no es un reescalador' => ['DLSS 4', Technology::DlssFg, null],
 ]);

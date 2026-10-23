@@ -15,3 +15,12 @@ test('each technology belongs to its vendor', function (Technology $technology, 
     'XeSS FG' => [Technology::XessFg, Vendor::Intel],
     'Ray Tracing' => [Technology::RayTracing, Vendor::All],
 ]);
+
+test('technologies are grouped by vendor in display order', function () {
+    expect(Technology::byVendor())->toBe([
+        'nvidia' => [Technology::Dlss, Technology::DlssFg, Technology::DlssMfg],
+        'amd' => [Technology::Fsr, Technology::FsrFg],
+        'intel' => [Technology::Xess, Technology::XessFg],
+        'all' => [Technology::RayTracing],
+    ]);
+});

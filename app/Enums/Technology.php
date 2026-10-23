@@ -26,8 +26,19 @@ enum Technology: string
         };
     }
 
-    public function isFrameGeneration(): bool
+    /**
+     * Las tecnologías agrupadas por marca, en el orden en que se muestran.
+     *
+     * @return array<string, list<self>> Indexado por el valor de {@see Vendor}.
+     */
+    public static function byVendor(): array
     {
-        return in_array($this, [self::DlssFg, self::DlssMfg, self::FsrFg, self::XessFg], true);
+        $groups = [];
+
+        foreach (self::cases() as $technology) {
+            $groups[$technology->vendor()->value][] = $technology;
+        }
+
+        return $groups;
     }
 }
