@@ -8,6 +8,7 @@ use App\Services\Steam\InvalidProfileInputException;
 use App\Services\Steam\ProfileInputParser;
 use App\Services\Steam\SteamClient;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 
 /**
@@ -15,6 +16,9 @@ use Livewire\Component;
  */
 class LibraryLookup extends Component
 {
+    /** Búsquedas por IP y minuto: cada una puede costar una llamada a ResolveVanityURL. */
+    public const LOOKUPS_PER_MINUTE = 10;
+
     public string $profile = '';
 
     public function lookup(ProfileInputParser $parser, SteamClient $steam): void
@@ -23,6 +27,17 @@ class LibraryLookup extends Component
             ['profile' => ['required', 'string', 'max:255']],
             ['profile.required' => __('lookup.errors.required')],
         );
+
+        // La IP va hasheada: la clave queda en la tabla de caché mientras dura el límite.
+        $rateLimitKey = 'profile-lookup:'.sha1((string) request()->ip());
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, self::LOOKUPS_PER_MINUTE)) {
+            $this->addError('profile', __('lookup.errors.too_many', ['seconds' => RateLimiter::availableIn($rateLimitKey)]));
+
+            return;
+        }
+
+        RateLimiter::increment($rateLimitKey);
 
         try {
             $steamId = $steam->resolveSteamId($parser->parse($this->profile));

@@ -5,7 +5,10 @@ namespace App\Providers;
 use App\Models\SyncRun;
 use App\Services\Steam\DemoSteamClient;
 use App\Services\Steam\SteamClient;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +17,9 @@ use SocialiteProviders\Steam\Provider as SteamProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /** Páginas que piden datos a Steam (biblioteca y login) por IP y minuto. */
+    public const STEAM_REQUESTS_PER_MINUTE = 30;
+
     /**
      * Register any application services.
      */
@@ -38,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('components.layout', function ($view) {
             $view->with('lastSyncAt', SyncRun::lastSuccessfulAt());
+        });
+
+        // La Steam Web API permite 100.000 llamadas diarias en total: cada IP tiene un cupo.
+        RateLimiter::for('steam', function (Request $request) {
+            return Limit::perMinute(self::STEAM_REQUESTS_PER_MINUTE)->by($request->ip());
         });
     }
 }

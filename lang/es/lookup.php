@@ -13,6 +13,7 @@ return [
         'invalid' => 'Eso no parece un perfil de Steam. Revisa los formatos aceptados.',
         'not_found' => 'No encontramos ningún perfil de Steam con esa URL personalizada.',
         'unavailable' => 'Steam no responde en este momento. Inténtalo de nuevo en unos minutos.',
+        'too_many' => 'Hiciste muchas búsquedas seguidas. Espera :seconds segundos e inténtalo de nuevo.',
     ],
 
 ];

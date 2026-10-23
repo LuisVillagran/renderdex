@@ -5,6 +5,7 @@ use App\Enums\Vendor;
 use App\Livewire\LibraryTable;
 use App\Models\Game;
 use App\Models\GameSteamAppid;
+use App\Providers\AppServiceProvider;
 use App\Services\Steam\DemoSteamClient;
 use App\Services\Steam\SteamClient;
 use Illuminate\Support\Facades\Http;
@@ -313,3 +314,15 @@ it('returns 404 for an invalid SteamID64 in the URL', function (string $steamId)
     'demasiado corto' => '12345',
     'fuera de rango' => '12345678901234567',
 ]);
+
+it('limits library pages per IP and explains it in Spanish', function () {
+    fakeOwnedGames([[570, 'Dota 2']]);
+
+    foreach (range(1, AppServiceProvider::STEAM_REQUESTS_PER_MINUTE) as $attempt) {
+        $this->get(route('library.show', TEST_STEAM_ID))->assertOk();
+    }
+
+    $this->get(route('library.show', TEST_STEAM_ID))
+        ->assertTooManyRequests()
+        ->assertSee(__('errors.429.title'));
+});

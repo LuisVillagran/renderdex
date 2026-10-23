@@ -82,3 +82,26 @@ it('asks to try again later when Steam does not respond, without technical detai
         ->assertDontSee('HTTP 503')
         ->assertNoRedirect();
 });
+
+it('stops looking up profiles after too many attempts from the same IP', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'api.steampowered.com/ISteamUser/ResolveVanityURL/v1/*' => Http::response(jsonFixture('steam/resolve-vanity-success')),
+    ]);
+
+    foreach (range(1, LibraryLookup::LOOKUPS_PER_MINUTE) as $attempt) {
+        Livewire::test(LibraryLookup::class)
+            ->set('profile', 'gabelogannewell')
+            ->call('lookup')
+            ->assertHasNoErrors();
+    }
+
+    Livewire::test(LibraryLookup::class)
+        ->set('profile', 'gabelogannewell')
+        ->call('lookup')
+        ->assertHasErrors('profile')
+        ->assertSee('Hiciste muchas búsquedas seguidas')
+        ->assertNoRedirect();
+
+    Http::assertSentCount(LibraryLookup::LOOKUPS_PER_MINUTE);
+});
