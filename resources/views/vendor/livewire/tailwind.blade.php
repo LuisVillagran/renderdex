@@ -10,10 +10,10 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
     JS
     : '';
 
-$base = 'relative inline-flex items-center border text-sm font-medium leading-5';
-$link = $base.' border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800';
-$disabled = $base.' cursor-default border-zinc-300 bg-white text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-600';
-$current = $base.' z-10 cursor-default border-sky-600 bg-sky-600 text-white';
+$base = 'relative inline-flex items-center border font-mono text-sm font-medium leading-5';
+$link = $base.' focus-ring border-line bg-panel/80 text-fg hover:bg-raised focus-visible:z-10';
+$disabled = $base.' cursor-default border-line bg-panel/80 text-muted/60';
+$current = $base.' bg-brand z-10 cursor-default border-transparent';
 @endphp
 
 <div>
@@ -39,13 +39,13 @@ $current = $base.' z-10 cursor-default border-sky-600 bg-sky-600 text-white';
             </div>
 
             <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                <p class="text-sm text-muted">
                     {{ __('Showing') }}
-                    <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $paginator->firstItem() }}</span>
+                    <span class="font-mono font-medium text-fg">{{ $paginator->firstItem() }}</span>
                     {{ __('to') }}
-                    <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $paginator->lastItem() }}</span>
+                    <span class="font-mono font-medium text-fg">{{ $paginator->lastItem() }}</span>
                     {{ __('of') }}
-                    <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $paginator->total() }}</span>
+                    <span class="font-mono font-medium text-fg">{{ $paginator->total() }}</span>
                     {{ __('results') }}
                 </p>
 

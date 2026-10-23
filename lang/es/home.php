@@ -2,7 +2,9 @@
 
 return [
 
-    'title' => '¿Qué juegos de tu biblioteca soportan DLSS, FSR, XeSS y Ray Tracing?',
+    'eyebrow' => ':count juegos documentados en PCGamingWiki',
+    'title' => '¿Qué juegos de tu biblioteca soportan :technologies?',
+    'title_technologies' => 'DLSS, FSR, XeSS y Ray Tracing',
     'intro' => 'Renderdex cruza tu biblioteca de Steam con los datos de PCGamingWiki y te muestra qué tecnologías de render soporta cada juego, sin que tengas que instalarlos.',
 
     'steam_login' => [
@@ -13,9 +15,33 @@ return [
 
     'or' => 'o',
 
+    'preview' => [
+        'label' => 'Vista previa',
+        'caption' => 'Datos reales de la wiki, tal como los verás en tu biblioteca.',
+    ],
+
+    'how' => [
+        'title' => 'Cómo funciona',
+        'steps' => [
+            [
+                'title' => 'Conecta tu biblioteca',
+                'body' => 'Inicia sesión con Steam o pega la URL de tu perfil. No hace falta instalar nada.',
+            ],
+            [
+                'title' => 'La cruzamos con la wiki',
+                'body' => 'Cada juego se compara con los datos de PCGamingWiki, que se sincronizan a diario.',
+            ],
+            [
+                'title' => 'Filtra por tu GPU',
+                'body' => 'Elige NVIDIA, AMD o Intel y ve de un vistazo qué juegos aprovechan tu tarjeta.',
+            ],
+        ],
+    ],
+
     'privacy_help' => [
         'title' => '¿Cómo hago pública mi biblioteca?',
         'steps' => 'En Steam, abre tu perfil → Editar perfil → Configuración de privacidad, y deja "Mi perfil" y "Detalles del juego" en Público.',
+        'family_sharing_title' => '¿Y el Préstamo familiar?',
         'family_sharing' => 'Los juegos que usas mediante Préstamo familiar (Family Sharing) no aparecen: Steam solo informa los juegos de tu propia biblioteca.',
     ],
 

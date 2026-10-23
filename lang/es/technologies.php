@@ -38,6 +38,14 @@ return [
         'ray_tracing' => 'Ray Tracing',
     ],
 
+    // Encabezado de cada grupo de columnas; Ray Tracing funciona en cualquier marca.
+    'group' => [
+        'nvidia' => 'NVIDIA',
+        'amd' => 'AMD',
+        'intel' => 'Intel',
+        'all' => 'Ray Tracing',
+    ],
+
     'vendor' => [
         'nvidia' => 'NVIDIA',
         'amd' => 'AMD',

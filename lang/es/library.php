@@ -3,7 +3,8 @@
 return [
 
     'title' => 'Biblioteca',
-    'heading' => 'Biblioteca de Steam',
+    'eyebrow' => 'Biblioteca de Steam',
+    'heading' => 'Tu biblioteca, por tecnología',
     'share' => 'Copiar enlace',
     'copied' => 'Enlace copiado',
 
@@ -12,7 +13,8 @@ return [
     'stats' => [
         'label' => 'Resumen de la biblioteca',
         'total' => 'Juegos',
-        'with_wiki_page' => 'Con página en la wiki',
+        'with_wiki_page' => ':count con página en la wiki',
+        'games_with' => ':count de :total juegos',
     ],
 
     'gpu' => [
@@ -35,7 +37,7 @@ return [
         'cover' => 'Portada',
         'name' => 'Nombre',
         'playtime' => 'Horas',
-        'versions' => 'Versiones',
+        'hours' => ':hours h',
         'sort_by' => 'Ordenar por :column',
     ],
 
@@ -46,7 +48,10 @@ return [
 
     'no_results' => 'Ningún juego coincide con la búsqueda o los filtros.',
     'empty' => 'Esta biblioteca no tiene juegos.',
-    'legend' => '"Sin datos" significa que la wiki no lo documenta.',
+    'legend' => [
+        'label' => 'Cómo leer la tabla',
+        'unknown' => '"Sin datos" significa que la wiki no lo documenta.',
+    ],
 
     'errors' => [
         'private' => [

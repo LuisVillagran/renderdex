@@ -1,6 +1,10 @@
 <?php
 
+use App\Enums\Support;
+use App\Http\Controllers\HomeController;
 use App\Livewire\LibraryLookup;
+use App\Models\Game;
+use App\Models\GameSteamAppid;
 use App\Models\SyncRun;
 
 it('offers signing in with Steam and pasting a profile to guests', function () {
@@ -73,4 +77,26 @@ it('says when the data has never been synced', function () {
 
     $response->assertOk();
     $response->assertSee(__('layout.footer.never_synced'));
+});
+
+it('previews real games from the wiki and how many games it documents', function () {
+    [$first, $second] = HomeController::SHOWCASE_APPIDS;
+    GameSteamAppid::factory()->for(Game::factory()->create(['title' => 'Showcase Two']))->create(['steam_appid' => $second]);
+    GameSteamAppid::factory()->for(Game::factory()->create(['title' => 'Showcase One', 'dlss' => Support::Yes, 'upscaling_tech' => 'DLSS 4.5']))->create(['steam_appid' => $first]);
+    Game::factory()->count(3)->create();
+
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertSee(__('home.eyebrow', ['count' => 5]));
+    $response->assertSeeInOrder(['Showcase One', 'DLSS (reescalado) 4.5:', 'Showcase Two']);
+    $response->assertSee("steam/apps/{$first}/capsule_184x69.jpg", escape: false);
+});
+
+it('hides the preview until the wiki has been synced', function () {
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertDontSee(__('home.preview.label'));
+    $response->assertDontSee(__('home.eyebrow', ['count' => 0]));
 });

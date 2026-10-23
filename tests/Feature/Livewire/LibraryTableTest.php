@@ -55,8 +55,9 @@ function listedNames($component): array
 it('lists every game with its support and a link to its wiki page', function () {
     $cyberpunk = wikiGame(1091500, 'Cyberpunk 2077', [
         'dlss' => Support::Yes,
-        'fsr' => Support::No,
-        'upscaling_tech' => 'DLSS 4,FSR 3.1',
+        'fsr' => Support::Yes,
+        'xess' => Support::No,
+        'upscaling_tech' => 'DLSS 4,FSR 2.1,FSR 3.1',
     ]);
     fakeOwnedGames([[1091500, 'Cyberpunk 2077', 5410]]);
 
@@ -64,9 +65,12 @@ it('lists every game with its support and a link to its wiki page', function () 
         ->assertSee('Cyberpunk 2077')
         ->assertSee('https://www.pcgamingwiki.com/w/index.php?curid='.$cyberpunk->pcgw_page_id)
         ->assertSee('90,2')
-        ->assertSee('DLSS 4, FSR 3.1')
+        ->assertSee('DLSS (reescalado) 4:')
+        ->assertSee('FSR (reescalado) 3.1:')
+        ->assertDontSee('FSR (reescalado) 2.1:')
         ->assertSeeHtml('<span class="sr-only">Sí</span>')
-        ->assertSeeHtml('<span class="sr-only">No</span>');
+        ->assertSeeHtml('<span class="sr-only">No</span>')
+        ->assertSeeHtml('<span class="sr-only">Sin datos</span>');
 });
 
 it('loads covers lazily from the Steam CDN with a fallback image', function () {

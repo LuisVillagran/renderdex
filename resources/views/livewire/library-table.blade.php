@@ -1,13 +1,18 @@
 @php
+    use App\Enums\MatchSource;
     use App\Enums\Support;
     use App\Enums\Technology;
-    use App\Services\Library\LibraryBrowser;
+    use App\Enums\Vendor;
     use Illuminate\Support\Number;
 
-    $technologies = Technology::cases();
-    $isHighlighted = fn (Technology $technology) => $highlightedVendor !== null && $technology->vendor() === $highlightedVendor;
+    $groups = Technology::byVendor();
+    $isHighlighted = fn (string $vendor) => $highlightedVendor?->value === $vendor;
+    // En pantallas chicas, con una marca elegida, solo se muestran sus tecnologías y Ray Tracing.
+    $compactGroups = $highlightedVendor ? array_intersect_key($groups, array_flip([$highlightedVendor->value, Vendor::All->value])) : $groups;
+    $percent = fn (int $count) => $stats['total'] > 0 ? round($count / $stats['total'] * 100) : 0;
     $sortIndicator = fn (string $column) => $sort === $column ? ($direction === 'asc' ? '↑' : '↓') : '';
     $ariaSort = fn (string $column) => $sort === $column ? ($direction === 'asc' ? 'ascending' : 'descending') : 'none';
+    $hours = fn (int $minutes) => __('library.table.hours', ['hours' => Number::format($minutes / 60, maxPrecision: 1)]);
 @endphp
 
 <div
@@ -26,115 +31,140 @@
         },
     }"
 >
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-2xl font-semibold tracking-tight">{{ __('library.heading') }}</h1>
+    {{-- Encabezado y selector "Mi GPU" --}}
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div class="flex flex-col gap-2">
+            <p class="font-mono text-xs tracking-widest text-accent uppercase">{{ __('library.eyebrow') }}</p>
+            <h1 class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">{{ __('library.heading') }}</h1>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-muted">
+                <span>SteamID {{ $steamId }}</span>
+                <button
+                    type="button"
+                    x-data="{ copied: false }"
+                    x-on:click="navigator.clipboard.writeText(@js(route('library.show', $steamId))); copied = true; setTimeout(() => copied = false, 2000)"
+                    class="focus-ring inline-flex items-center gap-1.5 rounded-md px-2 py-1 ring-1 ring-line ring-inset hover:text-fg hover:ring-muted"
+                >
+                    <svg class="size-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.6 3.4a3.5 3.5 0 0 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .75.75 0 1 1 1.06-1.06 2 2 0 0 0 2.83 0l2.5-2.5a2 2 0 0 0-2.83-2.83l-.88.88a.75.75 0 1 1-1.06-1.06l.88-.88Zm-5.2 5.2a3.5 3.5 0 0 1 4.95 0 .75.75 0 1 1-1.06 1.06 2 2 0 0 0-2.83 0l-2.5 2.5a2 2 0 1 0 2.83 2.83l.88-.88a.75.75 0 1 1 1.06 1.06l-.88.88a3.5 3.5 0 0 1-4.95-4.95l2.5-2.5Z" /></svg>
+                    <span x-show="! copied">{{ __('library.share') }}</span>
+                    <span x-show="copied" x-cloak role="status" class="text-accent">{{ __('library.copied') }}</span>
+                </button>
+            </div>
+        </div>
 
-        <button
-            type="button"
-            x-data="{ copied: false }"
-            x-on:click="navigator.clipboard.writeText(@js(route('library.show', $steamId))); copied = true; setTimeout(() => copied = false, 2000)"
-            class="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none dark:border-zinc-700 dark:hover:bg-zinc-800"
-        >
-            <span x-show="! copied">{{ __('library.share') }}</span>
-            <span x-show="copied" x-cloak role="status">{{ __('library.copied') }}</span>
-        </button>
+        @unless ($error)
+            <fieldset class="flex flex-col gap-2">
+                <legend class="mb-2 font-mono text-xs tracking-widest text-muted uppercase">{{ __('library.gpu.label') }}</legend>
+                <div class="grid grid-cols-4 gap-1 rounded-xl border border-line bg-panel/80 p-1 backdrop-blur">
+                    @foreach (['nvidia', 'amd', 'intel', 'all'] as $option)
+                        <button
+                            type="button"
+                            wire:key="gpu-{{ $option }}"
+                            x-on:click="chooseGpu('{{ $option }}')"
+                            aria-pressed="{{ $gpu === $option ? 'true' : 'false' }}"
+                            @class([
+                                'focus-ring rounded-lg px-3 py-2 text-sm font-semibold transition sm:px-5',
+                                'bg-brand shadow-lg shadow-accent-2/25' => $gpu === $option,
+                                'text-muted hover:bg-raised hover:text-fg' => $gpu !== $option,
+                            ])
+                        >
+                            {{ __('technologies.vendor.'.$option) }}
+                        </button>
+                    @endforeach
+                </div>
+                <p class="text-xs text-muted">{{ __('library.gpu.help') }}</p>
+            </fieldset>
+        @endunless
     </div>
 
     @if ($isDemo)
-        <p class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="note">
+        <p class="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200" role="note">
             {{ __('library.demo') }}
         </p>
     @endif
 
     @if ($error === 'private')
-        <section class="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900" role="alert">
+        <section class="panel flex flex-col gap-2 p-6" role="alert">
             <h2 class="text-lg font-semibold">{{ __('library.errors.private.title') }}</h2>
-            <p class="text-zinc-600 dark:text-zinc-400">{{ __('library.errors.private.body') }}</p>
-            <p class="text-zinc-600 dark:text-zinc-400">{{ __('home.privacy_help.steps') }}</p>
+            <p class="text-muted">{{ __('library.errors.private.body') }}</p>
+            <p class="text-muted">{{ __('home.privacy_help.steps') }}</p>
         </section>
     @elseif ($error === 'unavailable')
-        <section class="flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900" role="alert">
+        <section class="panel flex flex-col items-start gap-3 p-6" role="alert">
             <h2 class="text-lg font-semibold">{{ __('library.errors.unavailable.title') }}</h2>
-            <p class="text-zinc-600 dark:text-zinc-400">{{ __('library.errors.unavailable.body') }}</p>
-            <button type="button" wire:click="$refresh" class="rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-zinc-900">
+            <p class="text-muted">{{ __('library.errors.unavailable.body') }}</p>
+            <button type="button" wire:click="$refresh" class="focus-ring bg-brand rounded-lg px-4 py-2 font-semibold">
                 {{ __('library.errors.unavailable.retry') }}
             </button>
         </section>
     @else
         {{-- Estadísticas --}}
         <section aria-label="{{ __('library.stats.label') }}">
-            <dl class="grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 lg:grid-cols-10">
-                <div class="rounded-lg border border-zinc-200 bg-white p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                    <dt class="text-[0.7rem] leading-tight text-zinc-600 sm:text-xs dark:text-zinc-400">{{ __('library.stats.total') }}</dt>
-                    <dd class="text-lg font-semibold tabular-nums sm:text-xl">{{ Number::format($stats['total']) }}</dd>
+            <dl class="grid grid-cols-2 gap-3 lg:grid-cols-5">
+                <div class="panel col-span-2 flex flex-col justify-between gap-4 p-5 lg:col-span-1">
+                    <dt class="font-mono text-xs tracking-widest text-muted uppercase">{{ __('library.stats.total') }}</dt>
+                    <dd class="flex flex-col gap-3">
+                        <span class="text-4xl font-bold tabular-nums">{{ Number::format($stats['total']) }}</span>
+                        <span class="flex flex-col gap-1.5 text-xs text-muted">
+                            {{ __('library.stats.with_wiki_page', ['count' => Number::format($stats['with_wiki_page'])]) }}
+                            <span class="h-1 rounded-full bg-raised" aria-hidden="true">
+                                <span class="bg-brand block h-full rounded-full" style="width: {{ $percent($stats['with_wiki_page']) }}%"></span>
+                            </span>
+                        </span>
+                    </dd>
                 </div>
-                <div class="rounded-lg border border-zinc-200 bg-white p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                    <dt class="text-[0.7rem] leading-tight text-zinc-600 sm:text-xs dark:text-zinc-400">{{ __('library.stats.with_wiki_page') }}</dt>
-                    <dd class="text-lg font-semibold tabular-nums sm:text-xl">{{ Number::format($stats['with_wiki_page']) }}</dd>
-                </div>
-                @foreach ($technologies as $technology)
-                    <div wire:key="stat-{{ $technology->value }}" @class([
-                        'rounded-lg border bg-white p-2 sm:p-3 dark:bg-zinc-900',
-                        'border-sky-400 dark:border-sky-700' => $isHighlighted($technology),
-                        'border-zinc-200 dark:border-zinc-800' => ! $isHighlighted($technology),
-                    ])>
-                        <dt class="text-[0.7rem] leading-tight text-zinc-600 sm:text-xs dark:text-zinc-400">{{ __('technologies.label.'.$technology->value) }}</dt>
-                        <dd class="text-lg font-semibold tabular-nums sm:text-xl">{{ Number::format($stats['technologies'][$technology->value]) }}</dd>
+
+                @foreach ($groups as $vendor => $groupTechnologies)
+                    <div wire:key="stat-{{ $vendor }}" @class(['panel flex flex-col gap-3 p-4', 'ring-1 ring-accent/60 glow' => $isHighlighted($vendor)])>
+                        <dt @class(['font-mono text-xs tracking-widest uppercase', 'text-accent' => $isHighlighted($vendor), 'text-muted' => ! $isHighlighted($vendor)])>
+                            {{ __('technologies.group.'.$vendor) }}
+                        </dt>
+                        <dd class="flex flex-col gap-2.5">
+                            @if (count($groupTechnologies) === 1)
+                                {{-- Una sola tecnología (Ray Tracing): número grande, sin repetir el nombre. --}}
+                                @php $count = $stats['technologies'][$groupTechnologies[0]->value]; @endphp
+                                <span class="text-3xl font-bold tabular-nums">{{ Number::format($count) }}</span>
+                                <span class="flex flex-col gap-1.5 text-xs text-muted">
+                                    {{ __('library.stats.games_with', ['count' => Number::format($count), 'total' => Number::format($stats['total'])]) }}
+                                    <span class="h-1 rounded-full bg-raised" aria-hidden="true">
+                                        <span class="bg-brand block h-full rounded-full" style="width: {{ $percent($count) }}%"></span>
+                                    </span>
+                                </span>
+                            @else
+                                @foreach ($groupTechnologies as $technology)
+                                    @php $count = $stats['technologies'][$technology->value]; @endphp
+                                    <span class="flex flex-col gap-1">
+                                        <span class="flex items-baseline justify-between gap-2 text-sm">
+                                            <span class="text-muted">{{ __('technologies.label.'.$technology->value) }}</span>
+                                            <span class="font-semibold tabular-nums">{{ Number::format($count) }}</span>
+                                        </span>
+                                        <span class="h-1 rounded-full bg-raised" aria-hidden="true">
+                                            <span class="bg-brand block h-full rounded-full" style="width: {{ $percent($count) }}%"></span>
+                                        </span>
+                                    </span>
+                                @endforeach
+                            @endif
+                        </dd>
                     </div>
                 @endforeach
             </dl>
         </section>
 
-        {{-- Controles --}}
-        <section class="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <fieldset class="flex flex-col gap-1.5">
-                    <legend class="mb-1.5 text-sm font-medium">{{ __('library.gpu.label') }}</legend>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach (['nvidia', 'amd', 'intel', 'all'] as $option)
-                            <button
-                                type="button"
-                                wire:key="gpu-{{ $option }}"
-                                x-on:click="chooseGpu('{{ $option }}')"
-                                aria-pressed="{{ $gpu === $option ? 'true' : 'false' }}"
-                                @class([
-                                    'rounded-lg border px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none',
-                                    'border-sky-600 bg-sky-600 text-white' => $gpu === $option,
-                                    'border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800' => $gpu !== $option,
-                                ])
-                            >
-                                {{ __('technologies.vendor.'.$option) }}
-                            </button>
-                        @endforeach
-                    </div>
-                    <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('library.gpu.help') }}</p>
-                </fieldset>
-
-                <div class="flex flex-col gap-1.5 lg:w-72">
-                    <label for="library-search" class="text-sm font-medium">{{ __('library.search.label') }}</label>
-                    <input
-                        id="library-search"
-                        type="search"
-                        wire:model.live.debounce.300ms="search"
-                        placeholder="{{ __('library.search.placeholder') }}"
-                        class="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:placeholder:text-zinc-500"
-                    >
-                </div>
-            </div>
-
-            <fieldset class="flex flex-col gap-1.5">
-                <legend class="mb-1.5 text-sm font-medium">{{ __('library.filters.label') }}</legend>
+        {{-- Filtros y búsqueda --}}
+        <section class="panel flex flex-col gap-4 p-4 lg:flex-row lg:items-end lg:justify-between">
+            <fieldset class="flex flex-col gap-2">
+                <legend class="mb-2 font-mono text-xs tracking-widest text-muted uppercase">{{ __('library.filters.label') }}</legend>
                 <div class="flex flex-wrap items-center gap-2">
-                    @foreach ($technologies as $technology)
+                    @foreach (Technology::cases() as $technology)
+                        @php $isActive = in_array($technology->value, $activeFilters, true); @endphp
                         <button
                             type="button"
                             wire:key="filter-{{ $technology->value }}"
                             wire:click="toggleFilter('{{ $technology->value }}')"
-                            aria-pressed="{{ in_array($technology->value, $activeFilters, true) ? 'true' : 'false' }}"
+                            aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                             @class([
-                                'rounded-full border px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none',
-                                'border-emerald-600 bg-emerald-600 text-white' => in_array($technology->value, $activeFilters, true),
-                                'border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800' => ! in_array($technology->value, $activeFilters, true),
+                                'focus-ring rounded-full px-3 py-1 font-mono text-xs font-medium ring-1 ring-inset transition',
+                                'bg-accent/15 text-accent ring-accent/50' => $isActive,
+                                'text-muted ring-line hover:text-fg hover:ring-muted' => ! $isActive,
                             ])
                         >
                             {{ __('technologies.label.'.$technology->value) }}
@@ -142,109 +172,132 @@
                     @endforeach
 
                     @if ($activeFilters !== [] || $search !== '')
-                        <button type="button" wire:click="clearFilters" class="rounded-full px-3 py-1 text-sm text-sky-700 underline hover:text-sky-900 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none dark:text-sky-400 dark:hover:text-sky-300">
+                        <button type="button" wire:click="clearFilters" class="focus-ring rounded-full px-2 py-1 text-xs text-accent underline underline-offset-2">
                             {{ __('library.filters.clear') }}
                         </button>
                     @endif
                 </div>
             </fieldset>
+
+            <div class="flex flex-col gap-2 lg:w-72">
+                <label for="library-search" class="font-mono text-xs tracking-widest text-muted uppercase">{{ __('library.search.label') }}</label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.32 9.88l3.4 3.4a.75.75 0 1 0 1.06-1.06l-3.4-3.4A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd" /></svg>
+                    <input
+                        id="library-search"
+                        type="search"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="{{ __('library.search.placeholder') }}"
+                        class="w-full rounded-lg border border-line bg-canvas/60 py-2 pr-3 pl-9 text-sm placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/30 focus:outline-none"
+                    >
+                </div>
+            </div>
         </section>
 
         {{-- Tabla --}}
-        <div class="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900" wire:loading.class="opacity-60">
-            <table class="w-full text-sm">
-                <caption class="sr-only">{{ __('library.table.caption') }}</caption>
-                <thead class="bg-zinc-50 text-left text-xs text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">
-                    <tr>
-                        <th scope="col" class="hidden px-3 py-2 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
-                        @foreach (['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
-                            <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-2 py-2 sm:px-3', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
-                                <button type="button" wire:click="sortBy('{{ $column }}')" class="inline-flex items-center gap-1 rounded font-semibold hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none dark:hover:text-zinc-100" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
-                                    {{ $label }} <span aria-hidden="true">{{ $sortIndicator($column) }}</span>
-                                </button>
-                            </th>
-                        @endforeach
-                        @foreach ($technologies as $technology)
-                            <th scope="col" wire:key="th-{{ $technology->value }}" title="{{ __('technologies.description.'.$technology->value) }}" @class([
-                                'px-1.5 py-2 text-center font-semibold sm:px-2',
-                                'hidden md:table-cell' => $technology->isFrameGeneration(),
-                                'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200' => $isHighlighted($technology),
-                            ])>
-                                {{-- Ray Tracing no es de una marca: sin rótulo, pero con la misma altura. --}}
-                                <span class="block text-[0.65rem] font-normal tracking-wide uppercase" aria-hidden="true">{{ $technology->vendor() === \App\Enums\Vendor::All ? "\u{00A0}" : __('technologies.vendor.'.$technology->vendor()->value) }}</span>
-                                <abbr title="{{ __('technologies.description.'.$technology->value) }}" class="no-underline">{{ __('technologies.column.'.$technology->value) }}</abbr>
-                            </th>
-                        @endforeach
-                        <th scope="col" class="hidden px-3 py-2 font-semibold lg:table-cell">{{ __('library.table.versions') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                    @forelse ($games as $entry)
-                        <tr wire:key="game-{{ $entry->owned->appid }}">
-                            <td class="hidden px-3 py-2 sm:table-cell">
-                                <img
-                                    src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{{ $entry->owned->appid }}/capsule_184x69.jpg"
-                                    alt=""
-                                    width="92"
-                                    height="35"
-                                    loading="lazy"
-                                    onerror="this.onerror = null; this.src = '{{ asset('images/cover-placeholder.svg') }}'"
-                                    class="h-[35px] w-[92px] max-w-none rounded bg-zinc-200 object-cover dark:bg-zinc-800"
-                                >
-                            </td>
-                            <td class="px-2 py-2 sm:px-3">
-                                @if ($entry->game)
-                                    <a href="https://www.pcgamingwiki.com/w/index.php?curid={{ $entry->game->pcgw_page_id }}" rel="noopener" title="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="font-medium hover:underline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none">
-                                        {{ $entry->owned->name }}
-                                    </a>
-                                    @if ($entry->matchedBy === \App\Enums\MatchSource::Title)
-                                        <span class="block text-xs text-amber-700 dark:text-amber-400" title="{{ __('library.matched_by_title_help') }}">{{ __('library.matched_by_title') }}</span>
-                                    @endif
-                                @else
-                                    <span class="font-medium">{{ $entry->owned->name }}</span>
-                                    <span class="block text-xs text-zinc-500 dark:text-zinc-400">{{ __('library.no_wiki_page') }}</span>
-                                @endif
-                            </td>
-                            <td class="hidden px-3 py-2 text-right tabular-nums sm:table-cell">
-                                {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
-                            </td>
-                            @foreach ($technologies as $technology)
-                                <td wire:key="cell-{{ $entry->owned->appid }}-{{ $technology->value }}" @class([
-                                    'px-1.5 py-2 text-center sm:px-2',
-                                    'hidden md:table-cell' => $technology->isFrameGeneration(),
-                                    'bg-sky-50 dark:bg-sky-950/40' => $isHighlighted($technology),
-                                ])>
-                                    <x-support :value="$entry->game?->{$technology->value} ?? Support::Unknown" />
-                                </td>
-                            @endforeach
-                            <td class="hidden px-3 py-2 text-xs text-zinc-600 lg:table-cell dark:text-zinc-400">
-                                {{-- Solo upscaling: frame gen no trae versión y ya se ve en sus columnas. --}}
-                                {{ str_replace(',', ', ', (string) $entry->game?->upscaling_tech) }}
-                            </td>
-                        </tr>
-                    @empty
+        <div class="panel overflow-hidden" wire:loading.class="opacity-60">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <caption class="sr-only">{{ __('library.table.caption') }}</caption>
+                    <thead class="border-b border-line text-left font-mono text-[0.7rem] tracking-wider text-muted uppercase">
                         <tr>
-                            <td colspan="{{ count($technologies) + 4 }}" class="px-3 py-8 text-center text-zinc-600 dark:text-zinc-400">
-                                {{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
-                            </td>
+                            <th scope="col" class="hidden py-3 pr-1 pl-4 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
+                            @foreach (['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
+                                <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-3 py-3 font-medium', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
+                                    <button type="button" wire:click="sortBy('{{ $column }}')" class="focus-ring inline-flex items-center gap-1 rounded tracking-wider uppercase hover:text-fg" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
+                                        {{ $label }} <span aria-hidden="true" class="text-accent">{{ $sortIndicator($column) }}</span>
+                                    </button>
+                                </th>
+                            @endforeach
+                            @foreach ($groups as $vendor => $groupTechnologies)
+                                <th scope="col" wire:key="th-{{ $vendor }}" @class([
+                                    'hidden px-3 py-3 font-medium lg:table-cell',
+                                    'bg-accent/5 text-accent' => $isHighlighted($vendor),
+                                ])>
+                                    {{ __('technologies.group.'.$vendor) }}
+                                </th>
+                            @endforeach
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-line/70">
+                        @forelse ($games as $entry)
+                            <tr wire:key="game-{{ $entry->owned->appid }}" class="transition-colors hover:bg-raised/50">
+                                <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
+                                    <img
+                                        src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{{ $entry->owned->appid }}/capsule_184x69.jpg"
+                                        alt=""
+                                        width="92"
+                                        height="35"
+                                        loading="lazy"
+                                        onerror="this.onerror = null; this.src = '{{ asset('images/cover-placeholder.svg') }}'"
+                                        class="h-[35px] w-[92px] max-w-none rounded-md bg-raised object-cover ring-1 ring-line"
+                                    >
+                                </td>
+                                <td class="px-3 py-3">
+                                    <div class="flex flex-col gap-2">
+                                        <div class="flex flex-col gap-0.5">
+                                            @if ($entry->game)
+                                                <a href="https://www.pcgamingwiki.com/w/index.php?curid={{ $entry->game->pcgw_page_id }}" rel="noopener" title="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring self-start rounded font-semibold hover:text-accent">
+                                                    {{ $entry->owned->name }}
+                                                </a>
+                                            @else
+                                                <span class="font-semibold">{{ $entry->owned->name }}</span>
+                                            @endif
+                                            <span class="flex flex-wrap gap-x-3 text-xs text-muted">
+                                                <span class="font-mono sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                                                @if (! $entry->game)
+                                                    <span>{{ __('library.no_wiki_page') }}</span>
+                                                @elseif ($entry->matchedBy === MatchSource::Title)
+                                                    <span class="text-amber-700 dark:text-amber-400" title="{{ __('library.matched_by_title_help') }}">{{ __('library.matched_by_title') }}</span>
+                                                @endif
+                                            </span>
+                                        </div>
+
+                                        {{-- Sin espacio para las columnas por marca: las píldoras van bajo el nombre. --}}
+                                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 lg:hidden">
+                                            @foreach ($compactGroups as $vendor => $groupTechnologies)
+                                                <x-tech-pills wire:key="compact-{{ $entry->owned->appid }}-{{ $vendor }}" :game="$entry->game" :technologies="$groupTechnologies" />
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="hidden px-3 py-3 text-right align-top font-mono text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
+                                    {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
+                                </td>
+                                @foreach ($groups as $vendor => $groupTechnologies)
+                                    <td wire:key="cell-{{ $entry->owned->appid }}-{{ $vendor }}" @class([
+                                        'hidden px-3 py-3 lg:table-cell',
+                                        'bg-accent/5' => $isHighlighted($vendor),
+                                    ])>
+                                        <x-tech-pills :game="$entry->game" :technologies="$groupTechnologies" />
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ 3 + count($groups) }}" class="px-3 py-12 text-center text-muted">
+                                    {{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{ $games->links() }}
 
-        <div class="flex flex-col gap-1 text-sm text-zinc-600 dark:text-zinc-400">
-            <p class="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <div class="flex flex-col gap-3 text-sm text-muted">
+            <p class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <span class="font-mono text-xs tracking-widest uppercase">{{ __('library.legend.label') }}</span>
                 @foreach ([Support::Yes, Support::No, Support::Unknown] as $support)
-                    <span class="inline-flex items-center gap-1">
-                        {{-- El texto visible ya lo dice: el ícono se oculta a lectores de pantalla. --}}
-                        <span aria-hidden="true"><x-support :value="$support" /></span>
+                    <span class="inline-flex items-center gap-1.5">
+                        {{-- El texto visible ya lo dice: la píldora se oculta a lectores de pantalla. --}}
+                        <x-tech-pill :technology="Technology::Dlss" :support="$support" aria-hidden="true" />
                         {{ __('technologies.support.'.$support->value) }}
                     </span>
                 @endforeach
-                <span>{{ __('library.legend') }}</span>
+                <span>{{ __('library.legend.unknown') }}</span>
             </p>
             <p>{{ __('home.privacy_help.family_sharing') }}</p>
         </div>
