@@ -7,6 +7,7 @@ use App\Services\Steam\DemoSteamClient;
 use App\Services\Steam\SteamClient;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\Steam\Provider as SteamProvider;
@@ -28,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Number::format() usa inglés por defecto ("90.2"); en español debe ser "90,2".
+        Number::useLocale($this->app->getLocale());
+
         Event::listen(function (SocialiteWasCalled $event) {
             $event->extendSocialite('steam', SteamProvider::class);
         });

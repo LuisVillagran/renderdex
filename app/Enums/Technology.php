@@ -25,4 +25,9 @@ enum Technology: string
             self::RayTracing => Vendor::All,
         };
     }
+
+    public function isFrameGeneration(): bool
+    {
+        return in_array($this, [self::DlssFg, self::DlssMfg, self::FsrFg, self::XessFg], true);
+    }
 }
