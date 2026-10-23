@@ -26,7 +26,7 @@
                 x-on:click="chooseGpu('{{ $option }}')"
                 aria-pressed="{{ $gpu === $option ? 'true' : 'false' }}"
                 @class([
-                    'focus-ring px-3 py-2 font-mono text-xs font-bold uppercase transition sm:px-5',
+                    'focus-ring px-3 py-2 font-mono text-xs font-bold uppercase transition active:translate-y-px sm:px-5',
                     'border-l border-line-strong' => ! $loop->first,
                     'bg-accent text-on-accent' => $gpu === $option,
                     'text-muted hover:bg-raised hover:text-fg' => $gpu !== $option,

@@ -19,7 +19,7 @@
 
         <button
             type="submit"
-            class="focus-ring border border-accent bg-accent px-5 py-2.5 font-mono text-sm font-bold text-on-accent uppercase transition hover:brightness-110 disabled:opacity-60 sm:-ml-px"
+            class="focus-ring border border-accent bg-accent px-5 py-2.5 font-mono text-sm font-bold text-on-accent uppercase transition hover:brightness-110 active:translate-y-px disabled:opacity-60 sm:-ml-px"
             wire:loading.attr="disabled"
         >
             <span wire:loading.remove wire:target="lookup">{{ __('lookup.submit') }} ↵</span>

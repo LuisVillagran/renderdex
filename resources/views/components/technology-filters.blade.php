@@ -13,7 +13,7 @@
                     wire:click="toggleFilter('{{ $technology->value }}')"
                     aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                     @class([
-                        'focus-ring inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-xs transition',
+                        'focus-ring inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-xs transition active:translate-y-px',
                         'border-accent bg-accent/12 text-accent' => $isActive,
                         'border-line-strong text-muted hover:border-fg hover:text-fg' => ! $isActive,
                     ])

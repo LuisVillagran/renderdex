@@ -127,6 +127,21 @@
         linear-gradient(var(--tick), var(--tick)) bottom right / 1px 9px no-repeat,
         var(--rd-panel);
     background-origin: border-box;
+    transition: background-size 0.25s steps(5);
+
+    /* Las escuadras se extienden al pasar el mouse, como al enfocar un instrumento. */
+    &:hover {
+        --tick: var(--rd-accent);
+        background-size:
+            16px 1px,
+            1px 16px,
+            16px 1px,
+            1px 16px,
+            16px 1px,
+            1px 16px,
+            16px 1px,
+            1px 16px;
+    }
 }
 
 /* Regla con marcas cada 8px y una más larga cada 64px. */
@@ -151,6 +166,8 @@
     display: block;
     height: 100%;
     background-image: repeating-linear-gradient(90deg, var(--rd-accent) 0 5px, transparent 5px 7px);
+    /* Se llena de a segmentos al aparecer. */
+    animation: rd-meter 0.9s steps(24, end) 0.2s both;
 }
 
 /* Etiqueta técnica: mono, chica, en mayúsculas. */
@@ -170,8 +187,198 @@
     }
 }
 
+/*
+ * Movimiento. Todo es CSS salvo el marcador de la regla, los contadores y el texto
+ * que se decodifica (resources/js/app.js). Con prefers-reduced-motion se muestra el
+ * estado final sin animar (ver el bloque del final).
+ */
+@keyframes rd-type {
+    from {
+        width: 0;
+    }
+}
+
+@keyframes rd-rise {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@keyframes rd-ignite {
+    0% {
+        opacity: 0.2;
+        filter: grayscale(1);
+    }
+
+    55% {
+        filter: brightness(1.7);
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes rd-scan {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+@keyframes rd-render-text {
+    from {
+        background-position: 100% 0;
+    }
+}
+
+@keyframes rd-meter {
+    from {
+        clip-path: inset(0 100% 0 0);
+    }
+}
+
+@keyframes rd-loading {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(400%);
+    }
+}
+
+/* Texto que se "tipea": requiere fuente mono y --chars con la cantidad de caracteres. */
+@utility animate-type {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    width: calc(var(--chars) * 1ch);
+    animation: rd-type 0.8s steps(var(--chars)) var(--delay, 0ms) both;
+}
+
+/* Entrada escalonada: cada elemento define su --delay. */
+@utility animate-rise {
+    animation: rd-rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0ms) both;
+}
+
+/* Las píldoras se "encienden" una a una. */
+@utility animate-ignite {
+    animation: rd-ignite 0.5s ease-out var(--delay, 0ms) both;
+}
+
+/* Línea de escaneo que barre su contenedor (relative) una sola vez. */
+@utility scanline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--rd-accent), transparent);
+    box-shadow: 0 0 12px var(--rd-accent);
+    animation: rd-scan 1.6s ease-in-out var(--delay, 0ms) both;
+}
+
+/* El texto se "renderiza" de izquierda a derecha, en pasos, línea por línea. */
+@utility text-render {
+    color: transparent;
+    background-image: linear-gradient(90deg, var(--rd-accent) 0 50%, var(--rd-line-strong) 50% 100%);
+    background-size: 200% 100%;
+    background-position: 0 0;
+    background-clip: text;
+    box-decoration-break: clone;
+    animation: rd-render-text 1.2s steps(20) 0.3s both;
+}
+
+/* Barra de carga mientras Livewire actualiza; el contenedor debe ser relative. */
+@utility loading-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    height: 2px;
+    background-color: var(--rd-accent);
+    animation: rd-loading 0.9s ease-in-out infinite;
+}
+
+/* Marcador que sigue al mouse sobre la regla del header (posición desde app.js). */
+@utility ruler-cursor {
+    position: absolute;
+    bottom: 0;
+    left: var(--cursor-x, 0);
+    width: 1px;
+    height: 200%;
+    background-color: var(--rd-accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+
+    [data-active] > & {
+        opacity: 1;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: -3px;
+        border: 3.5px solid transparent;
+        border-bottom-color: var(--rd-accent);
+    }
+}
+
+/* Aparición al hacer scroll; solo se oculta si hay JS para mostrarlo después. */
+.js [data-reveal] {
+    transition:
+        opacity 0.6s ease,
+        transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--delay, 0ms);
+
+    &:not([data-revealed]) {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    /* Conectores del pipeline: se dibujan de a tramos. */
+    & [data-connector] {
+        transform-origin: left;
+        transition: transform 0.8s steps(12) calc(var(--delay, 0ms) + 0.3s);
+    }
+
+    &:not([data-revealed]) [data-connector] {
+        transform: scaleX(0);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .animate-blink {
-        animation: none;
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+    }
+
+    .loading-bar {
+        width: 100%;
+        transform: none;
+        opacity: 0.6;
+    }
+
+    .scanline {
+        display: none;
     }
 }

@@ -18,7 +18,7 @@
     {{-- Encabezado y selector "Mi GPU" --}}
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex flex-col gap-3">
-            <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> {{ __('library.eyebrow') }}</p>
+            <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('library.eyebrow')" /></p>
             <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('library.heading') }}</h1>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-muted">
                 <span><span aria-hidden="true">steamid=</span><span class="sr-only">SteamID </span><span class="text-fg">{{ $steamId }}</span></span>
@@ -49,14 +49,14 @@
 
     @if ($error === 'private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_PRIVATE_PROFILE</p>
+            <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_PRIVATE_PROFILE</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.private.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.private.body') }}</p>
             <p class="text-muted">{{ __('home.privacy_help.steps') }}</p>
         </section>
     @elseif ($error === 'unavailable')
         <section class="frame flex flex-col items-start gap-3 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_STEAM_TIMEOUT</p>
+            <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_STEAM_TIMEOUT</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.unavailable.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.unavailable.body') }}</p>
             <button type="button" wire:click="$refresh" class="focus-ring bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">
@@ -70,7 +70,7 @@
                 <div class="col-span-2 flex flex-col justify-between gap-4 bg-panel p-4 lg:col-span-1">
                     <dt class="label">{{ __('library.stats.total') }}</dt>
                     <dd class="flex flex-col gap-3">
-                        <span class="font-display text-5xl leading-none font-semibold tabular-nums">{{ Number::format($stats['total']) }}</span>
+                        <span class="font-display text-5xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($stats['total']) }}</span>
                         <span class="flex flex-col gap-1.5 font-mono text-xs text-muted">
                             {{ __('library.stats.with_wiki_page', ['count' => Number::format($stats['with_wiki_page'])]) }}
                             <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($stats['with_wiki_page']) }}%"></span></span>
@@ -87,7 +87,7 @@
                             @if (count($groupTechnologies) === 1)
                                 {{-- Una sola tecnología (Ray Tracing): número grande, sin repetir el nombre. --}}
                                 @php $count = $stats['technologies'][$groupTechnologies[0]->value]; @endphp
-                                <span class="font-display text-4xl leading-none font-semibold tabular-nums">{{ Number::format($count) }}</span>
+                                <span class="font-display text-4xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($count) }}</span>
                                 <span class="flex flex-col gap-1.5 font-mono text-xs text-muted">
                                     {{ __('library.stats.games_with', ['count' => Number::format($count), 'total' => Number::format($stats['total'])]) }}
                                     <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($count) }}%"></span></span>
@@ -98,7 +98,7 @@
                                     <span class="flex flex-col gap-1">
                                         <span class="flex items-baseline justify-between gap-2 font-mono text-xs">
                                             <span class="text-muted">{{ __('technologies.label.'.$technology->value) }}</span>
-                                            <span class="font-bold tabular-nums">{{ Number::format($count) }}</span>
+                                            <span class="font-bold tabular-nums" data-count-up>{{ Number::format($count) }}</span>
                                         </span>
                                         <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($count) }}%"></span></span>
                                     </span>
@@ -113,7 +113,8 @@
         <x-technology-filters :active-filters="$activeFilters" :search="$search" :placeholder="__('library.search.placeholder')" />
 
         {{-- Tabla --}}
-        <div class="frame overflow-hidden" wire:loading.class="opacity-60">
+        <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
+            <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <caption class="sr-only">{{ __('library.table.caption') }}</caption>
@@ -139,7 +140,7 @@
                     </thead>
                     <tbody class="divide-y divide-line">
                         @forelse ($games as $entry)
-                            <tr wire:key="game-{{ $entry->owned->appid }}" class="transition-colors hover:bg-raised/60">
+                            <tr wire:key="game-{{ $entry->owned->appid }}" class="animate-rise transition-colors hover:bg-raised/60 hover:shadow-[inset_2px_0_0_var(--rd-accent)]" style="--delay: {{ $loop->index * 18 }}ms">
                                 <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
                                     <x-game-cover :appid="$entry->owned->appid" />
                                 </td>

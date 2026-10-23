@@ -31,6 +31,8 @@
     {{-- Va en línea y antes de los estilos: aplica el tema antes de pintar, sin parpadeo. --}}
     <script>
         (() => {
+            document.documentElement.classList.add('js');
+
             const key = 'renderdex.theme';
             const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
             const stored = () => {
@@ -108,7 +110,9 @@
                 <x-theme-switcher />
             </div>
         </div>
-        <div class="ruler h-1.5" aria-hidden="true"></div>
+        <div class="ruler relative h-1.5" data-ruler aria-hidden="true">
+            <span class="ruler-cursor"></span>
+        </div>
     </header>
 
     <main id="main" tabindex="-1" class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 outline-none sm:py-14">
@@ -146,7 +150,13 @@
                     @endif
                 </p>
                 <p class="hidden sm:block" aria-hidden="true">{{ __('layout.footer.status_source') }}</p>
-                <p class="hidden sm:block sm:ml-auto" aria-hidden="true">utf-8 · {{ app()->getLocale() }}</p>
+                <p class="hidden sm:block sm:ml-auto" aria-hidden="true">
+                    @if (defined('LARAVEL_START'))
+                        {{-- Tiempo real que tardó el servidor en armar la página. --}}
+                        render {{ Number::format((microtime(true) - LARAVEL_START) * 1000, precision: 0) }} ms ·
+                    @endif
+                    utf-8 · {{ app()->getLocale() }}
+                </p>
             </div>
         </div>
     </footer>

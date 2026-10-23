@@ -28,7 +28,7 @@
 <div class="flex flex-col gap-8">
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex max-w-xl flex-col gap-3">
-            <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> {{ __('catalog.eyebrow') }}</p>
+            <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('catalog.eyebrow')" /></p>
             <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('catalog.heading') }}</h1>
             <p class="text-muted">{{ __('catalog.intro') }}</p>
         </div>
@@ -45,7 +45,8 @@
         @endif
     </p>
 
-    <div class="frame overflow-hidden" wire:loading.class="opacity-60">
+    <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
+        <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <caption class="sr-only">{{ __('catalog.title') }}</caption>
@@ -66,7 +67,7 @@
                 <tbody class="divide-y divide-line">
                     @forelse ($games as $game)
                         @php $appid = $game->steamAppids->first()?->steam_appid; @endphp
-                        <tr wire:key="catalog-{{ $game->id }}" class="transition-colors hover:bg-raised/60">
+                        <tr wire:key="catalog-{{ $game->id }}" class="animate-rise transition-colors hover:bg-raised/60 hover:shadow-[inset_2px_0_0_var(--rd-accent)]" style="--delay: {{ $loop->index * 18 }}ms">
                             <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
                                 <x-game-cover :appid="$appid" />
                             </td>

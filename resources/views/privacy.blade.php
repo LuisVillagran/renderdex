@@ -18,7 +18,7 @@
 
         <article class="flex max-w-2xl flex-col gap-10">
             <header class="flex flex-col gap-4">
-                <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> {{ __('privacy.title') }}</p>
+                <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('privacy.title')" /></p>
                 <h1 class="font-display text-4xl font-semibold tracking-tight">{{ __('privacy.heading') }}</h1>
                 <p class="text-lg text-muted">{{ __('privacy.intro') }}</p>
                 <p class="font-mono text-xs text-muted">{{ __('privacy.updated') }}</p>

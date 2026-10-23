@@ -10,12 +10,12 @@
                 @if ($gameCount > 0)
                     <p class="font-mono text-xs text-muted">
                         <span class="text-accent" aria-hidden="true">//</span>
-                        {{ __('home.eyebrow', ['count' => Number::format($gameCount)]) }}
+                        <x-decode :text="__('home.eyebrow', ['count' => Number::format($gameCount)])" />
                     </p>
                 @endif
 
                 <h1 class="font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.5rem]">
-                    {!! __('home.title', ['technologies' => '<span class="text-accent">'.e(__('home.title_technologies')).'</span>']) !!}
+                    {!! __('home.title', ['technologies' => '<span class="text-render">'.e(__('home.title_technologies')).'</span>']) !!}
                 </h1>
                 <p class="max-w-xl text-lg text-muted">{{ __('home.intro') }}</p>
 
@@ -72,7 +72,7 @@
                                 class="w-full border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent"
                             >
                         </div>
-                        <button type="submit" class="focus-ring border border-accent px-5 py-2.5 font-mono text-sm font-bold text-accent uppercase transition hover:bg-accent hover:text-on-accent sm:-ml-px">
+                        <button type="submit" class="focus-ring border border-accent px-5 py-2.5 font-mono text-sm font-bold text-accent uppercase transition hover:bg-accent hover:text-on-accent active:translate-y-px sm:-ml-px">
                             {{ __('home.catalog.submit') }} ↵
                         </button>
                     </div>
@@ -81,19 +81,21 @@
 
             @if ($showcase->isNotEmpty())
                 <figure class="flex flex-col gap-3 lg:mt-14">
-                    <div class="frame overflow-hidden">
+                    <div class="frame relative overflow-hidden">
+                        <span class="scanline z-10" style="--delay: 1400ms" aria-hidden="true"></span>
                         <div class="flex items-center justify-between gap-4 border-b border-line px-4 py-2">
                             <p class="font-mono text-xs">
                                 <span class="text-accent" aria-hidden="true">$</span>
                                 <span class="sr-only">{{ __('home.preview.label') }}:</span>
-                                <span aria-hidden="true">{{ __('home.preview.command') }}</span><span class="animate-blink ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 bg-fg" aria-hidden="true"></span>
+                                <span class="animate-type" style="--chars: {{ mb_strlen(__('home.preview.command')) }}; --delay: 300ms" aria-hidden="true">{{ __('home.preview.command') }}</span><span class="animate-blink ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 bg-fg" aria-hidden="true"></span>
                             </p>
                             <p class="label" aria-hidden="true">{{ trans_choice('home.preview.rows', $showcase->count()) }}</p>
                         </div>
 
                         <ul class="divide-y divide-line">
                             @foreach ($showcase as $appid)
-                                <li class="flex flex-col gap-3 px-4 py-4">
+                                @php $rowDelay = 1100 + $loop->index * 260; @endphp
+                                <li class="animate-rise flex flex-col gap-3 px-4 py-4" style="--delay: {{ $rowDelay }}ms">
                                     <div class="flex items-center gap-3">
                                         <x-game-cover :appid="$appid->steam_appid" />
                                         <span class="font-display text-lg leading-tight font-semibold">{{ $appid->game->title }}</span>
@@ -102,7 +104,7 @@
                                         @foreach (Technology::byVendor() as $vendor => $technologies)
                                             <div class="flex flex-col gap-1">
                                                 <span class="label text-[0.625rem]" aria-hidden="true">{{ __('technologies.group.'.$vendor) }}</span>
-                                                <x-tech-pills :game="$appid->game" :technologies="$technologies" class="flex-nowrap" />
+                                                <x-tech-pills :game="$appid->game" :technologies="$technologies" :delay="$rowDelay + 150 + $loop->index * 90" class="flex-nowrap" />
                                             </div>
                                         @endforeach
                                     </div>
@@ -118,15 +120,15 @@
         </section>
 
         <section class="flex flex-col gap-8" aria-labelledby="how-title">
-            <h2 id="how-title" class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> {{ __('home.how.title') }}</h2>
+            <h2 id="how-title" class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('home.how.title')" /></h2>
             <ol class="grid gap-10 sm:grid-cols-3 sm:gap-6">
                 @foreach (__('home.how.steps') as $step)
-                    <li class="flex flex-col gap-3">
+                    <li class="flex flex-col gap-3" data-reveal style="--delay: {{ $loop->index * 140 }}ms">
                         {{-- Nodo del pipeline: número y conector hacia el paso siguiente. --}}
                         <div class="flex items-center gap-3" aria-hidden="true">
                             <span class="border border-accent px-1.5 font-mono text-xs text-accent">{{ sprintf('%02d', $loop->iteration) }}</span>
                             @unless ($loop->last)
-                                <span class="hidden h-px flex-1 border-t border-dashed border-line-strong sm:block"></span>
+                                <span class="hidden h-px flex-1 border-t border-dashed border-line-strong sm:block" data-connector></span>
                                 <span class="hidden font-mono text-xs text-line-strong sm:block">▶</span>
                             @endunless
                         </div>
@@ -138,13 +140,13 @@
         </section>
 
         <section aria-labelledby="faq-title" class="flex flex-col gap-8">
-            <h2 id="faq-title" class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> {{ __('home.faq_title') }}</h2>
+            <h2 id="faq-title" class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('home.faq_title')" /></h2>
             <dl class="grid border-y border-line sm:grid-cols-2">
                 @foreach ([
                     [__('home.privacy_help.title'), __('home.privacy_help.steps')],
                     [__('home.privacy_help.family_sharing_title'), __('home.privacy_help.family_sharing')],
                 ] as [$question, $answer])
-                    <div @class(['flex flex-col gap-2 py-6 sm:px-6', 'border-b border-line sm:border-r sm:border-b-0 sm:pl-0' => $loop->first, 'sm:pr-0' => $loop->last])>
+                    <div data-reveal style="--delay: {{ $loop->index * 140 }}ms" @class(['flex flex-col gap-2 py-6 sm:px-6', 'border-b border-line sm:border-r sm:border-b-0 sm:pl-0' => $loop->first, 'sm:pr-0' => $loop->last])>
                         <dt class="flex gap-3 font-display text-lg font-semibold"><span class="font-mono text-sm leading-7 text-accent" aria-hidden="true">Q.</span>{{ $question }}</dt>
                         <dd class="pl-8 text-sm text-muted">{{ $answer }}</dd>
                     </div>
