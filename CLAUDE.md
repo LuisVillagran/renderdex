@@ -170,7 +170,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
   - Enlaces a privacidad, al repositorio y a "no afiliado a Valve, NVIDIA, AMD ni Intel".
 - **Página de privacidad:** `/privacidad`.
 - **Estilo visual:** "instrumento de diagnóstico de render". Un solo color de señal (ámbar, lejos del verde/rojo/azul de las marcas), esquinas rectas, líneas finas con escuadras (`frame`), regla en el header, barras segmentadas (`meter`) y footer como barra de estado. Tipografías: Chakra Petch (títulos), IBM Plex Sans (texto) y JetBrains Mono (datos y etiquetas). Evitar degradados, vidrio, `rounded-*` grandes y brillos: es lo que hacía que se viera genérico.
-- **Modo oscuro:** según `prefers-color-scheme`. En modo claro, "papel técnico".
+- **Modo oscuro:** selector Auto / Claro / Oscuro en el header (por defecto Auto, según `prefers-color-scheme`). La elección se guarda en `localStorage` (`renderdex.theme`) y un script en línea del `<head>` pone `data-theme` antes de pintar. En modo claro, "papel técnico". Los colores salen de los tokens `--rd-*`; la variante `dark:` de Tailwind sigue a `data-theme`.
 - **Responsive:** en móvil se ocultan columnas secundarias.
 - **Accesibilidad básica:**
   - Contraste suficiente.

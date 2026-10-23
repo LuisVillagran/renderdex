@@ -20,7 +20,7 @@
                 <p class="max-w-xl text-lg text-muted">{{ __('home.intro') }}</p>
 
                 @if (session('error'))
-                    <p class="border border-red-500/50 bg-red-500/10 px-4 py-3 text-sm text-red-800 dark:text-red-200" role="alert">
+                    <p class="border border-danger/60 bg-danger/10 px-4 py-3 text-sm text-danger" role="alert">
                         {{ session('error') }}
                     </p>
                 @endif

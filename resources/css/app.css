@@ -11,8 +11,12 @@
  * Estética de instrumento de medición: fondo casi negro, líneas finas, esquinas rectas
  * y un único color de señal (ámbar de fósforo), lejos del verde, rojo y azul de
  * NVIDIA, AMD e Intel para no sugerir afiliación. En modo claro, papel técnico.
+ *
+ * El tema lo resuelve un script en el <head> (ver layout): pone data-theme="light|dark"
+ * según la elección guardada o el sistema. La media query solo cubre a quien no tiene JS.
  */
 :root {
+    color-scheme: light;
     --rd-canvas: #f1eee6;
     --rd-panel: #f8f6f0;
     --rd-raised: #e6e2d7;
@@ -24,10 +28,12 @@
     --rd-accent: #9c4700;
     --rd-on-accent: #ffffff;
     --rd-warn: #7a4f00;
+    --rd-danger: #b42318;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme='light']) {
+        color-scheme: dark;
         --rd-canvas: #0b0b0a;
         --rd-panel: #111110;
         --rd-raised: #1b1b19;
@@ -39,8 +45,29 @@
         --rd-accent: #ffb224;
         --rd-on-accent: #0b0b0a;
         --rd-warn: #f5c26b;
+        --rd-danger: #ff8a7a;
     }
 }
+
+/* Los mismos valores que arriba: aplican cuando se elige "Oscuro" con el sistema en claro. */
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --rd-canvas: #0b0b0a;
+    --rd-panel: #111110;
+    --rd-raised: #1b1b19;
+    --rd-line: #2a2a27;
+    --rd-line-strong: #64625a;
+    --rd-mark: rgb(236 235 228 / 0.09);
+    --rd-fg: #ecebe4;
+    --rd-muted: #93918a;
+    --rd-accent: #ffb224;
+    --rd-on-accent: #0b0b0a;
+    --rd-warn: #f5c26b;
+    --rd-danger: #ff8a7a;
+}
+
+/* dark: de Tailwind sigue al tema elegido, no solo al sistema. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme {
     --font-display: var(--font-chakra-petch), ui-sans-serif, system-ui, sans-serif;
@@ -68,6 +95,7 @@
     --color-accent: var(--rd-accent);
     --color-on-accent: var(--rd-on-accent);
     --color-warn: var(--rd-warn);
+    --color-danger: var(--rd-danger);
 }
 
 @layer base {

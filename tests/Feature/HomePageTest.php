@@ -126,3 +126,11 @@ it('lets keyboard users skip straight to the content', function () {
         ->assertSee('id="main"', escape: false)
         ->assertSee(__('layout.skip_to_content'));
 });
+
+it('offers a light, dark and automatic theme switcher on every page', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee(__('layout.theme.label'))
+        ->assertSeeInOrder([__('layout.theme.system'), __('layout.theme.light'), __('layout.theme.dark')])
+        ->assertSee('window.renderdexTheme', escape: false);
+});

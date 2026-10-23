@@ -28,6 +28,38 @@
     <meta property="og:image:alt" content="{{ __('layout.og_image_alt') }}">
     <meta name="twitter:card" content="summary_large_image">
 
+    {{-- Va en línea y antes de los estilos: aplica el tema antes de pintar, sin parpadeo. --}}
+    <script>
+        (() => {
+            const key = 'renderdex.theme';
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+            const stored = () => {
+                try { return localStorage.getItem(key) } catch (e) { return null }
+            };
+            const apply = () => {
+                const choice = stored();
+                const theme = choice === 'light' || choice === 'dark' ? choice : (systemDark.matches ? 'dark' : 'light');
+                document.documentElement.dataset.theme = theme;
+                document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+                    meta.content = theme === 'dark' ? '#0b0b0a' : '#f1eee6';
+                });
+            };
+
+            apply();
+            systemDark.addEventListener('change', apply);
+
+            window.renderdexTheme = {
+                get: () => stored() ?? 'system',
+                set(choice) {
+                    try {
+                        choice === 'system' ? localStorage.removeItem(key) : localStorage.setItem(key, choice);
+                    } catch (e) {}
+                    apply();
+                },
+            };
+        })();
+    </script>
+
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -44,25 +76,29 @@
                 <x-logo />
             </a>
 
-            @if ($steamUser = session('steam_user'))
-                <div class="flex items-center gap-1 sm:gap-3">
-                    <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 px-2 py-1 hover:bg-raised">
-                        @if ($steamUser['avatar'])
-                            <img src="{{ $steamUser['avatar'] }}" alt="{{ __('layout.header.avatar_alt', ['name' => $steamUser['name']]) }}" width="28" height="28" class="size-7 ring-1 ring-line-strong">
-                        @endif
-                        <span class="max-w-32 truncate text-sm font-medium sm:max-w-none">{{ $steamUser['name'] ?? __('layout.header.your_account') }}</span>
-                    </a>
+            <div class="flex items-center gap-2 sm:gap-4">
+                @if ($steamUser = session('steam_user'))
+                    <div class="flex items-center gap-1 sm:gap-3">
+                        <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 px-2 py-1 hover:bg-raised">
+                            @if ($steamUser['avatar'])
+                                <img src="{{ $steamUser['avatar'] }}" alt="{{ __('layout.header.avatar_alt', ['name' => $steamUser['name']]) }}" width="28" height="28" class="size-7 ring-1 ring-line-strong">
+                            @endif
+                            <span class="max-w-32 truncate text-sm font-medium sm:max-w-none">{{ $steamUser['name'] ?? __('layout.header.your_account') }}</span>
+                        </a>
 
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="focus-ring px-2 py-1 font-mono text-xs text-muted uppercase hover:bg-raised hover:text-fg">
-                            {{ __('auth.logout') }}
-                        </button>
-                    </form>
-                </div>
-            @else
-                <p class="label hidden sm:block" aria-hidden="true">{{ __('layout.header.tagline') }}</p>
-            @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="focus-ring px-2 py-1 font-mono text-xs text-muted uppercase hover:bg-raised hover:text-fg">
+                                {{ __('auth.logout') }}
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <p class="label hidden lg:block" aria-hidden="true">{{ __('layout.header.tagline') }}</p>
+                @endif
+
+                <x-theme-switcher />
+            </div>
         </div>
         <div class="ruler h-1.5" aria-hidden="true"></div>
     </header>

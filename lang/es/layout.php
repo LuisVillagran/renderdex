@@ -14,6 +14,13 @@ return [
         'my_library' => 'Mi biblioteca',
     ],
 
+    'theme' => [
+        'label' => 'Tema de colores',
+        'system' => 'Auto',
+        'light' => 'Claro',
+        'dark' => 'Oscuro',
+    ],
+
     'footer' => [
         'nav' => 'Enlaces del sitio',
         'data_credit' => 'Datos de compatibilidad de :pcgw, bajo licencia :license.',
