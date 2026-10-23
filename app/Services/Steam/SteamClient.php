@@ -18,6 +18,14 @@ class SteamClient
     private const VANITY_NOT_FOUND = 42;
 
     /**
+     * La UI muestra un aviso cuando la biblioteca es de ejemplo ({@see DemoSteamClient}).
+     */
+    public function isDemo(): bool
+    {
+        return false;
+    }
+
+    /**
      * @throws ProfileNotFoundException
      * @throws SteamUnavailableException
      */

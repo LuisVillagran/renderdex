@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\Steam\DemoSteamClient;
+use App\Services\Steam\SteamClient;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
@@ -14,7 +16,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (DemoSteamClient::shouldReplaceSteam()) {
+            $this->app->bind(SteamClient::class, DemoSteamClient::class);
+        }
     }
 
     /**
