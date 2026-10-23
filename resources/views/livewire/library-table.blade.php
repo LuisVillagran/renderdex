@@ -63,23 +63,23 @@
     @else
         {{-- Estadísticas --}}
         <section aria-label="{{ __('library.stats.label') }}">
-            <dl class="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:grid-cols-10">
-                <div class="col-span-1 rounded-lg border border-zinc-200 bg-white p-3 sm:col-span-1 lg:col-span-1 dark:border-zinc-800 dark:bg-zinc-900">
-                    <dt class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('library.stats.total') }}</dt>
-                    <dd class="text-xl font-semibold tabular-nums">{{ Number::format($stats['total']) }}</dd>
+            <dl class="grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 lg:grid-cols-10">
+                <div class="rounded-lg border border-zinc-200 bg-white p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    <dt class="text-[0.7rem] leading-tight text-zinc-600 sm:text-xs dark:text-zinc-400">{{ __('library.stats.total') }}</dt>
+                    <dd class="text-lg font-semibold tabular-nums sm:text-xl">{{ Number::format($stats['total']) }}</dd>
                 </div>
-                <div class="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                    <dt class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('library.stats.with_wiki_page') }}</dt>
-                    <dd class="text-xl font-semibold tabular-nums">{{ Number::format($stats['with_wiki_page']) }}</dd>
+                <div class="rounded-lg border border-zinc-200 bg-white p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    <dt class="text-[0.7rem] leading-tight text-zinc-600 sm:text-xs dark:text-zinc-400">{{ __('library.stats.with_wiki_page') }}</dt>
+                    <dd class="text-lg font-semibold tabular-nums sm:text-xl">{{ Number::format($stats['with_wiki_page']) }}</dd>
                 </div>
                 @foreach ($technologies as $technology)
                     <div wire:key="stat-{{ $technology->value }}" @class([
-                        'rounded-lg border bg-white p-3 dark:bg-zinc-900',
+                        'rounded-lg border bg-white p-2 sm:p-3 dark:bg-zinc-900',
                         'border-sky-400 dark:border-sky-700' => $isHighlighted($technology),
                         'border-zinc-200 dark:border-zinc-800' => ! $isHighlighted($technology),
                     ])>
-                        <dt class="text-xs text-zinc-600 dark:text-zinc-400">{{ __('technologies.label.'.$technology->value) }}</dt>
-                        <dd class="text-xl font-semibold tabular-nums">{{ Number::format($stats['technologies'][$technology->value]) }}</dd>
+                        <dt class="text-[0.7rem] leading-tight text-zinc-600 sm:text-xs dark:text-zinc-400">{{ __('technologies.label.'.$technology->value) }}</dt>
+                        <dd class="text-lg font-semibold tabular-nums sm:text-xl">{{ Number::format($stats['technologies'][$technology->value]) }}</dd>
                     </div>
                 @endforeach
             </dl>
@@ -158,7 +158,7 @@
                     <tr>
                         <th scope="col" class="hidden px-3 py-2 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
                         @foreach (['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
-                            <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-3 py-2', 'text-right' => $column === 'playtime'])>
+                            <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-2 py-2 sm:px-3', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
                                 <button type="button" wire:click="sortBy('{{ $column }}')" class="inline-flex items-center gap-1 rounded font-semibold hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none dark:hover:text-zinc-100" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
                                     {{ $label }} <span aria-hidden="true">{{ $sortIndicator($column) }}</span>
                                 </button>
@@ -166,11 +166,12 @@
                         @endforeach
                         @foreach ($technologies as $technology)
                             <th scope="col" wire:key="th-{{ $technology->value }}" title="{{ __('technologies.description.'.$technology->value) }}" @class([
-                                'px-2 py-2 text-center font-semibold',
+                                'px-1.5 py-2 text-center font-semibold sm:px-2',
                                 'hidden md:table-cell' => $technology->isFrameGeneration(),
                                 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200' => $isHighlighted($technology),
                             ])>
-                                <span class="block text-[0.65rem] font-normal tracking-wide uppercase" aria-hidden="true">{{ __('technologies.vendor.'.$technology->vendor()->value) }}</span>
+                                {{-- Ray Tracing no es de una marca: sin rótulo, pero con la misma altura. --}}
+                                <span class="block text-[0.65rem] font-normal tracking-wide uppercase" aria-hidden="true">{{ $technology->vendor() === \App\Enums\Vendor::All ? "\u{00A0}" : __('technologies.vendor.'.$technology->vendor()->value) }}</span>
                                 <abbr title="{{ __('technologies.description.'.$technology->value) }}" class="no-underline">{{ __('technologies.column.'.$technology->value) }}</abbr>
                             </th>
                         @endforeach
@@ -188,10 +189,10 @@
                                     height="35"
                                     loading="lazy"
                                     onerror="this.onerror = null; this.src = '{{ asset('images/cover-placeholder.svg') }}'"
-                                    class="h-[35px] w-[92px] rounded bg-zinc-200 object-cover dark:bg-zinc-800"
+                                    class="h-[35px] w-[92px] max-w-none rounded bg-zinc-200 object-cover dark:bg-zinc-800"
                                 >
                             </td>
-                            <td class="px-3 py-2">
+                            <td class="px-2 py-2 sm:px-3">
                                 @if ($entry->game)
                                     <a href="https://www.pcgamingwiki.com/w/index.php?curid={{ $entry->game->pcgw_page_id }}" rel="noopener" title="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="font-medium hover:underline focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none">
                                         {{ $entry->owned->name }}
@@ -204,12 +205,12 @@
                                     <span class="block text-xs text-zinc-500 dark:text-zinc-400">{{ __('library.no_wiki_page') }}</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-2 text-right tabular-nums">
+                            <td class="hidden px-3 py-2 text-right tabular-nums sm:table-cell">
                                 {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
                             </td>
                             @foreach ($technologies as $technology)
                                 <td wire:key="cell-{{ $entry->owned->appid }}-{{ $technology->value }}" @class([
-                                    'px-2 py-2 text-center',
+                                    'px-1.5 py-2 text-center sm:px-2',
                                     'hidden md:table-cell' => $technology->isFrameGeneration(),
                                     'bg-sky-50 dark:bg-sky-950/40' => $isHighlighted($technology),
                                 ])>
@@ -217,7 +218,8 @@
                                 </td>
                             @endforeach
                             <td class="hidden px-3 py-2 text-xs text-zinc-600 lg:table-cell dark:text-zinc-400">
-                                {{ collect([$entry->game?->upscaling_tech, $entry->game?->frame_gen_tech])->filter()->map(fn ($list) => str_replace(',', ', ', $list))->implode(' · ') }}
+                                {{-- Solo upscaling: frame gen no trae versión y ya se ve en sus columnas. --}}
+                                {{ str_replace(',', ', ', (string) $entry->game?->upscaling_tech) }}
                             </td>
                         </tr>
                     @empty
@@ -234,9 +236,15 @@
         {{ $games->links() }}
 
         <div class="flex flex-col gap-1 text-sm text-zinc-600 dark:text-zinc-400">
-            <p class="flex flex-wrap items-center gap-x-1">
-                <x-support :value="Support::Yes" /> <x-support :value="Support::No" /> <x-support :value="Support::Unknown" />
-                {{ __('library.legend') }}
+            <p class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                @foreach ([Support::Yes, Support::No, Support::Unknown] as $support)
+                    <span class="inline-flex items-center gap-1">
+                        {{-- El texto visible ya lo dice: el ícono se oculta a lectores de pantalla. --}}
+                        <span aria-hidden="true"><x-support :value="$support" /></span>
+                        {{ __('technologies.support.'.$support->value) }}
+                    </span>
+                @endforeach
+                <span>{{ __('library.legend') }}</span>
             </p>
             <p>{{ __('home.privacy_help.family_sharing') }}</p>
         </div>

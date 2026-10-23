@@ -315,7 +315,7 @@ php artisan test
   - `pcgw:sync` probado contra la wiki real desde GitHub Actions: 55.717 páginas en ~3 min, 55.715 juegos y 62.318 AppIDs (octubre de 2026). Volcado importable en la rama `pcgw-data`.
   - ~12% de los juegos no tiene `Steam_AppID` en la wiki (algunos no están en Steam; otros son vacíos de la wiki, como Euro Truck Simulator 2).
 - [ ] Etapa 3: Steam (código y tests listos; login real con Steam probado a mano; falta la prueba manual de la biblioteca con `STEAM_API_KEY`)
-- [ ] Etapa 4: UI (código y tests listos; falta la revisión visual en el navegador)
+- [x] Etapa 4: UI (revisada en el navegador en escritorio y móvil, modo oscuro; el modo claro solo está cubierto por las clases `dark:`, sin revisión visual)
   - Sin `STEAM_API_KEY` en local, `DemoSteamClient` reemplaza a Steam con una biblioteca de ejemplo (`resources/demo/steam-library.json`) y la página lo avisa.
 - [ ] Etapa 5: Pulido
 - [ ] Etapa 6: Publicación

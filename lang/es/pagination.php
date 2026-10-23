@@ -2,7 +2,8 @@
 
 return [
 
-    'previous' => '&laquo; Anterior',
-    'next' => 'Siguiente &raquo;',
+    // Caracteres reales, no entidades HTML: estas cadenas también se usan en aria-label.
+    'previous' => '« Anterior',
+    'next' => 'Siguiente »',
 
 ];

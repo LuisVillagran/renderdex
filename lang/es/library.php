@@ -46,7 +46,7 @@ return [
 
     'no_results' => 'Ningún juego coincide con la búsqueda o los filtros.',
     'empty' => 'Esta biblioteca no tiene juegos.',
-    'legend' => 'Sí, No o Sin datos (la wiki no lo documenta).',
+    'legend' => '"Sin datos" significa que la wiki no lo documenta.',
 
     'errors' => [
         'private' => [
