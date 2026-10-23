@@ -169,7 +169,8 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
   - Fecha del último sync.
   - Enlaces a privacidad, al repositorio y a "no afiliado a Valve, NVIDIA, AMD ni Intel".
 - **Página de privacidad:** `/privacidad`.
-- **Modo oscuro:** según `prefers-color-scheme`.
+- **Estilo visual:** "instrumento de diagnóstico de render". Un solo color de señal (ámbar, lejos del verde/rojo/azul de las marcas), esquinas rectas, líneas finas con escuadras (`frame`), regla en el header, barras segmentadas (`meter`) y footer como barra de estado. Tipografías: Chakra Petch (títulos), IBM Plex Sans (texto) y JetBrains Mono (datos y etiquetas). Evitar degradados, vidrio, `rounded-*` grandes y brillos: es lo que hacía que se viera genérico.
+- **Modo oscuro:** según `prefers-color-scheme`. En modo claro, "papel técnico".
 - **Responsive:** en móvil se ocultan columnas secundarias.
 - **Accesibilidad básica:**
   - Contraste suficiente.
@@ -316,9 +317,12 @@ php artisan test
   - ~12% de los juegos no tiene `Steam_AppID` en la wiki (algunos no están en Steam; otros son vacíos de la wiki, como Euro Truck Simulator 2).
 - [x] Etapa 3: Steam
   - Login real con Steam y biblioteca real con `STEAM_API_KEY` probados a mano (octubre de 2026).
-- [x] Etapa 4: UI (revisada en el navegador en escritorio y móvil, modo oscuro; el modo claro solo está cubierto por las clases `dark:`, sin revisión visual)
+- [x] Etapa 4: UI (revisada en el navegador en escritorio y móvil)
   - Sin `STEAM_API_KEY` en local, `DemoSteamClient` reemplaza a Steam con una biblioteca de ejemplo (`resources/demo/steam-library.json`) y la página lo avisa.
-- [ ] Etapa 5: Pulido
+- [ ] Etapa 5: Pulido (implementada y con tests; falta la prueba manual en un navegador real)
+  - Rediseño visual completo (ver "Estilo visual" en UI), revisado con capturas en modo oscuro, claro y móvil.
+  - Rate limiting: `throttle:steam` (30/min por IP) en `/u/{steamid64}` y en el callback de login; `LibraryLookup` limita a 10 búsquedas/min por IP (hash). Páginas 429 y 404 en español.
+  - `/privacidad`, Open Graph (`public/images/og.png`), skip link y contraste WCAG AA verificado.
 - [ ] Etapa 6: Publicación
 
 ===
