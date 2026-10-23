@@ -1,19 +1,13 @@
-{{-- Marca propia: una "R" dentro de un cuadro, con el degradado del sitio. --}}
-@php
-    // Id único: el logo aparece más de una vez por página.
-    $gradientId = 'renderdex-logo-'.\Illuminate\Support\Str::random(6);
-@endphp
+{{-- Marca propia: un píxel chico proyectado a un cuadro grande, como un diagrama de reescalado. --}}
+@props(['cursor' => true])
 
-<span {{ $attributes->class(['inline-flex items-center gap-2']) }}>
+<span {{ $attributes->class(['inline-flex items-center gap-2.5']) }}>
     <svg viewBox="0 0 32 32" fill="none" class="size-7 shrink-0" aria-hidden="true">
-        <defs>
-            <linearGradient id="{{ $gradientId }}" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-                <stop style="stop-color: var(--rd-accent-2)" />
-                <stop offset="1" style="stop-color: var(--rd-accent)" />
-            </linearGradient>
-        </defs>
-        <rect x="2.25" y="2.25" width="27.5" height="27.5" rx="8" stroke="url(#{{ $gradientId }})" stroke-width="2.5" />
-        <path d="M11 23V9.5h6a4.25 4.25 0 0 1 0 8.5h-6m6.25 0L22 23" stroke="url(#{{ $gradientId }})" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        <rect x="3.5" y="3.5" width="25" height="25" stroke="currentColor" stroke-width="1.5" />
+        <path d="M14 18 28.5 3.5" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" />
+        <rect x="6" y="16" width="10" height="10" class="fill-accent" />
     </svg>
-    <span class="text-lg font-bold tracking-tight">Render<span class="text-gradient">dex</span></span>
+    <span class="font-mono text-[0.95rem] font-bold tracking-tight lowercase">
+        renderdex<span @class(['ml-0.5 inline-block h-[1.05em] w-[0.5em] translate-y-[0.15em] bg-accent', 'animate-blink' => $cursor]) aria-hidden="true"></span>
+    </span>
 </span>

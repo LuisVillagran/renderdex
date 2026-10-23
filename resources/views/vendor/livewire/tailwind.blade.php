@@ -10,10 +10,10 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
     JS
     : '';
 
-$base = 'relative inline-flex items-center border font-mono text-sm font-medium leading-5';
-$link = $base.' focus-ring border-line bg-panel/80 text-fg hover:bg-raised focus-visible:z-10';
-$disabled = $base.' cursor-default border-line bg-panel/80 text-muted/60';
-$current = $base.' bg-brand z-10 cursor-default border-transparent';
+$base = 'relative inline-flex items-center border font-mono text-xs font-medium leading-5';
+$link = $base.' focus-ring border-line-strong bg-panel text-fg hover:border-accent hover:text-accent focus-visible:z-10';
+$disabled = $base.' cursor-default border-line-strong bg-panel text-muted/50';
+$current = $base.' z-10 cursor-default border-accent bg-accent text-on-accent font-bold';
 @endphp
 
 <div>
@@ -22,24 +22,24 @@ $current = $base.' bg-brand z-10 cursor-default border-transparent';
             {{-- Móvil: solo anterior y siguiente --}}
             <div class="flex flex-1 justify-between sm:hidden">
                 @if ($paginator->onFirstPage())
-                    <span class="{{ $disabled }} rounded-lg px-4 py-2">{{ __('pagination.previous') }}</span>
+                    <span class="{{ $disabled }} px-4 py-2">{{ __('pagination.previous') }}</span>
                 @else
-                    <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" class="{{ $link }} rounded-lg px-4 py-2">
+                    <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" class="{{ $link }} px-4 py-2">
                         {{ __('pagination.previous') }}
                     </button>
                 @endif
 
                 @if ($paginator->hasMorePages())
-                    <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" class="{{ $link }} rounded-lg px-4 py-2">
+                    <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" class="{{ $link }} px-4 py-2">
                         {{ __('pagination.next') }}
                     </button>
                 @else
-                    <span class="{{ $disabled }} rounded-lg px-4 py-2">{{ __('pagination.next') }}</span>
+                    <span class="{{ $disabled }} px-4 py-2">{{ __('pagination.next') }}</span>
                 @endif
             </div>
 
             <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <p class="text-sm text-muted">
+                <p class="font-mono text-xs text-muted">
                     {{ __('Showing') }}
                     <span class="font-mono font-medium text-fg">{{ $paginator->firstItem() }}</span>
                     {{ __('to') }}
@@ -49,13 +49,13 @@ $current = $base.' bg-brand z-10 cursor-default border-transparent';
                     {{ __('results') }}
                 </p>
 
-                <span class="relative z-0 inline-flex rounded-lg rtl:flex-row-reverse">
+                <span class="relative z-0 inline-flex rtl:flex-row-reverse">
                     @if ($paginator->onFirstPage())
-                        <span class="{{ $disabled }} rounded-l-lg px-2 py-2" aria-disabled="true" aria-label="{{ __('pagination.previous') }}">
+                        <span class="{{ $disabled }} px-2 py-2" aria-disabled="true" aria-label="{{ __('pagination.previous') }}">
                             <svg class="size-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                         </span>
                     @else
-                        <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" class="{{ $link }} rounded-l-lg px-2 py-2" aria-label="{{ __('pagination.previous') }}">
+                        <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" class="{{ $link }} px-2 py-2" aria-label="{{ __('pagination.previous') }}">
                             <svg class="size-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                         </button>
                     @endif
@@ -81,11 +81,11 @@ $current = $base.' bg-brand z-10 cursor-default border-transparent';
                     @endforeach
 
                     @if ($paginator->hasMorePages())
-                        <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" class="{{ $link }} -ml-px rounded-r-lg px-2 py-2" aria-label="{{ __('pagination.next') }}">
+                        <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" class="{{ $link }} -ml-px px-2 py-2" aria-label="{{ __('pagination.next') }}">
                             <svg class="size-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                         </button>
                     @else
-                        <span class="{{ $disabled }} -ml-px rounded-r-lg px-2 py-2" aria-disabled="true" aria-label="{{ __('pagination.next') }}">
+                        <span class="{{ $disabled }} -ml-px px-2 py-2" aria-disabled="true" aria-label="{{ __('pagination.next') }}">
                             <svg class="size-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                         </span>
                     @endif

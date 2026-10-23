@@ -14,65 +14,72 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="relative isolate flex min-h-screen flex-col bg-canvas font-sans text-fg antialiased">
-    {{-- Fondo decorativo: cuadrícula y un brillo arriba. --}}
-    <div class="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
-        <div class="bg-grid absolute inset-0"></div>
-        <div class="absolute -top-48 left-1/2 h-96 w-[56rem] max-w-full -translate-x-1/2 rounded-full bg-accent-2/20 blur-3xl"></div>
-        <div class="absolute -top-32 left-[60%] h-72 w-[32rem] max-w-full -translate-x-1/2 rounded-full bg-accent/15 blur-3xl"></div>
-    </div>
+    <div class="bg-marks pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
 
-    <header class="sticky top-0 z-20 border-b border-line/70 bg-canvas/70 backdrop-blur-md">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-            <a href="{{ route('home') }}" class="focus-ring rounded-lg" aria-label="{{ __('layout.header.home') }}">
+    <header class="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-sm">
+        <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+            <a href="{{ route('home') }}" class="focus-ring" aria-label="{{ __('layout.header.home') }}">
                 <x-logo />
             </a>
 
             @if ($steamUser = session('steam_user'))
-                <div class="flex items-center gap-1 sm:gap-2">
-                    <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-raised">
+                <div class="flex items-center gap-1 sm:gap-3">
+                    <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 px-2 py-1 hover:bg-raised">
                         @if ($steamUser['avatar'])
-                            <img src="{{ $steamUser['avatar'] }}" alt="{{ __('layout.header.avatar_alt', ['name' => $steamUser['name']]) }}" width="32" height="32" class="size-8 rounded-md ring-1 ring-line">
+                            <img src="{{ $steamUser['avatar'] }}" alt="{{ __('layout.header.avatar_alt', ['name' => $steamUser['name']]) }}" width="28" height="28" class="size-7 ring-1 ring-line-strong">
                         @endif
                         <span class="max-w-32 truncate text-sm font-medium sm:max-w-none">{{ $steamUser['name'] ?? __('layout.header.your_account') }}</span>
                     </a>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="focus-ring rounded-lg px-2 py-1 text-sm text-muted hover:bg-raised hover:text-fg">
+                        <button type="submit" class="focus-ring px-2 py-1 font-mono text-xs text-muted uppercase hover:bg-raised hover:text-fg">
                             {{ __('auth.logout') }}
                         </button>
                     </form>
                 </div>
+            @else
+                <p class="label hidden sm:block" aria-hidden="true">{{ __('layout.header.tagline') }}</p>
             @endif
         </div>
+        <div class="ruler h-1.5" aria-hidden="true"></div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:py-12">
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:py-14">
         {{ $slot }}
     </main>
 
-    <footer class="border-t border-line/70 text-sm text-muted">
-        <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-start sm:justify-between">
-            <div class="flex flex-col gap-2">
-                <x-logo class="text-fg" />
-                <p class="max-w-md">
+    <footer class="border-t border-line bg-canvas text-sm">
+        <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 md:flex-row md:items-end md:justify-between">
+            <div class="flex flex-col gap-3">
+                <x-logo :cursor="false" />
+                <p class="max-w-md text-muted">
                     {!! __('layout.footer.data_credit', [
-                        'pcgw' => '<a href="https://www.pcgamingwiki.com/" class="underline decoration-line underline-offset-2 hover:text-fg" rel="noopener">PCGamingWiki</a>',
-                        'license' => '<a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" class="underline decoration-line underline-offset-2 hover:text-fg" rel="noopener license">CC BY-NC-SA 3.0</a>',
+                        'pcgw' => '<a href="https://www.pcgamingwiki.com/" class="text-fg underline decoration-line-strong underline-offset-4 hover:decoration-accent" rel="noopener">PCGamingWiki</a>',
+                        'license' => '<a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" class="text-fg underline decoration-line-strong underline-offset-4 hover:decoration-accent" rel="noopener license">CC BY-NC-SA 3.0</a>',
                     ]) !!}
                 </p>
+                <p class="text-muted">{{ __('layout.footer.not_affiliated') }}</p>
             </div>
-            <div class="flex flex-col gap-2 font-mono text-xs sm:items-end sm:text-right">
+
+            <nav aria-label="{{ __('layout.footer.nav') }}" class="flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs uppercase">
+                <a href="{{ config('app.repository_url') }}" class="focus-ring text-muted hover:text-accent" rel="noopener">{{ __('layout.footer.repository') }} ↗</a>
+            </nav>
+        </div>
+
+        {{-- Barra de estado, como la de un editor. --}}
+        <div class="border-t border-line">
+            <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 font-mono text-[0.7rem] text-muted">
                 <p class="flex items-center gap-2">
-                    <span class="size-1.5 rounded-full {{ $lastSyncAt ? 'bg-accent glow' : 'bg-muted' }}" aria-hidden="true"></span>
+                    <span @class(['size-1.5', 'bg-accent' => $lastSyncAt, 'bg-line-strong' => ! $lastSyncAt]) aria-hidden="true"></span>
                     @if ($lastSyncAt)
                         {{ __('layout.footer.last_sync', ['date' => $lastSyncAt->isoFormat('LL')]) }}
                     @else
                         {{ __('layout.footer.never_synced') }}
                     @endif
                 </p>
-                <a href="{{ config('app.repository_url') }}" class="focus-ring rounded underline decoration-line underline-offset-2 hover:text-fg" rel="noopener">{{ __('layout.footer.repository') }}</a>
-                <p>{{ __('layout.footer.not_affiliated') }}</p>
+                <p class="hidden sm:block" aria-hidden="true">{{ __('layout.footer.status_source') }}</p>
+                <p class="hidden sm:block sm:ml-auto" aria-hidden="true">utf-8 · {{ app()->getLocale() }}</p>
             </div>
         </div>
     </footer>

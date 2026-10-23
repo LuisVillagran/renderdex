@@ -6,15 +6,18 @@ return [
 
     'header' => [
         'home' => 'Renderdex, ir al inicio',
+        'tagline' => 'Diagnóstico de render para tu biblioteca',
         'your_account' => 'Tu cuenta',
         'avatar_alt' => 'Avatar de :name',
         'my_library' => 'Mi biblioteca',
     ],
 
     'footer' => [
+        'nav' => 'Enlaces del sitio',
         'data_credit' => 'Datos de compatibilidad de :pcgw, bajo licencia :license.',
         'last_sync' => 'Datos actualizados el :date.',
         'never_synced' => 'Los datos de compatibilidad aún no se han sincronizado.',
+        'status_source' => 'src: pcgamingwiki · cargo api',
         'repository' => 'Código fuente',
         'not_affiliated' => 'No afiliado a Valve, NVIDIA, AMD ni Intel.',
     ],

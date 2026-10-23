@@ -13,10 +13,16 @@ return [
         'open_library' => 'Ver mi biblioteca',
     ],
 
+    'access' => [
+        'label' => 'Conectar biblioteca',
+    ],
+
     'or' => 'o',
 
     'preview' => [
         'label' => 'Vista previa',
+        'command' => 'renderdex scan --preview',
+        'rows' => ':count fila|:count filas',
         'caption' => 'Datos reales de la wiki, tal como los verás en tu biblioteca.',
     ],
 
@@ -37,6 +43,8 @@ return [
             ],
         ],
     ],
+
+    'faq_title' => 'Preguntas frecuentes',
 
     'privacy_help' => [
         'title' => '¿Cómo hago pública mi biblioteca?',
