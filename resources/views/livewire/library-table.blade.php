@@ -1,6 +1,5 @@
 @php
     use App\Enums\MatchSource;
-    use App\Enums\Support;
     use App\Enums\Technology;
     use App\Enums\Vendor;
     use Illuminate\Support\Number;
@@ -15,22 +14,7 @@
     $hours = fn (int $minutes) => __('library.table.hours', ['hours' => Number::format($minutes / 60, maxPrecision: 1)]);
 @endphp
 
-<div
-    class="flex flex-col gap-8"
-    x-data="{
-        init() {
-            let saved = null;
-            try { saved = localStorage.getItem('renderdex.gpu') } catch (e) {}
-            if (saved && saved !== $wire.gpu) {
-                $wire.selectGpu(saved, {{ $activeFilters === [] ? 'true' : 'false' }});
-            }
-        },
-        chooseGpu(gpu) {
-            try { localStorage.setItem('renderdex.gpu', gpu) } catch (e) {}
-            $wire.selectGpu(gpu);
-        },
-    }"
->
+<div class="flex flex-col gap-8">
     {{-- Encabezado y selector "Mi GPU" --}}
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex flex-col gap-3">
@@ -52,28 +36,7 @@
         </div>
 
         @unless ($error)
-            <fieldset class="flex flex-col gap-2">
-                <legend class="label mb-2">{{ __('library.gpu.label') }}</legend>
-                <div class="grid grid-cols-4 border border-line-strong bg-panel">
-                    @foreach (['nvidia', 'amd', 'intel', 'all'] as $option)
-                        <button
-                            type="button"
-                            wire:key="gpu-{{ $option }}"
-                            x-on:click="chooseGpu('{{ $option }}')"
-                            aria-pressed="{{ $gpu === $option ? 'true' : 'false' }}"
-                            @class([
-                                'focus-ring px-3 py-2 font-mono text-xs font-bold uppercase transition sm:px-5',
-                                'border-l border-line-strong' => ! $loop->first,
-                                'bg-accent text-on-accent' => $gpu === $option,
-                                'text-muted hover:bg-raised hover:text-fg' => $gpu !== $option,
-                            ])
-                        >
-                            {{ __('technologies.vendor.'.$option) }}
-                        </button>
-                    @endforeach
-                </div>
-                <p class="text-xs text-muted">{{ __('library.gpu.help') }}</p>
-            </fieldset>
+            <x-gpu-selector :gpu="$gpu" :has-filters="$activeFilters !== []" />
         @endunless
     </div>
 
@@ -147,58 +110,7 @@
             </dl>
         </section>
 
-        {{-- Filtros y búsqueda --}}
-        <section class="flex flex-col gap-5 border-y border-line py-5 lg:flex-row lg:items-end lg:justify-between">
-            <fieldset class="flex flex-col gap-2">
-                <legend class="label mb-2">{{ __('library.filters.label') }}</legend>
-                <div class="flex flex-wrap items-center gap-1.5">
-                    @foreach (Technology::cases() as $technology)
-                        @php $isActive = in_array($technology->value, $activeFilters, true); @endphp
-                        <button
-                            type="button"
-                            wire:key="filter-{{ $technology->value }}"
-                            wire:click="toggleFilter('{{ $technology->value }}')"
-                            aria-pressed="{{ $isActive ? 'true' : 'false' }}"
-                            @class([
-                                'focus-ring inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-xs transition',
-                                'border-accent bg-accent/12 text-accent' => $isActive,
-                                'border-line-strong text-muted hover:border-fg hover:text-fg' => ! $isActive,
-                            ])
-                        >
-                            {{-- Casilla: refuerza el estado sin depender del color. --}}
-                            <span @class(['size-2 border', 'border-accent bg-accent' => $isActive, 'border-current' => ! $isActive]) aria-hidden="true"></span>
-                            {{ __('technologies.label.'.$technology->value) }}
-                        </button>
-                    @endforeach
-
-                    @if ($activeFilters !== [] || $search !== '')
-                        <button type="button" wire:click="clearFilters" class="focus-ring px-2 py-1 font-mono text-xs text-accent underline underline-offset-4">
-                            {{ __('library.filters.clear') }}
-                        </button>
-                    @endif
-                </div>
-            </fieldset>
-
-            <div
-                class="flex flex-col gap-2 lg:w-80"
-                x-on:keydown.window="if ($event.key === '/' && ! ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) { $event.preventDefault(); $refs.search.focus() }"
-            >
-                <label for="library-search" class="label">{{ __('library.search.label') }}</label>
-                <div class="relative">
-                    <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 font-mono text-sm text-accent" aria-hidden="true">›</span>
-                    <input
-                        id="library-search"
-                        type="search"
-                        x-ref="search"
-                        wire:model.live.debounce.300ms="search"
-                        placeholder="{{ __('library.search.placeholder') }}"
-                        aria-keyshortcuts="/"
-                        class="w-full border border-line-strong bg-canvas py-2 pr-10 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent"
-                    >
-                    <kbd class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 border border-line-strong px-1.5 font-mono text-[0.65rem] text-muted" aria-hidden="true">/</kbd>
-                </div>
-            </div>
-        </section>
+        <x-technology-filters :active-filters="$activeFilters" :search="$search" :placeholder="__('library.search.placeholder')" />
 
         {{-- Tabla --}}
         <div class="frame overflow-hidden" wire:loading.class="opacity-60">
@@ -229,15 +141,7 @@
                         @forelse ($games as $entry)
                             <tr wire:key="game-{{ $entry->owned->appid }}" class="transition-colors hover:bg-raised/60">
                                 <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
-                                    <img
-                                        src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{{ $entry->owned->appid }}/capsule_184x69.jpg"
-                                        alt=""
-                                        width="92"
-                                        height="35"
-                                        loading="lazy"
-                                        onerror="this.onerror = null; this.src = '{{ asset('images/cover-placeholder.svg') }}'"
-                                        class="h-[35px] w-[92px] max-w-none bg-raised object-cover ring-1 ring-line"
-                                    >
+                                    <x-game-cover :appid="$entry->owned->appid" />
                                 </td>
                                 <td class="px-3 py-3">
                                     <div class="flex flex-col gap-2">
@@ -294,17 +198,7 @@
         {{ $games->links() }}
 
         <div class="flex flex-col gap-3 border-t border-line pt-5 text-sm text-muted">
-            <p class="flex flex-wrap items-center gap-x-5 gap-y-2">
-                <span class="label">{{ __('library.legend.label') }}</span>
-                @foreach ([Support::Yes, Support::No, Support::Unknown] as $support)
-                    <span class="inline-flex items-center gap-1.5">
-                        {{-- El texto visible ya lo dice: la píldora se oculta a lectores de pantalla. --}}
-                        <x-tech-pill :technology="Technology::Dlss" :support="$support" aria-hidden="true" />
-                        {{ __('technologies.support.'.$support->value) }}
-                    </span>
-                @endforeach
-                <span>{{ __('library.legend.unknown') }}</span>
-            </p>
+            <x-support-legend />
             <p>{{ __('home.privacy_help.family_sharing') }}</p>
         </div>
     @endif

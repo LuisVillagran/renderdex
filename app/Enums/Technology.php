@@ -27,6 +27,22 @@ enum Technology: string
     }
 
     /**
+     * Convierte valores sueltos (p. ej. de la URL) en tecnologías, descartando los desconocidos.
+     *
+     * @param  array<mixed>  $values
+     * @return list<self>
+     */
+    public static function fromValues(array $values): array
+    {
+        return collect($values)
+            ->map(fn ($value) => is_string($value) ? self::tryFrom($value) : null)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Las tecnologías agrupadas por marca, en el orden en que se muestran.
      *
      * @return array<string, list<self>> Indexado por el valor de {@see Vendor}.

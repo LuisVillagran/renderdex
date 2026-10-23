@@ -77,6 +77,14 @@
             </a>
 
             <div class="flex items-center gap-2 sm:gap-4">
+                <a href="{{ route('catalog') }}" @class([
+                    'focus-ring px-2 py-1 font-mono text-xs uppercase hover:text-accent',
+                    'text-accent' => request()->routeIs('catalog'),
+                    'text-muted' => ! request()->routeIs('catalog'),
+                ]) @if (request()->routeIs('catalog')) aria-current="page" @endif>
+                    {{ __('layout.header.catalog') }}
+                </a>
+
                 @if ($steamUser = session('steam_user'))
                     <div class="flex items-center gap-1 sm:gap-3">
                         <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 px-2 py-1 hover:bg-raised">

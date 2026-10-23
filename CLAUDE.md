@@ -85,6 +85,13 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 - El botón usa el diseño oficial de "Sign in through Steam" que Valve permite. Es la única excepción a la regla de no usar logos de terceros.
 - Ambas opciones conviven en la página de inicio: **"Iniciar sesión con Steam"** como opción principal y el campo de URL/SteamID como alternativa, para quien no quiera iniciar sesión.
 
+### 2c. Modo catálogo (sin cuenta)
+- Ruta `/juegos` (`App\Livewire\CatalogTable` + `App\Services\Catalog\CatalogSearch`): busca en todos los juegos de la wiki, p. ej. antes de comprar uno. No pide perfil ni sesión, y solo lee la base local: nunca llama a Steam ni a la wiki.
+- Búsqueda contra `normalized_title`. Orden: título exacto, luego los que empiezan con el texto y después el resto; los comodines `%` y `_` se buscan como texto. Sin texto, primero los juegos con más tecnologías en `Yes`.
+- Mismos filtros y selector "Mi GPU" que la biblioteca (trait `App\Livewire\Concerns\WithTechnologyFilters` y componentes `x-gpu-selector` y `x-technology-filters`).
+- Cada juego enlaza a PCGamingWiki y, si tiene AppID, a su página en la tienda de Steam (enlace normal, sin afiliados).
+- El inicio tiene un formulario GET hacia `/juegos?q=`, y el header un enlace "Buscar juegos".
+
 ### 3. Casos borde (cada uno con su mensaje claro en la UI)
 - **Perfil no encontrado:** la vanity no se resuelve o el ID es inválido.
 - **Perfil privado:** `GetOwnedGames` vuelve sin `games`.

@@ -5,6 +5,7 @@ use App\Http\Controllers\SteamAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::view('/juegos', 'catalog')->name('catalog');
 Route::view('/privacidad', 'privacy')->name('privacy');
 
 Route::get('/auth/steam', [SteamAuthController::class, 'redirect'])->name('auth.steam');

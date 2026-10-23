@@ -9,6 +9,7 @@ return [
     'header' => [
         'home' => 'Renderdex, ir al inicio',
         'tagline' => 'Diagnóstico de render para tu biblioteca',
+        'catalog' => 'Buscar juegos',
         'your_account' => 'Tu cuenta',
         'avatar_alt' => 'Avatar de :name',
         'my_library' => 'Mi biblioteca',

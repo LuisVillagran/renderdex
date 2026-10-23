@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\Technology;
-use App\Enums\Vendor;
+use App\Livewire\Concerns\WithTechnologyFilters;
 use App\Services\Library\LibraryBrowser;
 use App\Services\Library\LibraryMatcher;
 use App\Services\Steam\Exceptions\PrivateProfileException;
@@ -22,26 +22,12 @@ use Livewire\WithPagination;
 class LibraryTable extends Component
 {
     use WithPagination;
+    use WithTechnologyFilters;
 
     public const PER_PAGE = 25;
 
-    /** Filtro que se preselecciona al elegir cada marca en "Mi GPU". */
-    private const GPU_FILTERS = [
-        'nvidia' => [Technology::Dlss],
-        'amd' => [Technology::Fsr],
-        'intel' => [Technology::Xess],
-        'all' => [],
-    ];
-
     #[Locked]
     public string $steamId;
-
-    #[Url(as: 'q', except: '')]
-    public string $search = '';
-
-    /** @var list<string> */
-    #[Url(as: 'tech', except: [])]
-    public array $filters = [];
 
     #[Url(except: 'name')]
     public string $sort = 'name';
@@ -49,36 +35,9 @@ class LibraryTable extends Component
     #[Url(as: 'dir', except: 'asc')]
     public string $direction = 'asc';
 
-    /** Se recuerda en localStorage desde el navegador; ver la vista. */
-    public string $gpu = 'all';
-
     public function mount(string $steamId): void
     {
         $this->steamId = $steamId;
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function toggleFilter(string $technology): void
-    {
-        if (Technology::tryFrom($technology) === null) {
-            return;
-        }
-
-        $this->filters = in_array($technology, $this->filters, true)
-            ? array_values(array_diff($this->filters, [$technology]))
-            : [...$this->filters, $technology];
-
-        $this->resetPage();
-    }
-
-    public function clearFilters(): void
-    {
-        $this->reset('search', 'filters');
-        $this->resetPage();
     }
 
     public function sortBy(string $column): void
@@ -96,23 +55,6 @@ class LibraryTable extends Component
         }
 
         $this->resetPage();
-    }
-
-    /**
-     * @param  bool  $preselectFilters  False al restaurar la elección guardada, para no pisar filtros de un link compartido.
-     */
-    public function selectGpu(string $gpu, bool $preselectFilters = true): void
-    {
-        if (! array_key_exists($gpu, self::GPU_FILTERS)) {
-            return;
-        }
-
-        $this->gpu = $gpu;
-
-        if ($preselectFilters) {
-            $this->filters = array_map(fn (Technology $technology) => $technology->value, self::GPU_FILTERS[$gpu]);
-            $this->resetPage();
-        }
     }
 
     public function render(SteamClient $steam, LibraryMatcher $matcher, LibraryBrowser $browser): View
@@ -141,8 +83,8 @@ class LibraryTable extends Component
                 self::PER_PAGE,
                 $page,
             ),
-            'activeFilters' => array_map(fn (Technology $technology) => $technology->value, $browser->validTechnologies($this->filters)),
-            'highlightedVendor' => $this->gpu === 'all' ? null : Vendor::tryFrom($this->gpu),
+            'activeFilters' => array_map(fn (Technology $technology) => $technology->value, $this->validFilters()),
+            'highlightedVendor' => $this->highlightedVendor(),
         ]);
     }
 }

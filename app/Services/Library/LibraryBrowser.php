@@ -74,12 +74,7 @@ class LibraryBrowser
      */
     public function validTechnologies(array $technologies): array
     {
-        return collect($technologies)
-            ->map(fn ($value) => is_string($value) ? Technology::tryFrom($value) : null)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+        return Technology::fromValues($technologies);
     }
 
     private function supports(LibraryEntry $entry, Technology $technology): bool

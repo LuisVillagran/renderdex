@@ -1,0 +1,20 @@
+<?php
+
+return [
+
+    'title' => 'Buscar juegos',
+    'eyebrow' => 'Catálogo completo',
+    'heading' => 'Busca cualquier juego',
+    'intro' => 'Sin cuenta ni perfil de Steam: consulta qué tecnologías soporta un juego antes de comprarlo.',
+
+    'search' => [
+        'placeholder' => 'Cyberpunk, Elden Ring, Hades…',
+    ],
+
+    'results' => ':count resultado|:count resultados',
+    'top_hint' => 'Sin búsqueda: primero los juegos con más tecnologías soportadas.',
+    'store_link' => 'Tienda',
+    'store_link_label' => 'Ver :name en la tienda de Steam',
+    'no_results' => 'No encontramos juegos con ese nombre o esos filtros en PCGamingWiki.',
+
+];
