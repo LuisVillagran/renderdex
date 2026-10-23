@@ -100,3 +100,21 @@ it('hides the preview until the wiki has been synced', function () {
     $response->assertDontSee(__('home.preview.label'));
     $response->assertDontSee(__('home.eyebrow', ['count' => 0]));
 });
+
+it('describes the page for link previews with Open Graph', function () {
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertSee('<meta property="og:title" content="Renderdex">', escape: false);
+    $response->assertSee('<meta property="og:description" content="'.e(__('layout.description')).'">', escape: false);
+    $response->assertSee('<meta property="og:image" content="'.asset('images/og.png').'">', escape: false);
+    $response->assertSee('<meta name="twitter:card" content="summary_large_image">', escape: false);
+    expect(public_path('images/og.png'))->toBeFile();
+});
+
+it('uses the page title in link previews of inner pages', function () {
+    $this->get(route('privacy'))
+        ->assertOk()
+        ->assertSee('<meta property="og:title" content="Privacidad · Renderdex">', escape: false)
+        ->assertSee('<meta property="og:url" content="'.route('privacy').'">', escape: false);
+});

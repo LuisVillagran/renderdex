@@ -1,14 +1,32 @@
 @props(['title' => null])
 
+@php
+    $fullTitle = $title ? $title.' · '.config('app.name') : config('app.name');
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ? $title.' · '.config('app.name') : config('app.name') }}</title>
+    <title>{{ $fullTitle }}</title>
     <meta name="description" content="{{ __('layout.description') }}">
     <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f1eee6" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b0b0a" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="{{ $fullTitle }}">
+    <meta property="og:description" content="{{ __('layout.description') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('images/og.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ __('layout.og_image_alt') }}">
+    <meta name="twitter:card" content="summary_large_image">
 
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
