@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'repository_url' => 'https://github.com/LuisVillagran/renderdex',
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
