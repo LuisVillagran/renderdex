@@ -118,3 +118,11 @@ it('uses the page title in link previews of inner pages', function () {
         ->assertSee('<meta property="og:title" content="Privacidad · Renderdex">', escape: false)
         ->assertSee('<meta property="og:url" content="'.route('privacy').'">', escape: false);
 });
+
+it('lets keyboard users skip straight to the content', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('href="#main"', escape: false)
+        ->assertSee('id="main"', escape: false)
+        ->assertSee(__('layout.skip_to_content'));
+});

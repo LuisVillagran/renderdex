@@ -37,7 +37,7 @@
             <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> {{ __('library.eyebrow') }}</p>
             <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('library.heading') }}</h1>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-muted">
-                <span><span class="text-line-strong">steamid=</span>{{ $steamId }}</span>
+                <span><span aria-hidden="true">steamid=</span><span class="sr-only">SteamID </span><span class="text-fg">{{ $steamId }}</span></span>
                 <button
                     type="button"
                     x-data="{ copied: false }"
@@ -193,7 +193,7 @@
                         wire:model.live.debounce.300ms="search"
                         placeholder="{{ __('library.search.placeholder') }}"
                         aria-keyshortcuts="/"
-                        class="w-full border border-line-strong bg-canvas py-2 pr-10 pl-7 font-mono text-sm placeholder:text-muted/70 focus:border-accent focus:outline-none"
+                        class="w-full border border-line-strong bg-canvas py-2 pr-10 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent"
                     >
                     <kbd class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 border border-line-strong px-1.5 font-mono text-[0.65rem] text-muted" aria-hidden="true">/</kbd>
                 </div>

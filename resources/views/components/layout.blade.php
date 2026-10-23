@@ -32,6 +32,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="relative isolate flex min-h-screen flex-col bg-canvas font-sans text-fg antialiased">
+    <a href="#main" class="sr-only z-50 bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3">
+        {{ __('layout.skip_to_content') }}
+    </a>
+
     <div class="bg-marks pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
 
     <header class="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-sm">
@@ -63,7 +67,7 @@
         <div class="ruler h-1.5" aria-hidden="true"></div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:py-14">
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 outline-none sm:py-14">
         {{ $slot }}
     </main>
 

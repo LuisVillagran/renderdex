@@ -12,7 +12,7 @@
 <span {{ $attributes->class([
     'inline-flex items-center border px-1.5 font-mono text-[0.7rem] leading-[1.125rem] font-medium whitespace-nowrap',
     'border-accent/60 bg-accent/12 text-accent' => $support === Support::Yes,
-    'border-transparent text-muted/80 line-through decoration-muted/60' => $support === Support::No,
+    'border-transparent text-muted line-through decoration-muted/70' => $support === Support::No,
     'border-dashed border-line-strong text-muted' => $support === Support::Unknown,
 ]) }} title="{{ $description }}: {{ $state }}">
     <span aria-hidden="true">{{ __('technologies.column.'.$technology->value).$suffix }}</span>

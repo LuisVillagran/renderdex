@@ -13,7 +13,7 @@
                 spellcheck="false"
                 aria-describedby="profile-help @error('profile') profile-error @enderror"
                 @error('profile') aria-invalid="true" @enderror
-                class="w-full border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-mono text-sm placeholder:text-muted/70 focus:border-accent focus:outline-none aria-invalid:border-red-500"
+                class="w-full border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent aria-invalid:border-red-500"
             >
         </div>
 
