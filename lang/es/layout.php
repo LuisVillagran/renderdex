@@ -18,6 +18,7 @@ return [
         'last_sync' => 'Datos actualizados el :date.',
         'never_synced' => 'Los datos de compatibilidad aún no se han sincronizado.',
         'status_source' => 'src: pcgamingwiki · cargo api',
+        'privacy' => 'Privacidad',
         'repository' => 'Código fuente',
         'not_affiliated' => 'No afiliado a Valve, NVIDIA, AMD ni Intel.',
     ],

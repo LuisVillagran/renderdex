@@ -63,6 +63,7 @@
             </div>
 
             <nav aria-label="{{ __('layout.footer.nav') }}" class="flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs uppercase">
+                <a href="{{ route('privacy') }}" class="focus-ring text-muted hover:text-accent">{{ __('layout.footer.privacy') }}</a>
                 <a href="{{ config('app.repository_url') }}" class="focus-ring text-muted hover:text-accent" rel="noopener">{{ __('layout.footer.repository') }} ↗</a>
             </nav>
         </div>
