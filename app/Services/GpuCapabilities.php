@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Enums\Availability;
+use App\Enums\Capability;
 use App\Enums\GpuProfile;
 use App\Enums\Support;
 use App\Enums\Technology;
+use App\Enums\Vendor;
 use App\Models\Game;
 
 /**
@@ -59,6 +61,71 @@ class GpuCapabilities
             null => Availability::Depends,
             false => Availability::NeedsOtherGpu,
         };
+    }
+
+    /**
+     * Las tecnologías de una capacidad que tu GPU puede usar (todas, sin GPU elegida).
+     * "Depende" no cuenta: no se puede prometer.
+     *
+     * @return list<Technology>
+     */
+    public function usableTechnologies(Capability $capability, ?GpuProfile $gpu): array
+    {
+        return array_values(array_filter(
+            $capability->technologies(),
+            fn (Technology $technology) => $gpu === null || $this->hardware($gpu, $technology) === Availability::Usable,
+        ));
+    }
+
+    /**
+     * Lo que conviene mostrar en la columna "En tu GPU": la mejor tecnología usable de cada
+     * capacidad (primero la de tu marca) y lo que el juego trae pero tu GPU no puede usar.
+     *
+     * @return array{usable: list<array{technology: Technology, version: ?string}>, depends: list<Technology>, blocked: list<Technology>}
+     */
+    public function summary(?Game $game, GpuProfile $gpu): array
+    {
+        $usable = [];
+
+        foreach (Capability::cases() as $capability) {
+            $best = collect($this->byPreference($capability, $gpu))
+                ->first(fn (Technology $technology) => $this->availability($game, $gpu, $technology) === Availability::Usable);
+
+            if ($best !== null) {
+                $usable[] = ['technology' => $best, 'version' => $this->usableVersion($game, $gpu, $best)];
+            }
+        }
+
+        $withAvailability = fn (Availability $availability) => array_values(array_filter(
+            Technology::cases(),
+            fn (Technology $technology) => $this->availability($game, $gpu, $technology) === $availability,
+        ));
+
+        return [
+            'usable' => $usable,
+            'depends' => $withAvailability(Availability::Depends),
+            // Solo lo de tu marca: "DLSS requiere RTX" no le sirve a quien tiene una Radeon.
+            'blocked' => array_values(array_filter(
+                $withAvailability(Availability::NeedsOtherGpu),
+                fn (Technology $technology) => in_array($technology->vendor(), [$gpu->vendor(), Vendor::All], true),
+            )),
+        ];
+    }
+
+    /**
+     * Las tecnologías de la capacidad, primero las de tu marca. En generación de frames, MFG antes que FG.
+     *
+     * @return list<Technology>
+     */
+    private function byPreference(Capability $capability, GpuProfile $gpu): array
+    {
+        return collect($capability->technologies())
+            ->sortBy(fn (Technology $technology) => [
+                $technology->vendor() === $gpu->vendor() ? 0 : 1,
+                $technology === Technology::DlssMfg ? 0 : 1,
+            ])
+            ->values()
+            ->all();
     }
 
     /**

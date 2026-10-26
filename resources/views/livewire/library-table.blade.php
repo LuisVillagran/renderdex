@@ -1,17 +1,19 @@
 @php
+    use App\Enums\Capability;
     use App\Enums\MatchSource;
     use App\Enums\Technology;
-    use App\Enums\Vendor;
     use Illuminate\Support\Number;
 
-    $groups = Technology::byVendor();
-    $isHighlighted = fn (string $vendor) => $highlightedVendor?->value === $vendor;
-    // En pantallas chicas, con una marca elegida, solo se muestran sus tecnologías y Ray Tracing.
-    $compactGroups = $highlightedVendor ? array_intersect_key($groups, array_flip([$highlightedVendor->value, Vendor::All->value])) : $groups;
     $percent = fn (int $count) => $stats['total'] > 0 ? round($count / $stats['total'] * 100) : 0;
     $sortIndicator = fn (string $column) => $sort === $column ? ($direction === 'asc' ? '↑' : '↓') : '';
     $ariaSort = fn (string $column) => $sort === $column ? ($direction === 'asc' ? 'ascending' : 'descending') : 'none';
     $hours = fn (int $minutes) => __('library.table.hours', ['hours' => Number::format($minutes / 60, maxPrecision: 1)]);
+    // Desglose bajo cada capacidad; MFG queda fuera porque ya cuenta como DLSS FG.
+    $breakdown = [
+        Capability::Upscaling->value => [Technology::Dlss, Technology::Fsr, Technology::Xess],
+        Capability::FrameGeneration->value => [Technology::DlssFg, Technology::FsrFg, Technology::XessFg],
+        Capability::RayTracing->value => [],
+    ];
 @endphp
 
 <div class="flex flex-col gap-8">
@@ -36,7 +38,7 @@
         </div>
 
         @unless ($error)
-            <x-gpu-selector :gpu="$gpu" :gpu-model="$gpuModel" :has-filters="$activeFilters !== []" />
+            <x-gpu-selector :gpu="$gpu" :gpu-model="$gpuModel" />
         @endunless
     </div>
 
@@ -64,57 +66,40 @@
             </button>
         </section>
     @else
-        @if ($gpuStats)
-            <p class="flex gap-3 border-l-2 border-accent pl-4 text-sm" role="status">
-                <span class="shrink-0 font-mono text-xs leading-5 font-bold text-accent" aria-hidden="true">GPU</span>
-                <span>{{ __('gpu.summary', [
-                    'gpu' => $gpuProfile->label(),
-                    'upscaling' => trans_choice('gpu.games', $gpuStats['upscaling'], ['count' => Number::format($gpuStats['upscaling'])]),
-                    'frame_gen' => trans_choice('gpu.games', $gpuStats['frame_gen'], ['count' => Number::format($gpuStats['frame_gen'])]),
-                    'ray_tracing' => trans_choice('gpu.games', $gpuStats['ray_tracing'], ['count' => Number::format($gpuStats['ray_tracing'])]),
-                ]) }}</span>
-            </p>
-        @endif
-
-        {{-- Estadísticas: una sola lectura, dividida en celdas como un panel de instrumentos. --}}
+        {{-- Estadísticas: total con cobertura de la wiki y una celda por capacidad. --}}
         <section aria-label="{{ __('library.stats.label') }}">
-            <dl class="grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-5">
+            <dl class="grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-4">
                 <div class="col-span-2 flex flex-col justify-between gap-4 bg-panel p-4 lg:col-span-1">
                     <dt class="label">{{ __('library.stats.total') }}</dt>
                     <dd class="flex flex-col gap-3">
                         <span class="font-display text-5xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($stats['total']) }}</span>
                         <span class="flex flex-col gap-1.5 font-mono text-xs text-muted">
-                            {{ __('library.stats.with_wiki_page', ['count' => Number::format($stats['with_wiki_page'])]) }}
-                            <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($stats['with_wiki_page']) }}%"></span></span>
+                            <span title="{{ __('library.stats.with_data_help') }}">{{ __('library.stats.with_data', ['count' => Number::format($stats['with_data'])]) }}</span>
+                            <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($stats['with_data']) }}%"></span></span>
                         </span>
                     </dd>
                 </div>
 
-                @foreach ($groups as $vendor => $groupTechnologies)
-                    <div wire:key="stat-{{ $vendor }}" @class(['relative flex flex-col gap-3 bg-panel p-4', 'shadow-[inset_0_2px_0_var(--rd-accent)]' => $isHighlighted($vendor)])>
-                        <dt @class(['label', 'text-accent!' => $isHighlighted($vendor)])>
-                            {{ __('technologies.group.'.$vendor) }}
+                @foreach (Capability::cases() as $capability)
+                    @php $count = $stats['capabilities'][$capability->value]; @endphp
+                    <div wire:key="stat-{{ $capability->value }}" @class(['flex flex-col gap-3 bg-panel p-4', 'col-span-2 sm:col-span-1' => $loop->last])>
+                        <dt class="flex flex-col gap-0.5">
+                            <span class="label">{{ __('library.capability.'.$capability->value.'.label') }}</span>
+                            <span @class(['font-mono text-[0.65rem]', 'text-accent' => $gpuProfile, 'text-muted' => ! $gpuProfile])>
+                                {{ $gpuProfile ? __('library.stats.on_gpu', ['gpu' => $gpuProfile->label()]) : __('library.stats.any_vendor') }}
+                            </span>
                         </dt>
-                        <dd class="flex flex-col gap-3">
-                            @if (count($groupTechnologies) === 1)
-                                {{-- Una sola tecnología (Ray Tracing): número grande, sin repetir el nombre. --}}
-                                @php $count = $stats['technologies'][$groupTechnologies[0]->value]; @endphp
-                                <span class="font-display text-4xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($count) }}</span>
-                                <span class="flex flex-col gap-1.5 font-mono text-xs text-muted">
-                                    {{ __('library.stats.games_with', ['count' => Number::format($count), 'total' => Number::format($stats['total'])]) }}
-                                    <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($count) }}%"></span></span>
+                        <dd class="flex flex-col gap-2">
+                            <span class="font-display text-4xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($count) }}</span>
+                            <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($count) }}%"></span></span>
+                            @if ($breakdown[$capability->value] !== [])
+                                <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
+                                    @foreach ($breakdown[$capability->value] as $technology)
+                                        <span>{{ __('technologies.label.'.$technology->value) }} <span class="text-fg tabular-nums">{{ Number::format($stats['technologies'][$technology->value]) }}</span></span>
+                                    @endforeach
                                 </span>
                             @else
-                                @foreach ($groupTechnologies as $technology)
-                                    @php $count = $stats['technologies'][$technology->value]; @endphp
-                                    <span class="flex flex-col gap-1">
-                                        <span class="flex items-baseline justify-between gap-2 font-mono text-xs">
-                                            <span class="text-muted">{{ __('technologies.label.'.$technology->value) }}</span>
-                                            <span class="font-bold tabular-nums" data-count-up>{{ Number::format($count) }}</span>
-                                        </span>
-                                        <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($count) }}%"></span></span>
-                                    </span>
-                                @endforeach
+                                <span class="font-mono text-[0.7rem] text-muted">{{ __('library.stats.games_with', ['count' => Number::format($count), 'total' => Number::format($stats['total'])]) }}</span>
                             @endif
                         </dd>
                     </div>
@@ -122,96 +107,115 @@
             </dl>
         </section>
 
-        <x-technology-filters :active-filters="$activeFilters" :search="$search" :placeholder="__('library.search.placeholder')" />
+        <x-technology-filters :filter="$filter" :has-active-filters="$hasActiveFilters" :search="$search" :placeholder="__('library.search.placeholder')" />
 
-        {{-- Tabla --}}
-        <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
-            <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <caption class="sr-only">{{ __('library.table.caption') }}</caption>
-                    <thead class="border-b border-line-strong text-left">
-                        <tr>
-                            <th scope="col" class="hidden py-3 pr-1 pl-4 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
-                            @foreach (['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
-                                <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-3 py-3 font-normal', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
-                                    <button type="button" wire:click="sortBy('{{ $column }}')" class="focus-ring label inline-flex items-center gap-1 hover:text-fg!" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
-                                        {{ $label }} <span aria-hidden="true" class="text-accent">{{ $sortIndicator($column) ?: '↕' }}</span>
-                                    </button>
-                                </th>
-                            @endforeach
-                            @foreach ($groups as $vendor => $groupTechnologies)
-                                <th scope="col" wire:key="th-{{ $vendor }}" @class([
-                                    'label hidden px-3 py-3 font-normal lg:table-cell',
-                                    'bg-accent/8 text-accent! shadow-[inset_0_2px_0_var(--rd-accent)]' => $isHighlighted($vendor),
-                                ])>
-                                    {{ __('technologies.group.'.$vendor) }}
-                                </th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-line">
-                        @forelse ($games as $entry)
-                            <tr wire:key="game-{{ $entry->owned->appid }}" class="animate-rise transition-colors hover:bg-raised/60 hover:shadow-[inset_2px_0_0_var(--rd-accent)]" style="--delay: {{ $loop->index * 18 }}ms">
-                                <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
-                                    <x-game-cover :appid="$entry->owned->appid" />
-                                </td>
-                                <td class="px-3 py-3">
-                                    <div class="flex flex-col gap-2">
-                                        <div class="flex flex-col gap-0.5">
-                                            @if ($entry->game)
-                                                <a href="{{ $entry->game->url() }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
-                                                    {{ $entry->owned->name }}
-                                                </a>
-                                            @else
-                                                <span class="font-medium">{{ $entry->owned->name }}</span>
-                                            @endif
-                                            <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
-                                                <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
-                                                @if (! $entry->game)
-                                                    <span>{{ __('library.no_wiki_page') }}</span>
-                                                @else
-                                                    <a href="{{ $entry->game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
-                                                    @if ($entry->matchedBy === MatchSource::Title)
-                                                        <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
-                                                    @endif
-                                                @endif
-                                            </span>
-                                        </div>
+        {{-- Tabla. `all` muestra las columnas por marca además de "En tu GPU"; se recuerda en el navegador. --}}
+        <div
+            class="flex flex-col gap-3"
+            x-data="{
+                all: false,
+                init() { try { this.all = localStorage.getItem('renderdex.all-technologies') === '1' } catch (e) {} },
+                toggleAll() {
+                    this.all = ! this.all;
+                    try { localStorage.setItem('renderdex.all-technologies', this.all ? '1' : '0') } catch (e) {}
+                },
+            }"
+        >
+            @if ($gpuProfile)
+                <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden self-end font-mono text-xs text-muted uppercase hover:text-accent lg:inline-flex">
+                    <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
+                    <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
+                </button>
+            @endif
 
-                                        {{-- Sin espacio para las columnas por marca: las píldoras van bajo el nombre. --}}
-                                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 lg:hidden">
-                                            @foreach ($compactGroups as $vendor => $groupTechnologies)
-                                                <x-tech-pills wire:key="compact-{{ $entry->owned->appid }}-{{ $vendor }}" :game="$entry->game" :technologies="$groupTechnologies" />
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="hidden px-3 py-3 text-right align-top font-mono text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
-                                    {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
-                                </td>
-                                @foreach ($groups as $vendor => $groupTechnologies)
-                                    <td wire:key="cell-{{ $entry->owned->appid }}-{{ $vendor }}" @class([
-                                        'hidden px-3 py-3 lg:table-cell',
-                                        'bg-accent/5' => $isHighlighted($vendor),
-                                    ])>
-                                        <x-tech-pills :game="$entry->game" :technologies="$groupTechnologies" />
-                                    </td>
-                                @endforeach
-                            </tr>
-                        @empty
+            <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
+                <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <caption class="sr-only">{{ __('library.table.caption') }}</caption>
+                        <thead class="border-b border-line-strong text-left">
                             <tr>
-                                <td colspan="{{ 3 + count($groups) }}" class="px-3 py-14 text-center font-mono text-sm text-muted">
-                                    <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
-                                </td>
+                                <th scope="col" class="hidden py-3 pr-1 pl-4 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
+                                @foreach (['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
+                                    <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-3 py-3 font-normal', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
+                                        <button type="button" wire:click="sortBy('{{ $column }}')" class="focus-ring label inline-flex items-center gap-1 hover:text-fg!" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
+                                            {{ $label }} <span aria-hidden="true" class="text-accent">{{ $sortIndicator($column) ?: '↕' }}</span>
+                                        </button>
+                                    </th>
+                                @endforeach
+                                <x-technology-headers :gpu-profile="$gpuProfile" :highlighted-vendor="$highlightedVendor" />
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-line">
+                            @forelse ($games as $entry)
+                                <tr wire:key="game-{{ $entry->owned->appid }}" class="animate-rise transition-colors hover:bg-raised/60 hover:shadow-[inset_2px_0_0_var(--rd-accent)]" style="--delay: {{ $loop->index * 18 }}ms">
+                                    <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
+                                        <x-game-cover :appid="$entry->owned->appid" />
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <div class="flex flex-col gap-2">
+                                            <div class="flex flex-col gap-0.5">
+                                                @if ($entry->game)
+                                                    <a href="{{ $entry->game->url() }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
+                                                        {{ $entry->owned->name }}
+                                                    </a>
+                                                @else
+                                                    <span class="font-medium">{{ $entry->owned->name }}</span>
+                                                @endif
+                                                <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
+                                                    <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                                                    @if ($entry->game)
+                                                        <a href="{{ $entry->game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
+                                                        @if ($entry->matchedBy === MatchSource::Title)
+                                                            <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
+                                                        @endif
+                                                    @endif
+                                                </span>
+                                            </div>
+
+                                            <x-technology-compact :game="$entry->game" :name="$entry->owned->name" :gpu-profile="$gpuProfile" :highlighted-vendor="$highlightedVendor" />
+                                        </div>
+                                    </td>
+                                    <td class="hidden px-3 py-3 text-right align-top font-mono text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
+                                        {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
+                                    </td>
+                                    <x-technology-cells :game="$entry->game" :row-key="$entry->owned->appid" :name="$entry->owned->name" :gpu-profile="$gpuProfile" :highlighted-vendor="$highlightedVendor" />
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="{{ 3 + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-mono text-sm text-muted">
+                                        <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         {{ $games->links() }}
+
+        @if ($missingData->isNotEmpty())
+            <section class="frame flex flex-col gap-4 p-5" aria-labelledby="missing-data-title">
+                <div class="flex flex-col gap-1">
+                    <h2 id="missing-data-title" class="font-display text-lg font-semibold">{{ __('library.missing.title') }}</h2>
+                    <p class="max-w-2xl text-sm text-muted">{{ __('library.missing.body') }}</p>
+                </div>
+                <ol class="flex flex-col divide-y divide-line">
+                    @foreach ($missingData as $entry)
+                        <li wire:key="missing-{{ $entry->owned->appid }}" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
+                            <span class="flex items-baseline gap-3">
+                                <span class="font-mono text-xs text-accent" aria-hidden="true">{{ sprintf('%02d', $loop->iteration) }}</span>
+                                <span class="text-sm font-medium">{{ $entry->owned->name }}</span>
+                                <span class="font-mono text-xs text-muted">{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                            </span>
+                            <x-no-data :game="$entry->game" :name="$entry->owned->name" />
+                        </li>
+                    @endforeach
+                </ol>
+            </section>
+        @endif
 
         <div class="flex flex-col gap-3 border-t border-line pt-5 text-sm text-muted">
             <x-support-legend />

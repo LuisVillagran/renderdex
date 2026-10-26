@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Enums\Technology;
 use App\Livewire\Concerns\WithTechnologyFilters;
 use App\Services\Library\LibraryBrowser;
 use App\Services\Library\LibraryMatcher;
@@ -70,23 +69,24 @@ class LibraryTable extends Component
             $error = 'unavailable';
         }
 
-        $results = $browser->browse($entries, $this->search, $this->filters, $this->sort, $this->direction);
+        $filter = $this->technologyFilter();
+        $results = $browser->browse($entries, $this->search, $filter, $this->sort, $this->direction);
         $page = $this->getPage();
-        $gpuProfile = $this->gpuProfile();
 
         return view('livewire.library-table', [
-            'gpuProfile' => $gpuProfile,
-            'gpuStats' => $gpuProfile ? $browser->gpuStats($entries, $gpuProfile) : null,
             'error' => $error,
             'isDemo' => $steam->isDemo(),
-            'stats' => $browser->stats($entries),
+            'stats' => $browser->stats($entries, $filter->gpu),
+            'missingData' => $browser->mostPlayedWithoutData($entries),
             'games' => new LengthAwarePaginator(
                 $results->forPage($page, self::PER_PAGE)->values(),
                 $results->count(),
                 self::PER_PAGE,
                 $page,
             ),
-            'activeFilters' => array_map(fn (Technology $technology) => $technology->value, $this->validFilters()),
+            'filter' => $filter,
+            'hasActiveFilters' => $this->hasActiveFilters(),
+            'gpuProfile' => $filter->gpu,
             'highlightedVendor' => $this->highlightedVendor(),
         ]);
     }

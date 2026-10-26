@@ -12,6 +12,22 @@ enum Capability: string
     case RayTracing = 'ray_tracing';
 
     /**
+     * Convierte valores sueltos (p. ej. de la URL) en capacidades, descartando los desconocidos.
+     *
+     * @param  array<mixed>  $values
+     * @return list<self>
+     */
+    public static function fromValues(array $values): array
+    {
+        return collect($values)
+            ->map(fn ($value) => is_string($value) ? self::tryFrom($value) : null)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return list<Technology>
      */
     public function technologies(): array

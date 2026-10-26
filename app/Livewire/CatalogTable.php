@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Enums\Technology;
 use App\Livewire\Concerns\WithTechnologyFilters;
 use App\Services\Catalog\CatalogSearch;
 use Illuminate\Contracts\View\View;
@@ -19,13 +18,15 @@ class CatalogTable extends Component
 
     public function render(CatalogSearch $catalog): View
     {
-        $technologies = $this->validFilters();
-        $results = $catalog->search($this->search, $technologies, $this->getPage());
+        $filter = $this->technologyFilter();
+        $results = $catalog->search($this->search, $filter, $this->getPage());
 
         return view('livewire.catalog-table', [
             'games' => $results->games,
             'approximate' => $results->approximate,
-            'activeFilters' => array_map(fn (Technology $technology) => $technology->value, $technologies),
+            'filter' => $filter,
+            'hasActiveFilters' => $this->hasActiveFilters(),
+            'gpuProfile' => $filter->gpu,
             'highlightedVendor' => $this->highlightedVendor(),
         ]);
     }

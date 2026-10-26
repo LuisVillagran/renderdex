@@ -1,8 +1,8 @@
 {{--
     Selector "Mi GPU": marca y, opcionalmente, generación. La elección se recuerda en localStorage
-    y se restaura al cargar, sin pisar filtros de un link compartido.
+    y se restaura al cargar. No toca los filtros, así que un link compartido se ve igual.
 --}}
-@props(['gpu', 'gpuModel' => null, 'hasFilters'])
+@props(['gpu', 'gpuModel' => null])
 
 @php
     use App\Enums\GpuProfile;
@@ -23,7 +23,7 @@
                 savedModel = localStorage.getItem('renderdex.gpu-model');
             } catch (e) {}
             if ((saved && saved !== $wire.gpu) || (savedModel && savedModel !== $wire.gpuModel)) {
-                $wire.restoreGpu(saved ?? $wire.gpu, savedModel ?? '', {{ $hasFilters ? 'false' : 'true' }});
+                $wire.restoreGpu(saved ?? $wire.gpu, savedModel ?? '');
             }
         },
         chooseGpu(gpu) {

@@ -66,17 +66,34 @@ it('reads the search from the URL, as the home page form sends it', function () 
         ->assertDontSee('Outer Wilds');
 });
 
-it('filters by technology and preselects the filter of the chosen GPU', function () {
+it('filters by exact technology and by capability', function () {
     Game::factory()->create(['title' => 'With FSR', 'fsr' => Support::Yes]);
     Game::factory()->create(['title' => 'Without FSR', 'fsr' => Support::No]);
+    Game::factory()->create(['title' => 'With RT', 'ray_tracing' => Support::Yes]);
 
     Livewire::test(CatalogTable::class)
-        ->call('selectGpu', 'amd')
+        ->call('toggleFilter', 'fsr')
         ->assertSet('filters', ['fsr'])
         ->assertSee('With FSR')
         ->assertDontSee('Without FSR')
         ->call('toggleFilter', 'fsr')
-        ->assertSee('Without FSR');
+        ->assertSee('Without FSR')
+        ->call('toggleCapability', 'ray_tracing')
+        ->assertSee('With RT')
+        ->assertDontSee('With FSR')
+        ->call('clearFilters')
+        ->assertSet('capabilities', [])
+        ->assertSee('With FSR');
+});
+
+it('shows what the chosen GPU can use in its own column', function () {
+    Game::factory()->create(['title' => 'Cyberpunk 2077', 'dlss' => Support::Yes, 'dlss_mfg' => Support::Yes, 'dlss_fg' => Support::Yes, 'upscaling_tech' => 'DLSS 4']);
+
+    Livewire::test(CatalogTable::class)
+        ->call('restoreGpu', 'nvidia', 'rtx50')
+        ->assertSee('En tu RTX 50')
+        ->assertSee('DLSS 4')
+        ->assertSee('DLSS MFG');
 });
 
 it('says when nothing matches', function () {

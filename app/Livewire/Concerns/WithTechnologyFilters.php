@@ -2,31 +2,38 @@
 
 namespace App\Livewire\Concerns;
 
+use App\Enums\Capability;
 use App\Enums\GpuProfile;
 use App\Enums\Technology;
 use App\Enums\Vendor;
+use App\Services\TechnologyFilter;
 use Livewire\Attributes\Url;
 
 /**
- * Búsqueda por nombre, filtros por tecnología y selector "Mi GPU", compartidos por
- * la biblioteca y el catálogo. El componente debe usar WithPagination.
+ * Búsqueda por nombre, filtros y selector "Mi GPU", compartidos por la biblioteca y el catálogo.
+ * El componente debe usar WithPagination.
+ *
+ * Los filtros principales son por intención ({@see Capability}: "quiero reescalado"); con una
+ * generación de GPU elegida, cuentan solo lo que esa GPU puede usar. Los filtros por tecnología
+ * exacta quedan en "Más filtros".
  */
 trait WithTechnologyFilters
 {
-    /** Filtro que se preselecciona al elegir cada marca en "Mi GPU". */
-    private const GPU_FILTERS = [
-        'nvidia' => [Technology::Dlss],
-        'amd' => [Technology::Fsr],
-        'intel' => [Technology::Xess],
-        'all' => [],
-    ];
+    private const GPUS = ['nvidia', 'amd', 'intel', 'all'];
 
     #[Url(as: 'q', except: '')]
     public string $search = '';
 
     /** @var list<string> */
+    #[Url(as: 'cap', except: [])]
+    public array $capabilities = [];
+
+    /** @var list<string> */
     #[Url(as: 'tech', except: [])]
     public array $filters = [];
+
+    #[Url(as: 'data', except: false)]
+    public bool $onlyWithData = false;
 
     /** Se recuerda en localStorage desde el navegador; ver la vista. */
     public string $gpu = 'all';
@@ -39,31 +46,40 @@ trait WithTechnologyFilters
         $this->resetPage();
     }
 
+    public function updatedOnlyWithData(): void
+    {
+        $this->resetPage();
+    }
+
+    public function toggleCapability(string $capability): void
+    {
+        if (Capability::tryFrom($capability) === null) {
+            return;
+        }
+
+        $this->capabilities = $this->toggled($this->capabilities, $capability);
+        $this->resetPage();
+    }
+
     public function toggleFilter(string $technology): void
     {
         if (Technology::tryFrom($technology) === null) {
             return;
         }
 
-        $this->filters = in_array($technology, $this->filters, true)
-            ? array_values(array_diff($this->filters, [$technology]))
-            : [...$this->filters, $technology];
-
+        $this->filters = $this->toggled($this->filters, $technology);
         $this->resetPage();
     }
 
     public function clearFilters(): void
     {
-        $this->reset('search', 'filters');
+        $this->reset('search', 'capabilities', 'filters', 'onlyWithData');
         $this->resetPage();
     }
 
-    /**
-     * @param  bool  $preselectFilters  False al restaurar la elección guardada, para no pisar filtros de un link compartido.
-     */
-    public function selectGpu(string $gpu, bool $preselectFilters = true): void
+    public function selectGpu(string $gpu): void
     {
-        if (! array_key_exists($gpu, self::GPU_FILTERS)) {
+        if (! in_array($gpu, self::GPUS, true)) {
             return;
         }
 
@@ -74,10 +90,7 @@ trait WithTechnologyFilters
             $this->gpuModel = null;
         }
 
-        if ($preselectFilters) {
-            $this->filters = array_map(fn (Technology $technology) => $technology->value, self::GPU_FILTERS[$gpu]);
-            $this->resetPage();
-        }
+        $this->resetPage();
     }
 
     /**
@@ -88,15 +101,39 @@ trait WithTechnologyFilters
         $profile = GpuProfile::tryFrom($model);
 
         $this->gpuModel = $profile?->vendor()->value === $this->gpu ? $profile->value : null;
+        $this->resetPage();
     }
 
     /**
      * Restaura lo guardado en localStorage en un solo viaje al servidor.
      */
-    public function restoreGpu(string $gpu, string $model, bool $preselectFilters): void
+    public function restoreGpu(string $gpu, string $model): void
     {
-        $this->selectGpu($gpu, $preselectFilters);
+        $this->selectGpu($gpu);
         $this->selectGpuModel($model);
+    }
+
+    /**
+     * Los filtros activos, ya validados (p. ej. si alguien edita la URL).
+     */
+    protected function technologyFilter(): TechnologyFilter
+    {
+        return new TechnologyFilter(
+            technologies: Technology::fromValues($this->filters),
+            capabilities: Capability::fromValues($this->capabilities),
+            gpu: $this->gpuProfile(),
+            onlyWithData: $this->onlyWithData,
+        );
+    }
+
+    /**
+     * Hay algún filtro que reduzca los resultados, para ofrecer "Limpiar".
+     */
+    protected function hasActiveFilters(): bool
+    {
+        $filter = $this->technologyFilter();
+
+        return $this->search !== '' || $filter->technologies !== [] || $filter->capabilities !== [] || $filter->onlyWithData;
     }
 
     protected function gpuProfile(): ?GpuProfile
@@ -106,18 +143,19 @@ trait WithTechnologyFilters
         return $profile?->vendor()->value === $this->gpu ? $profile : null;
     }
 
-    /**
-     * Descarta valores desconocidos, p. ej. si alguien edita los filtros en la URL.
-     *
-     * @return list<Technology>
-     */
-    protected function validFilters(): array
-    {
-        return Technology::fromValues($this->filters);
-    }
-
     protected function highlightedVendor(): ?Vendor
     {
         return $this->gpu === 'all' ? null : Vendor::tryFrom($this->gpu);
+    }
+
+    /**
+     * @param  list<string>  $values
+     * @return list<string>
+     */
+    private function toggled(array $values, string $value): array
+    {
+        return in_array($value, $values, true)
+            ? array_values(array_diff($values, [$value]))
+            : [...$values, $value];
     }
 }

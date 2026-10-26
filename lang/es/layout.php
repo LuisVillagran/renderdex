@@ -8,7 +8,7 @@ return [
 
     'header' => [
         'home' => 'Renderdex, ir al inicio',
-        'catalog' => 'Buscar juegos',
+        'catalog' => 'Juegos',
         'your_account' => 'Tu cuenta',
         'avatar_alt' => 'Avatar de :name',
         'my_library' => 'Mi biblioteca',

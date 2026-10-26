@@ -25,13 +25,19 @@
                     </p>
                 @endif
 
+                {{-- Lo más directo: buscar un juego, sin cuenta ni perfil. --}}
+                <div class="flex flex-col gap-2">
+                    <livewire:game-search-box input-id="home-search" :label="__('home.catalog.title')" />
+                    <p class="text-sm text-muted">{{ __('home.catalog.body') }}</p>
+                </div>
+
                 <div class="frame">
                     <p class="label flex items-center justify-between border-b border-line px-4 py-2">
                         <span>{{ __('home.access.label') }}</span>
                         <span aria-hidden="true">steam · openid</span>
                     </p>
 
-                    <div class="flex flex-col gap-5 p-4 sm:p-5">
+                    <div class="flex flex-col gap-4 p-4 sm:p-5">
                         <div class="flex flex-col gap-3">
                             @if ($steamUser = session('steam_user'))
                                 <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring self-start bg-accent px-5 py-2.5 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">
@@ -46,20 +52,18 @@
                             @endif
                         </div>
 
-                        <div class="flex items-center gap-3 font-mono text-xs text-muted" aria-hidden="true">
-                            <span class="h-px flex-1 bg-line"></span>
-                            {{ __('home.or') }}
-                            <span class="h-px flex-1 bg-line"></span>
-                        </div>
-
-                        <livewire:library-lookup />
+                        {{-- Alternativa para quien no quiere iniciar sesión: plegada para no competir con el botón. --}}
+                        <details class="group border-t border-line pt-4">
+                            <summary class="focus-ring flex cursor-pointer list-none items-center gap-2 font-mono text-xs text-muted uppercase hover:text-fg">
+                                <span class="text-accent group-open:hidden" aria-hidden="true">+</span>
+                                <span class="hidden text-accent group-open:inline" aria-hidden="true">−</span>
+                                {{ __('home.access.paste_profile') }}
+                            </summary>
+                            <div class="pt-4">
+                                <livewire:library-lookup />
+                            </div>
+                        </details>
                     </div>
-                </div>
-
-                {{-- Sin cuenta: búsqueda en todo el catálogo, p. ej. antes de comprar un juego. --}}
-                <div class="flex flex-col gap-2 border-l-2 border-accent pl-4">
-                    <livewire:game-search-box input-id="home-search" :label="__('home.catalog.title')" />
-                    <p class="text-sm text-muted">{{ __('home.catalog.body') }}</p>
                 </div>
             </div>
 

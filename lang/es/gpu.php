@@ -31,7 +31,4 @@ return [
         'xess_fg' => 'Fuera de Intel Arc, solo si el juego usa XeSS 2.1 o posterior',
     ],
 
-    'summary' => 'Con tu :gpu: reescalado en :upscaling, generación de frames en :frame_gen y ray tracing en :ray_tracing.',
-    'games' => ':count juego|:count juegos',
-
 ];

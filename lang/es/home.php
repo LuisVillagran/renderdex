@@ -14,10 +14,9 @@ return [
     ],
 
     'access' => [
-        'label' => 'Conectar biblioteca',
+        'label' => 'Revisa tu biblioteca completa',
+        'paste_profile' => '¿Prefieres no iniciar sesión? Pega tu perfil',
     ],
-
-    'or' => 'o',
 
     'catalog' => [
         'title' => '¿Vas a comprar un juego?',

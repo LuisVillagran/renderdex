@@ -2,13 +2,13 @@
 
 namespace App\Services\Library;
 
-use App\Enums\Availability;
 use App\Enums\Capability;
 use App\Enums\GpuProfile;
 use App\Enums\Support;
 use App\Enums\Technology;
 use App\Services\GpuCapabilities;
 use App\Services\SearchKey;
+use App\Services\TechnologyFilter;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,57 +19,50 @@ class LibraryBrowser
 {
     public const SORTS = ['name', 'playtime'];
 
+    /** Cuántos juegos sin datos se sugieren para completar en la wiki. */
+    public const MISSING_DATA_SUGGESTIONS = 5;
+
     public function __construct(
         private SearchKey $searchKey,
         private GpuCapabilities $gpus,
     ) {}
 
     /**
-     * Cuántos juegos tienen cada capacidad que tu GPU puede usar de verdad.
-     *
      * @param  list<LibraryEntry>  $entries
-     * @return array<string, int> Indexado por el valor de {@see Capability}.
+     * @param  GpuProfile|null  $gpu  Con GPU, las capacidades cuentan solo lo que se puede usar en ella.
+     * @return array{total: int, with_wiki_page: int, with_data: int, technologies: array<string, int>, capabilities: array<string, int>}
      */
-    public function gpuStats(array $entries, GpuProfile $gpu): array
-    {
-        return collect(Capability::cases())
-            ->mapWithKeys(fn (Capability $capability) => [
-                $capability->value => collect($entries)->filter(fn (LibraryEntry $entry) => collect($capability->technologies())->contains(
-                    fn (Technology $technology) => $this->gpus->availability($entry->game, $gpu, $technology) === Availability::Usable,
-                ))->count(),
-            ])
-            ->all();
-    }
-
-    /**
-     * @param  list<LibraryEntry>  $entries
-     * @return array{total: int, with_wiki_page: int, technologies: array<string, int>}
-     */
-    public function stats(array $entries): array
+    public function stats(array $entries, ?GpuProfile $gpu = null): array
     {
         $entries = collect($entries);
 
         return [
             'total' => $entries->count(),
             'with_wiki_page' => $entries->filter(fn (LibraryEntry $entry) => $entry->game !== null)->count(),
+            'with_data' => $entries->filter(fn (LibraryEntry $entry) => $this->hasData($entry))->count(),
             'technologies' => collect(Technology::cases())
                 ->mapWithKeys(fn (Technology $technology) => [
                     $technology->value => $entries->filter(fn (LibraryEntry $entry) => $this->supports($entry, $technology))->count(),
+                ])
+                ->all(),
+            'capabilities' => collect(Capability::cases())
+                ->mapWithKeys(fn (Capability $capability) => [
+                    $capability->value => $entries->filter(fn (LibraryEntry $entry) => $this->hasCapability($entry, $capability, $gpu))->count(),
                 ])
                 ->all(),
         ];
     }
 
     /**
+     * Primero los juegos con datos; dentro de cada grupo, el orden elegido.
+     *
      * @param  list<LibraryEntry>  $entries
-     * @param  list<string>  $technologies  Valores de {@see Technology}; se exige soporte "Yes" en todas.
      * @return Collection<int, LibraryEntry>
      */
-    public function browse(array $entries, string $search, array $technologies, string $sort, string $direction): Collection
+    public function browse(array $entries, string $search, TechnologyFilter $filter, string $sort, string $direction): Collection
     {
         // Igual que el catálogo: todas las palabras, en cualquier orden y sin puntuación.
         $words = $this->searchKey->words($this->searchKey->make($search));
-        $technologies = $this->validTechnologies($technologies);
 
         $results = collect($entries)
             ->when($words !== [], fn (Collection $entries) => $entries->filter(function (LibraryEntry $entry) use ($words) {
@@ -77,34 +70,56 @@ class LibraryBrowser
 
                 return collect($words)->every(fn (string $word) => str_contains($name, $word));
             }))
-            ->filter(fn (LibraryEntry $entry) => collect($technologies)->every(
+            ->when($filter->onlyWithData, fn (Collection $entries) => $entries->filter(fn (LibraryEntry $entry) => $this->hasData($entry)))
+            ->filter(fn (LibraryEntry $entry) => collect($filter->technologies)->every(
                 fn (Technology $technology) => $this->supports($entry, $technology),
+            ))
+            ->filter(fn (LibraryEntry $entry) => collect($filter->capabilities)->every(
+                fn (Capability $capability) => $this->hasCapability($entry, $capability, $filter->gpu),
             ));
 
         $descending = $direction === 'desc';
+        $byName = fn (LibraryEntry $a, LibraryEntry $b) => strnatcasecmp($a->owned->name, $b->owned->name);
 
-        return match (in_array($sort, self::SORTS, true) ? $sort : 'name') {
-            'playtime' => $results->sortBy([
-                fn (LibraryEntry $a, LibraryEntry $b) => $descending
-                    ? $b->owned->playtimeMinutes <=> $a->owned->playtimeMinutes
-                    : $a->owned->playtimeMinutes <=> $b->owned->playtimeMinutes,
-                fn (LibraryEntry $a, LibraryEntry $b) => strnatcasecmp($a->owned->name, $b->owned->name),
-            ])->values(),
-            default => $results->sort(fn (LibraryEntry $a, LibraryEntry $b) => $descending
-                ? strnatcasecmp($b->owned->name, $a->owned->name)
-                : strnatcasecmp($a->owned->name, $b->owned->name))->values(),
-        };
+        return $results->sortBy([
+            fn (LibraryEntry $a, LibraryEntry $b) => $this->hasData($b) <=> $this->hasData($a),
+            ...match (in_array($sort, self::SORTS, true) ? $sort : 'name') {
+                'playtime' => [
+                    fn (LibraryEntry $a, LibraryEntry $b) => $descending
+                        ? $b->owned->playtimeMinutes <=> $a->owned->playtimeMinutes
+                        : $a->owned->playtimeMinutes <=> $b->owned->playtimeMinutes,
+                    $byName,
+                ],
+                default => [fn (LibraryEntry $a, LibraryEntry $b) => $descending ? $byName($b, $a) : $byName($a, $b)],
+            },
+        ])->values();
     }
 
     /**
-     * Descarta valores desconocidos, p. ej. si alguien edita los filtros en la URL.
+     * Los juegos más jugados que la wiki no documenta: los que más vale la pena completar.
      *
-     * @param  list<string>  $technologies
-     * @return list<Technology>
+     * @param  list<LibraryEntry>  $entries
+     * @return Collection<int, LibraryEntry>
      */
-    public function validTechnologies(array $technologies): array
+    public function mostPlayedWithoutData(array $entries, int $limit = self::MISSING_DATA_SUGGESTIONS): Collection
     {
-        return Technology::fromValues($technologies);
+        return collect($entries)
+            ->reject(fn (LibraryEntry $entry) => $this->hasData($entry))
+            ->filter(fn (LibraryEntry $entry) => $entry->owned->playtimeMinutes > 0)
+            ->sortByDesc(fn (LibraryEntry $entry) => $entry->owned->playtimeMinutes)
+            ->take($limit)
+            ->values();
+    }
+
+    public function hasData(LibraryEntry $entry): bool
+    {
+        return (bool) $entry->game?->has_data;
+    }
+
+    private function hasCapability(LibraryEntry $entry, Capability $capability, ?GpuProfile $gpu): bool
+    {
+        return collect($this->gpus->usableTechnologies($capability, $gpu))
+            ->contains(fn (Technology $technology) => $this->supports($entry, $technology));
     }
 
     private function supports(LibraryEntry $entry, Technology $technology): bool

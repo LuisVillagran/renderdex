@@ -5,7 +5,9 @@ namespace App\Services\Catalog;
 use App\Enums\Support;
 use App\Enums\Technology;
 use App\Models\Game;
+use App\Services\GpuCapabilities;
 use App\Services\SearchKey;
+use App\Services\TechnologyFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,31 +25,32 @@ class CatalogSearch
 
     public const SUGGESTIONS = 6;
 
-    public function __construct(private SearchKey $searchKey) {}
+    public function __construct(
+        private SearchKey $searchKey,
+        private GpuCapabilities $gpus,
+    ) {}
 
     /**
      * Con texto, primero el título exacto, luego los que empiezan igual, los que contienen la frase
      * y después el resto. Sin texto, los juegos con más tecnologías soportadas, para poder explorar.
-     *
-     * @param  list<Technology>  $technologies  Se exige soporte "Yes" en todas.
      */
-    public function search(string $query, array $technologies, int $page = 1): CatalogResults
+    public function search(string $query, TechnologyFilter $filter = new TechnologyFilter, int $page = 1): CatalogResults
     {
         $key = $this->searchKey->make($query);
 
         if ($key === '') {
-            $games = $this->filtered($technologies)->orderByRaw($this->supportedCountSql().' desc');
+            $games = $this->filtered($filter)->orderByRaw($this->supportedCountSql().' desc');
 
             return new CatalogResults($this->paginate($games, $page));
         }
 
-        $results = $this->paginate($this->matching($this->filtered($technologies), $key), $page);
+        $results = $this->paginate($this->matching($this->filtered($filter), $key), $page);
 
         if ($results->total() > 0) {
             return new CatalogResults($results);
         }
 
-        return new CatalogResults($this->paginate($this->similar($this->filtered($technologies), $key), $page), approximate: true);
+        return new CatalogResults($this->paginate($this->similar($this->filtered($filter), $key), $page), approximate: true);
     }
 
     /**
@@ -63,23 +66,39 @@ class CatalogSearch
             return new Collection;
         }
 
-        $games = $this->matching($this->filtered([]), $key)->limit($limit)->get();
+        $games = $this->matching($this->filtered(new TechnologyFilter), $key)->limit($limit)->get();
 
         return $games->isNotEmpty()
             ? $games
-            : $this->similar($this->filtered([]), $key)->limit($limit)->get();
+            : $this->similar($this->filtered(new TechnologyFilter), $key)->limit($limit)->get();
     }
 
     /**
-     * @param  list<Technology>  $technologies
      * @return Builder<Game>
      */
-    private function filtered(array $technologies): Builder
+    private function filtered(TechnologyFilter $filter): Builder
     {
         $games = Game::query()->with(['steamAppids' => fn ($appids) => $appids->orderBy('id')]);
 
-        foreach ($technologies as $technology) {
+        foreach ($filter->technologies as $technology) {
             $games->where($technology->value, Support::Yes->value);
+        }
+
+        // Cada capacidad: al menos una de sus tecnologías y, con GPU, solo las que puede usar.
+        foreach ($filter->capabilities as $capability) {
+            $technologies = $this->gpus->usableTechnologies($capability, $filter->gpu);
+
+            $games->where(function (Builder $games) use ($technologies) {
+                $games->whereRaw('false');
+
+                foreach ($technologies as $technology) {
+                    $games->orWhere($technology->value, Support::Yes->value);
+                }
+            });
+        }
+
+        if ($filter->onlyWithData) {
+            $games->where('has_data', true);
         }
 
         return $games;

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Support;
+use App\Enums\Technology;
 use App\Enums\Vendor;
 use App\Livewire\LibraryTable;
 use App\Models\Game;
@@ -157,7 +158,7 @@ it('ignores unknown technologies in the filters', function () {
         ->set('filters', ['dlss', 'also-not-a-technology']);
 
     expect(listedNames($component))->toBe(['Cyberpunk 2077']);
-    expect($component->viewData('activeFilters'))->toBe(['dlss']);
+    expect($component->viewData('filter')->technologies)->toBe([Technology::Dlss]);
 });
 
 it('clears the search and the filters', function () {
@@ -215,67 +216,116 @@ it('goes back to the first page when the search changes', function () {
     expect(listedNames($component))->toBe(['Game 07']);
 });
 
-it('summarizes what the chosen GPU generation can really use', function () {
-    wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes, 'dlss_fg' => Support::Yes, 'ray_tracing' => Support::Yes]);
+it('counts what the chosen GPU generation can really use and shows it in its own column', function () {
+    wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes, 'dlss_fg' => Support::Yes, 'ray_tracing' => Support::Yes, 'upscaling_tech' => 'DLSS 4']);
     wikiGame(570, 'Dota 2', ['fsr' => Support::Yes, 'fsr_fg' => Support::Yes]);
     fakeOwnedGames([[1091500, 'Cyberpunk 2077'], [570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
-        ->call('selectGpu', 'nvidia', false)
+        ->call('selectGpu', 'nvidia')
         ->call('selectGpuModel', 'rtx20-30')
         ->assertSet('gpuModel', 'rtx20-30')
         // Reescalado en los dos (DLSS y FSR), FG solo por FSR (DLSS FG requiere RTX 40) y RT en uno.
-        ->assertViewHas('gpuStats', ['upscaling' => 2, 'frame_gen' => 1, 'ray_tracing' => 1])
-        ->assertSee('Con tu RTX 20 / 30: reescalado en 2 juegos, generación de frames en 1 juego y ray tracing en 1 juego.');
+        ->assertViewHas('stats', fn (array $stats) => $stats['capabilities'] === ['upscaling' => 2, 'frame_gen' => 1, 'ray_tracing' => 1])
+        ->assertSee('En tu RTX 20 / 30')
+        ->assertSee('Usable en tu RTX 20 / 30')
+        ->assertSee('DLSS 4')
+        ->assertSee('DLSS FG: Requiere RTX 40 o superior')
+        ->assertSee(__('library.gpu.show_all'));
 });
 
 it('drops the GPU generation when it does not belong to the chosen vendor', function () {
     fakeOwnedGames([[570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
-        ->call('selectGpu', 'amd', false)
+        ->call('selectGpu', 'amd')
         ->call('selectGpuModel', 'rtx40')
         ->assertSet('gpuModel', null)
         ->call('selectGpuModel', 'rx6000')
         ->assertSet('gpuModel', 'rx6000')
-        ->call('selectGpu', 'nvidia', false)
+        ->call('selectGpu', 'nvidia')
         ->assertSet('gpuModel', null)
-        ->assertViewHas('gpuStats', null);
+        ->assertViewHas('gpuProfile', null);
 });
 
-it('restores the saved vendor and generation in one request', function () {
+it('restores the saved vendor and generation in one request, without touching shared filters', function () {
     fakeOwnedGames([[570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
-        ->call('restoreGpu', 'intel', 'arc', true)
+        ->set('filters', ['ray_tracing'])
+        ->call('restoreGpu', 'intel', 'arc')
         ->assertSet('gpu', 'intel')
         ->assertSet('gpuModel', 'arc')
-        ->assertSet('filters', ['xess']);
+        ->assertSet('filters', ['ray_tracing']);
 });
 
-it('preselects the filter of the chosen GPU vendor and highlights its columns', function (string $gpu, array $filters, ?Vendor $highlighted) {
+it('highlights the columns of the chosen GPU vendor', function (string $gpu, ?Vendor $highlighted) {
     fakeOwnedGames([[570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
         ->call('selectGpu', $gpu)
         ->assertSet('gpu', $gpu)
-        ->assertSet('filters', $filters)
+        ->assertSet('filters', [])
         ->assertViewHas('highlightedVendor', $highlighted);
 })->with([
-    'NVIDIA' => ['nvidia', ['dlss'], Vendor::Nvidia],
-    'AMD' => ['amd', ['fsr'], Vendor::Amd],
-    'Intel' => ['intel', ['xess'], Vendor::Intel],
-    'Todas' => ['all', [], null],
+    'NVIDIA' => ['nvidia', Vendor::Nvidia],
+    'AMD' => ['amd', Vendor::Amd],
+    'Intel' => ['intel', Vendor::Intel],
+    'Todas' => ['all', null],
 ]);
 
-it('keeps shared filters when restoring the saved GPU', function () {
-    fakeOwnedGames([[570, 'Dota 2']]);
+it('filters by capability, with any vendor or only what the GPU can use', function () {
+    wikiGame(1091500, 'Cyberpunk 2077', ['dlss_fg' => Support::Yes]);
+    wikiGame(570, 'Dota 2', ['fsr_fg' => Support::Yes]);
+    wikiGame(413150, 'Stardew Valley', ['ray_tracing' => Support::No]);
+    fakeOwnedGames([[1091500, 'Cyberpunk 2077'], [570, 'Dota 2'], [413150, 'Stardew Valley']]);
+
+    $component = Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('toggleCapability', 'frame_gen')
+        ->assertSet('capabilities', ['frame_gen']);
+
+    expect(listedNames($component))->toBe(['Cyberpunk 2077', 'Dota 2']);
+
+    $component->call('selectGpu', 'nvidia')->call('selectGpuModel', 'rtx20-30');
+
+    expect(listedNames($component))->toBe(['Dota 2']);
+
+    $component->call('toggleCapability', 'not-a-capability')->assertSet('capabilities', ['frame_gen']);
+});
+
+it('lists games with wiki data first and can hide the rest', function () {
+    wikiGame(570, 'Dota 2', ['fsr' => Support::Yes]);
+    fakeOwnedGames([[10, 'Counter-Strike'], [570, 'Dota 2'], [20, 'Abandoned Game']]);
+
+    $component = Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID]);
+
+    expect(listedNames($component))->toBe(['Dota 2', 'Abandoned Game', 'Counter-Strike']);
+
+    $component->set('onlyWithData', true);
+
+    expect(listedNames($component))->toBe(['Dota 2']);
+});
+
+it('shows a single cell to complete the wiki instead of a row of unknowns', function () {
+    $empty = wikiGame(570, 'Dota 2');
+    fakeOwnedGames([[570, 'Dota 2', 600], [10, 'Counter-Strike', 120], [20, 'Never Played', 0]]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
-        ->set('filters', ['ray_tracing'])
-        ->call('selectGpu', 'amd', false)
-        ->assertSet('gpu', 'amd')
-        ->assertSet('filters', ['ray_tracing']);
+        ->assertSee(__('library.no_data'))
+        ->assertSee($empty->wikiEditUrl())
+        ->assertSee('https://www.pcgamingwiki.com/w/index.php?search=Counter-Strike')
+        ->assertSee(__('library.missing.title'))
+        ->assertViewHas('missingData', fn ($entries) => $entries->map(fn ($entry) => $entry->owned->name)->all() === ['Dota 2', 'Counter-Strike']);
+});
+
+it('counts the games with wiki data in the stats', function () {
+    wikiGame(570, 'Dota 2', ['fsr' => Support::Yes]);
+    wikiGame(10, 'Counter-Strike');
+    fakeOwnedGames([[570, 'Dota 2'], [10, 'Counter-Strike'], [20, 'Not In Wiki']]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->assertViewHas('stats', fn (array $stats) => $stats['with_wiki_page'] === 2 && $stats['with_data'] === 1)
+        ->assertSee('Datos de render para 1');
 });
 
 it('ignores an unknown GPU vendor', function () {

@@ -13,17 +13,35 @@ return [
     'stats' => [
         'label' => 'Resumen de la biblioteca',
         'total' => 'Juegos',
-        'with_wiki_page' => ':count con página en la wiki',
+        'with_data' => 'Datos de render para :count',
+        'with_data_help' => 'El resto no está documentado en la wiki todavía.',
         'games_with' => ':count de :total juegos',
+        'on_gpu' => 'Usable en tu :gpu',
+        'any_vendor' => 'De cualquier marca',
+    ],
+
+    'capability' => [
+        'upscaling' => ['label' => 'Reescalado', 'hint' => 'DLSS, FSR o XeSS'],
+        'frame_gen' => ['label' => 'Generación de frames', 'hint' => 'DLSS FG, FSR FG o XeSS FG'],
+        'ray_tracing' => ['label' => 'Ray tracing', 'hint' => 'Cualquier marca'],
     ],
 
     'gpu' => [
         'label' => 'Mi GPU',
-        'help' => 'Resalta las columnas de tu marca y preselecciona su filtro.',
+        'help' => 'Resalta las columnas de tu marca.',
+        'column' => 'En tu :gpu',
+        'show_all' => 'Ver todas las tecnologías',
+        'show_less' => 'Ver solo tu GPU',
+        'nothing_usable' => 'Nada usable en tu GPU',
     ],
 
     'filters' => [
-        'label' => 'Mostrar solo juegos con',
+        'label' => 'Tecnologías exactas',
+        'capabilities' => 'Quiero jugar con',
+        'capabilities_on_gpu' => 'Quiero jugar con, en mi :gpu',
+        'only_with_data' => 'Solo juegos con datos',
+        'more' => 'Más filtros',
+        'more_help' => 'Exige soporte en cada tecnología marcada, sin importar tu GPU.',
         'clear' => 'Quitar búsqueda y filtros',
     ],
 
@@ -39,12 +57,22 @@ return [
         'playtime' => 'Horas',
         'hours' => ':hours h',
         'sort_by' => 'Ordenar por :column',
+        'technologies' => 'Tecnologías',
     ],
 
     'wiki_link' => 'Ver :name en PCGamingWiki',
     'matched_by_title' => 'Encontrado por nombre',
     'matched_by_title_help' => 'La wiki no tiene el Steam AppID de este juego; lo encontramos por su nombre exacto.',
     'no_wiki_page' => 'Sin página en la wiki',
+    'no_data' => 'Sin datos en la wiki',
+    'complete' => 'completar',
+    'complete_label' => 'Completar :name en PCGamingWiki',
+
+    'missing' => [
+        'title' => 'Ayuda a completarlo',
+        'body' => 'Tus juegos más jugados que la wiki todavía no documenta. PCGamingWiki la escribe la comunidad: si sabes qué soportan, puedes agregarlo.',
+        'create' => 'buscar en la wiki',
+    ],
 
     'no_results' => 'Ningún juego coincide con la búsqueda o los filtros.',
     'empty' => 'Esta biblioteca no tiene juegos.',
