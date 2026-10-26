@@ -54,7 +54,7 @@
                     <caption class="sr-only">{{ __('catalog.title') }}</caption>
                     <thead class="border-b border-line-strong text-left">
                         <tr>
-                            <th scope="col" class="hidden py-3 pr-1 pl-4 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
+                            <th scope="col" class="py-3 pr-1 pl-3 sm:pl-4"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
                             <th scope="col" class="label px-3 py-3 font-normal">{{ __('library.table.name') }}</th>
                             <x-technology-headers :gpu-profile="$gpuProfile" :highlighted-vendor="$highlightedVendor" />
                         </tr>
@@ -63,8 +63,11 @@
                         @forelse ($games as $game)
                             @php $appid = $game->steamAppids->first()?->steam_appid; @endphp
                             <tr wire:key="catalog-{{ $game->id }}" class="animate-rise transition-colors hover:bg-raised/60 hover:shadow-[inset_2px_0_0_var(--rd-accent)]" style="--delay: {{ $loop->index * 18 }}ms">
-                                <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
-                                    <x-game-cover :appid="$appid" />
+                                <td class="py-3 pr-1 pl-3 align-top sm:pl-4">
+                                    {{-- El título ya enlaza a la ficha: la portada es un atajo para el mouse. --}}
+                                    <a href="{{ $game->url() }}" tabindex="-1" aria-hidden="true" class="block transition hover:brightness-110">
+                                        <x-game-cover :appid="$appid" :cover="$game->cover_url" :title="$game->title" />
+                                    </a>
                                 </td>
                                 <td class="px-3 py-3">
                                     <div class="flex flex-col gap-2">

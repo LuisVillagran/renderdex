@@ -77,13 +77,15 @@ it('lists every game with its support and a link to its wiki page', function () 
         ->assertSeeHtml('<span class="sr-only">Sin datos</span>');
 });
 
-it('loads covers lazily from the Steam CDN with a fallback image', function () {
+it('loads vertical covers lazily, falling back to the wiki cover and to initials', function () {
+    wikiGame(570, 'Dota 2', ['cover_url' => 'https://images.pcgamingwiki.com/1/1a/Dota_2_cover.jpg']);
     fakeOwnedGames([[570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
-        ->assertSeeHtml('steam/apps/570/capsule_184x69.jpg')
+        ->assertSeeHtml('steam/apps/570/library_600x900.jpg')
         ->assertSeeHtml('loading="lazy"')
-        ->assertSeeHtml('images/cover-placeholder.svg');
+        ->assertSeeHtml('thumb/1/1a/Dota_2_cover.jpg/120px-Dota_2_cover.jpg')
+        ->assertSeeHtml('>D2</span>');
 });
 
 it('marks games found by title and games without a wiki page', function () {

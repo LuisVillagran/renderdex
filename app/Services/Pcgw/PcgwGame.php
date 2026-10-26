@@ -17,10 +17,11 @@ readonly class PcgwGame
         public ?string $upscaling,
         public ?string $frameGen,
         public ?string $rayTracing,
+        public ?string $coverUrl = null,
     ) {}
 
     /**
-     * @param  array{PageID: string, Page: string, SteamAppID?: string|null, Upscaling?: string|null, FrameGen?: string|null, RayTracing?: string|null}  $row
+     * @param  array{PageID: string, Page: string, SteamAppID?: string|null, Cover?: string|null, Upscaling?: string|null, FrameGen?: string|null, RayTracing?: string|null}  $row
      */
     public static function fromCargo(array $row): self
     {
@@ -31,6 +32,7 @@ readonly class PcgwGame
             upscaling: self::nullIfBlank($row['Upscaling'] ?? null),
             frameGen: self::nullIfBlank($row['FrameGen'] ?? null),
             rayTracing: self::nullIfBlank($row['RayTracing'] ?? null),
+            coverUrl: PcgwCover::normalize($row['Cover'] ?? null),
         );
     }
 

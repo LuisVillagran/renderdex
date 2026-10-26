@@ -58,4 +58,18 @@ return [
         'ray_tracing' => ['Ray_tracing'],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Campos opcionales de la tabla Game
+    |--------------------------------------------------------------------------
+    |
+    | Igual que los de Video, pero si ninguno aparece en action=cargofields no
+    | se piden (la portada es opcional y un campo inexistente rompe la consulta).
+    |
+    */
+
+    'game_fields' => [
+        'cover' => ['Cover_URL', 'Cover'],
+    ],
+
 ];

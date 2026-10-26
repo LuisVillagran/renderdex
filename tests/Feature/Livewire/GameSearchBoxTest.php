@@ -25,7 +25,7 @@ it('suggests games while typing, with a link to each page and what they support'
         ->assertSee($hades->url())
         ->assertSee('DLSS 3.5')
         ->assertSee(__('search.no_data'))
-        ->assertSeeHtml('steam/apps/1145360/capsule_184x69.jpg')
+        ->assertSeeHtml('steam/apps/1145360/library_600x900.jpg')
         ->assertSeeHtml('<mark class="bg-accent/20 text-fg">Hades</mark>')
         ->assertSee(__('search.see_all', ['query' => 'hades']))
         ->assertDontSee('Celeste');

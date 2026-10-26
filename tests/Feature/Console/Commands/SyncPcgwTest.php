@@ -38,7 +38,7 @@ function fakePcgwApi(array $overrides = []): void
         return match ($request['action']) {
             'query' => Http::response(jsonFixture('pcgw/login-token')),
             'login' => Http::response(jsonFixture('pcgw/login-success')),
-            'cargofields' => Http::response(jsonFixture('pcgw/cargofields-video')),
+            'cargofields' => Http::response(jsonFixture($request['table'] === 'Game' ? 'pcgw/cargofields-game' : 'pcgw/cargofields-video')),
             'cargoquery' => match (true) {
                 $request['fields'] === 'COUNT(*)=Total' => Http::response(jsonFixture('pcgw/games-count')),
                 array_key_exists($request['offset'], $overrides) => $overrides[$request['offset']],
@@ -88,6 +88,7 @@ it('stores the precomputed classification and the raw technology text', function
         ->title->toBe("Mirror's Edge")
         ->normalized_title->toBe("mirror's edge")
         ->search_title->toBe('mirrors edge')
+        ->cover_url->toBe('https://images.pcgamingwiki.com/3/3d/Mirror%27s_Edge_cover.jpg')
         ->has_data->toBeTrue()
         ->dlss->toBe(Support::Yes)
         ->dlss_fg->toBe(Support::Yes)

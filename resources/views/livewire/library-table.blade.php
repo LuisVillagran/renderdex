@@ -169,7 +169,7 @@
                         <caption class="sr-only">{{ __('library.table.caption') }}</caption>
                         <thead class="border-b border-line-strong text-left">
                             <tr>
-                                <th scope="col" class="hidden py-3 pr-1 pl-4 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
+                                <th scope="col" class="py-3 pr-1 pl-3 sm:pl-4"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
                                 @foreach ($isWishlist ? ['name' => __('library.table.name')] : ['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
                                     <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-3 py-3 font-normal', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
                                         <button type="button" wire:click="sortBy('{{ $column }}')" class="focus-ring label inline-flex items-center gap-1 hover:text-fg!" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
@@ -183,8 +183,15 @@
                         <tbody class="divide-y divide-line">
                             @forelse ($games as $entry)
                                 <tr wire:key="game-{{ $entry->owned->appid }}" class="animate-rise transition-colors hover:bg-raised/60 hover:shadow-[inset_2px_0_0_var(--rd-accent)]" style="--delay: {{ $loop->index * 18 }}ms">
-                                    <td class="hidden py-3 pr-1 pl-4 align-top sm:table-cell lg:align-middle">
-                                        <x-game-cover :appid="$entry->owned->appid" />
+                                    <td class="py-3 pr-1 pl-3 align-top sm:pl-4">
+                                        @if ($entry->game)
+                                            {{-- El título ya enlaza a la ficha: la portada es un atajo para el mouse. --}}
+                                            <a href="{{ $entry->game->url() }}" tabindex="-1" aria-hidden="true" class="block transition hover:brightness-110">
+                                                <x-game-cover :appid="$entry->owned->appid" :cover="$entry->game->cover_url" :title="$entry->owned->name" />
+                                            </a>
+                                        @else
+                                            <x-game-cover :appid="$entry->owned->appid" :title="$entry->owned->name" />
+                                        @endif
                                     </td>
                                     <td class="px-3 py-3">
                                         <div class="flex flex-col gap-2">

@@ -21,6 +21,7 @@ it('logs in with the bot password and returns parsed games', function () {
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/games-page-1')),
     ]);
 
@@ -76,12 +77,13 @@ it('identifies itself with a descriptive user agent on every request', function 
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/games-page-1')),
     ]);
 
     (new PcgwClient)->games(offset: 0, limit: 2);
 
-    Http::assertSentCount(4);
+    Http::assertSentCount(5);
     Http::assertNotSent(fn (Request $request) => ! $request->hasHeader(
         'User-Agent',
         'Renderdex/1.0 (https://github.com/LuisVillagran/renderdex; LuisVillagran) Laravel/13',
@@ -96,6 +98,7 @@ it('parses app ids with spaces and skips pages without app ids', function () {
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/games-page-2'))
             ->push(jsonFixture('pcgw/games-page-3')),
     ]);
@@ -116,12 +119,13 @@ it('pauses before every request to stay under the rate limit', function () {
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/games-page-1')),
     ]);
 
     (new PcgwClient)->games(offset: 0, limit: 2);
 
-    Sleep::assertSequence(array_fill(0, 4, Sleep::for(1100)->milliseconds()));
+    Sleep::assertSequence(array_fill(0, 5, Sleep::for(1100)->milliseconds()));
 });
 
 it('logs in again once when the session expires', function () {
@@ -132,6 +136,7 @@ it('logs in again once when the session expires', function () {
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/permission-denied'))
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
@@ -141,7 +146,7 @@ it('logs in again once when the session expires', function () {
     $games = (new PcgwClient)->games(offset: 0, limit: 2);
 
     expect($games)->toHaveCount(2);
-    Http::assertSentCount(7);
+    Http::assertSentCount(8);
 });
 
 it('throws when permission is still denied after logging in again', function () {
@@ -152,6 +157,7 @@ it('throws when permission is still denied after logging in again', function () 
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/permission-denied'))
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
@@ -213,6 +219,7 @@ it('waits longer than the 60 second block before retrying a rate-limited request
             ->push(jsonFixture('pcgw/login-token'))
             ->push(jsonFixture('pcgw/login-success'))
             ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
             ->push(jsonFixture('pcgw/games-page-1')),
     ]);
 
@@ -273,4 +280,43 @@ it('falls back to the configured field names when cargofields fails', function (
         'frame_gen' => 'Frame_gen',
         'ray_tracing' => 'Ray_tracing',
     ]);
+});
+
+it('asks for the cover of each page when the Game table has a cover field', function () {
+    Http::preventStrayRequests();
+    Sleep::fake();
+    Http::fake([
+        'www.pcgamingwiki.com/w/api.php*' => Http::sequence()
+            ->push(jsonFixture('pcgw/login-token'))
+            ->push(jsonFixture('pcgw/login-success'))
+            ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(jsonFixture('pcgw/cargofields-game'))
+            ->push(jsonFixture('pcgw/games-page-1')),
+    ]);
+
+    $games = (new PcgwClient)->games(offset: 0, limit: 2);
+
+    expect($games[0]->coverUrl)->toBe('https://images.pcgamingwiki.com/3/3d/Mirror%27s_Edge_cover.jpg')
+        ->and($games[1]->coverUrl)->toBeNull();
+    Http::assertSent(fn (Request $request) => $request['action'] === 'cargofields' && $request['table'] === 'Game');
+    Http::assertSent(fn (Request $request) => $request['action'] === 'cargoquery'
+        && str_contains($request['fields'], 'Game.Cover_URL=Cover'));
+});
+
+it('does not ask for a cover field that the Game table does not have', function () {
+    Http::preventStrayRequests();
+    Sleep::fake();
+    Http::fake([
+        'www.pcgamingwiki.com/w/api.php*' => Http::sequence()
+            ->push(jsonFixture('pcgw/login-token'))
+            ->push(jsonFixture('pcgw/login-success'))
+            ->push(jsonFixture('pcgw/cargofields-video'))
+            ->push(['cargofields' => ['Steam_AppID' => ['type' => 'String']]])
+            ->push(jsonFixture('pcgw/games-page-1')),
+    ]);
+
+    (new PcgwClient)->games(offset: 0, limit: 2);
+
+    Http::assertSent(fn (Request $request) => $request['action'] === 'cargoquery'
+        && ! str_contains($request['fields'], 'Cover'));
 });

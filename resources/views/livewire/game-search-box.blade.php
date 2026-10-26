@@ -103,7 +103,7 @@
                     x-on:mouseenter="active = {{ $loop->index }}"
                 >
                     <a href="{{ $suggestion['url'] }}" tabindex="-1" class="flex items-center gap-3 px-3 py-2">
-                        <x-game-cover :appid="$suggestion['appid']" class="hidden sm:block" />
+                        <x-game-cover :appid="$suggestion['appid']" :cover="$suggestion['cover']" :title="$suggestion['title']" size="xs" />
                         <span class="flex min-w-0 flex-col gap-0.5">
                             <span class="truncate text-sm font-medium"><x-highlight :text="$suggestion['title']" :query="$query" /></span>
                             <span class="truncate font-mono text-[0.7rem]">

@@ -3,6 +3,7 @@
 @php
     use App\Enums\Support;
     use App\Enums\Technology;
+    use App\Services\Pcgw\PcgwCover;
     use Illuminate\Support\Arr;
 
     $technologyList = Arr::join($supported, ', ', __('game.list_and'));
@@ -10,11 +11,16 @@
     $metaDescription = $supported !== []
         ? __('game.meta_description', ['title' => $game->title, 'technologies' => $technologyList])
         : __('game.meta_description_none', ['title' => $game->title]);
-    $headerImage = $appid ? "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$appid}/header.jpg" : null;
+    // Para compartir conviene una imagen horizontal: el header de Steam o, sin AppID, la portada de la wiki.
+    $shareImage = match (true) {
+        $appid !== null => "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$appid}/header.jpg",
+        $game->cover_url !== null => PcgwCover::thumbnail($game->cover_url, 600),
+        default => null,
+    };
     $rawList = fn (?string $list) => $list ? collect(explode(',', $list))->map(fn (string $value) => trim($value))->implode(', ') : null;
 @endphp
 
-<x-layout :title="$metaTitle" :description="$metaDescription" :image="$headerImage" :canonical="$game->url()" :noindex="! $game->has_data">
+<x-layout :title="$metaTitle" :description="$metaDescription" :image="$shareImage" :canonical="$game->url()" :noindex="! $game->has_data">
     <article class="flex flex-col gap-10">
         <nav aria-label="{{ __('game.breadcrumb') }}" class="font-mono text-xs text-muted">
             <ol class="flex flex-wrap items-center gap-2">
@@ -24,8 +30,12 @@
             </ol>
         </nav>
 
-        <header class="grid items-start gap-8 lg:grid-cols-[1fr_auto]">
-            <div class="flex flex-col gap-4">
+        <header class="grid items-start gap-6 sm:grid-cols-[auto_1fr] sm:gap-10">
+            <div class="frame self-start p-1.5" data-reveal>
+                <x-game-cover :appid="$appid" :cover="$game->cover_url" :title="$game->title" size="lg" :alt="__('game.cover_alt', ['title' => $game->title])" />
+            </div>
+
+            <div class="flex flex-col gap-4 sm:pt-2">
                 <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('game.eyebrow')" /></p>
                 <h1 class="font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{{ $game->title }}</h1>
 
@@ -46,19 +56,6 @@
                     @endif
                 </div>
             </div>
-
-            @if ($headerImage)
-                <div class="frame p-1.5">
-                    <img
-                        src="{{ $headerImage }}"
-                        alt="{{ __('game.cover_alt', ['title' => $game->title]) }}"
-                        width="460"
-                        height="215"
-                        class="block aspect-[460/215] w-full max-w-[460px] bg-raised object-cover"
-                        onerror="this.closest('.frame').remove()"
-                    >
-                </div>
-            @endif
         </header>
 
         @if ($game->has_data)

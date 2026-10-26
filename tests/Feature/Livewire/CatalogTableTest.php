@@ -30,7 +30,7 @@ it('links each game to its wiki page and, when it has an app id, to the Steam st
         ->assertSee('https://www.pcgamingwiki.com/w/index.php?curid='.$cyberpunk->pcgw_page_id)
         ->assertSee($cyberpunk->url())
         ->assertSee('https://store.steampowered.com/app/1091500/')
-        ->assertSeeHtml('steam/apps/1091500/capsule_184x69.jpg')
+        ->assertSeeHtml('steam/apps/1091500/library_600x900.jpg')
         ->assertSee('DLSS (reescalado) 4:')
         ->assertSee(__('catalog.store_link_label', ['name' => 'Cyberpunk 2077']))
         ->assertDontSee(__('catalog.store_link_label', ['name' => 'Not On Steam']));

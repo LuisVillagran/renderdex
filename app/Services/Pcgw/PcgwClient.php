@@ -18,6 +18,9 @@ class PcgwClient
     /** @var array{upscaling: string, frame_gen: string, ray_tracing: string}|null */
     private ?array $videoFields = null;
 
+    /** @var array{cover: string|null}|null */
+    private ?array $gameFields = null;
+
     public function __construct()
     {
         $this->cookies = new CookieJar;
@@ -48,19 +51,21 @@ class PcgwClient
         $game = config('pcgw.tables.game');
         $video = config('pcgw.tables.video');
         $fields = $this->videoFields();
+        $cover = $this->gameFields()['cover'];
 
         $response = $this->cargo([
             'action' => 'cargoquery',
             'tables' => "{$game},{$video}",
             'join_on' => "{$game}._pageID={$video}._pageID",
-            'fields' => implode(',', [
+            'fields' => implode(',', array_filter([
                 "{$game}._pageID=PageID",
                 "{$game}._pageName=Page",
                 "{$game}.Steam_AppID=SteamAppID",
+                $cover ? "{$game}.{$cover}=Cover" : null,
                 "{$video}.{$fields['upscaling']}=Upscaling",
                 "{$video}.{$fields['frame_gen']}=FrameGen",
                 "{$video}.{$fields['ray_tracing']}=RayTracing",
-            ]),
+            ])),
             'order_by' => "{$game}._pageID",
             'limit' => $limit,
             'offset' => $offset,
@@ -99,6 +104,33 @@ class PcgwClient
             ->all();
 
         return $this->videoFields = $fields;
+    }
+
+    /**
+     * Campos opcionales de Game, detectados con action=cargofields. A diferencia de los de Video,
+     * si no aparecen quedan en null y no se piden: un nombre equivocado haría fallar la consulta.
+     *
+     * @return array{cover: string|null}
+     */
+    public function gameFields(): array
+    {
+        if ($this->gameFields !== null) {
+            return $this->gameFields;
+        }
+
+        $available = array_map('mb_strtolower', array_keys($this->cargo([
+            'action' => 'cargofields',
+            'table' => config('pcgw.tables.game'),
+        ], throwOnApiError: false)['cargofields'] ?? []));
+
+        /** @var array{cover: string|null} $fields */
+        $fields = collect(config('pcgw.game_fields'))
+            ->map(fn (array $candidates) => collect($candidates)->first(
+                fn (string $candidate) => in_array(mb_strtolower($candidate), $available, true),
+            ))
+            ->all();
+
+        return $this->gameFields = $fields;
     }
 
     /**

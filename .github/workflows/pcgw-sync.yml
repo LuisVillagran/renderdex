@@ -85,6 +85,11 @@ jobs:
             echo '```'
             $PSQL -c "SELECT 'games', count(*) FROM games UNION ALL SELECT 'steam appids', count(*) FROM game_steam_appids"
             echo '```'
+            echo "## Portadas de la wiki (con portada / con datos y portada / con datos, sin AppID y con portada)"
+            echo '```'
+            $PSQL -c "SELECT count(*) FILTER (WHERE cover_url IS NOT NULL), count(*) FILTER (WHERE has_data AND cover_url IS NOT NULL), count(*) FILTER (WHERE has_data AND cover_url IS NOT NULL AND NOT EXISTS (SELECT 1 FROM game_steam_appids a WHERE a.game_id = games.id)) FROM games"
+            $PSQL -c "SELECT cover_url FROM games WHERE cover_url IS NOT NULL ORDER BY pcgw_page_id LIMIT 3"
+            echo '```'
             echo "## Soporte por tecnología (yes / no / unknown)"
             echo '```'
             for column in dlss dlss_fg dlss_mfg fsr fsr_fg xess xess_fg ray_tracing; do

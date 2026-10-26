@@ -1,0 +1,22 @@
+{
+    "cargofields": {
+        "Cover_URL": {
+            "type": "URL"
+        },
+        "Developers": {
+            "type": "Page",
+            "isList": "",
+            "delimiter": ","
+        },
+        "Released": {
+            "type": "Date",
+            "isList": "",
+            "delimiter": ";"
+        },
+        "Steam_AppID": {
+            "type": "String",
+            "isList": "",
+            "delimiter": ","
+        }
+    }
+}

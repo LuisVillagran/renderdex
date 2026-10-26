@@ -71,7 +71,9 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
    - Primero por Steam AppID (`game_steam_appids`).
    - **Respaldo por nombre** para los que no coinciden: título exacto normalizado (`App\Services\TitleNormalizer`: minúsculas, sin ™ ® ©, apóstrofes/guiones unificados, espacios colapsados) contra `games.normalized_title`, **solo** entre juegos sin ningún AppID en la wiki y **solo** si hay un único candidato. Nunca coincidencias parciales ("Cyberpunk 2077" ≠ "Cyberpunk 2077: Ultimate Edition"). Cubre vacíos de la wiki como Euro Truck Simulator 2.
    - `LibraryMatcher::matchCached()` recuerda 1 hora qué juego corresponde a cada AppID (clave: hash del SteamID64 + la lista de AppIDs), así que cada clic de filtro solo carga esos juegos por ID.
-5. Las portadas se cargan desde el CDN de Steam, con `loading="lazy"` y un fallback si fallan.
+5. Portadas verticales 2:3 (`x-game-cover`, tamaños `xs`/`sm`/`md`/`lg`), con `loading="lazy"`. Cadena de respaldos en el navegador (`onerror`): `library_600x900.jpg` de Steam → portada de la wiki (`games.cover_url`, miniatura de MediaWiki vía `App\Services\Pcgw\PcgwCover`) → `header.jpg` de Steam → iniciales del título. Por qué: el 31% de los juegos con datos no tiene AppID, y en los juegos nuevos Steam sirve las imágenes en rutas con hash (las URLs fijas dan 404).
+   - La portada de la wiki sale del sync: `PcgwClient::gameFields()` detecta con `cargofields` el campo de portada de `Game` (`config('pcgw.game_fields.cover')`: `Cover_URL`, `Cover`). Es opcional: si no aparece, no se pide. **Pendiente:** confirmar el nombre real con una corrida del workflow (el resumen muestra cuántos juegos traen portada).
+   - Las imágenes de la wiki se cargan desde `images.pcgamingwiki.com` solo como respaldo, en miniatura (120 px en tablas, 480 px en la ficha).
 
 ### 2a. Lista de deseados
 - Pestaña "Lista de deseados" en `/u/{steamid64}` (`?vista=wishlist`). Steam solo se consulta al abrirla.

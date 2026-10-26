@@ -24,6 +24,7 @@ class Game extends Model
         'title',
         'normalized_title',
         'search_title',
+        'cover_url',
         'dlss',
         'dlss_fg',
         'dlss_mfg',

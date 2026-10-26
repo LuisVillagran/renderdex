@@ -48,7 +48,7 @@ class PcgwGameImporter
             Game::upsert(
                 $rows->values()->all(),
                 uniqueBy: ['pcgw_page_id'],
-                update: ['title', 'normalized_title', 'search_title', 'dlss', 'dlss_fg', 'dlss_mfg', 'fsr', 'fsr_fg', 'xess', 'xess_fg', 'ray_tracing', 'upscaling_tech', 'frame_gen_tech', 'synced_at'],
+                update: ['title', 'normalized_title', 'search_title', 'cover_url', 'dlss', 'dlss_fg', 'dlss_mfg', 'fsr', 'fsr_fg', 'xess', 'xess_fg', 'ray_tracing', 'upscaling_tech', 'frame_gen_tech', 'synced_at'],
             );
 
             $gameIds = Game::whereIn('pcgw_page_id', $games->keys())->pluck('id', 'pcgw_page_id');
@@ -127,6 +127,7 @@ class PcgwGameImporter
             'title' => $game->title,
             'normalized_title' => $this->normalizer->normalize($game->title),
             'search_title' => $this->searchKey->make($game->title),
+            'cover_url' => $game->coverUrl,
             ...$support,
             'upscaling_tech' => $game->upscaling,
             'frame_gen_tech' => $game->frameGen,
