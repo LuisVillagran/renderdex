@@ -12,6 +12,7 @@ it('explains what is queried, what is kept and what the Steam session stores', f
         ->assertSee(__('privacy.heading'))
         ->assertSee('Solo consultamos un perfil cuando tú lo pides')
         ->assertSee('durante 1 hora')
+        ->assertSee('Lista de deseados')
         ->assertSee('Junto con tu nombre visible y tu avatar, vive solo en la sesión')
         ->assertSee('No usamos cookies de terceros, analítica ni publicidad.')
         ->assertSee(config('app.repository_url'));

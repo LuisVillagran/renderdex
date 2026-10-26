@@ -43,4 +43,12 @@ class DemoSteamClient extends SteamClient
 
         return array_map(fn (array $game) => OwnedGame::fromApi($game), $games);
     }
+
+    /**
+     * @return list<int>
+     */
+    public function wishlist(string $steamId): array
+    {
+        return json_decode(file_get_contents(resource_path('demo/steam-wishlist.json')), associative: true, flags: JSON_THROW_ON_ERROR);
+    }
 }

@@ -4,7 +4,7 @@ return [
 
     'title' => 'Privacidad',
     'heading' => 'Política de privacidad',
-    'updated' => 'Última actualización: 23 de octubre de 2026.',
+    'updated' => 'Última actualización: 26 de octubre de 2026.',
     'intro' => 'Renderdex es un proyecto personal, sin publicidad ni analítica. Esta página explica qué datos consulta, cuáles guarda y por cuánto tiempo.',
     'contents' => 'Contenido',
 
@@ -15,6 +15,7 @@ return [
             'items' => [
                 'Solo consultamos un perfil cuando tú lo pides: al pegar tu URL o SteamID, o al iniciar sesión con Steam.',
                 'A la Steam Web API le pedimos el SteamID64 que corresponde a una URL personalizada y la lista de juegos de esa biblioteca, con las horas jugadas.',
+                'Solo si abres la pestaña "Lista de deseados", también pedimos los juegos de esa lista (solo sus AppIDs).',
                 'Si inicias sesión, también pedimos tu nombre visible y tu avatar, para mostrarlos en el encabezado.',
                 'Steam solo entrega bibliotecas públicas: iniciar sesión no nos da acceso a datos privados.',
             ],
@@ -23,7 +24,7 @@ return [
             'id' => 'que-guardamos',
             'title' => 'Qué guardamos y por cuánto tiempo',
             'items' => [
-                'La biblioteca no se guarda en nuestra base de datos. Queda en caché en el servidor durante 1 hora, identificada por un hash de tu SteamID64, para no repetir la consulta a Steam. Después se borra.',
+                'La biblioteca y la lista de deseados no se guardan en nuestra base de datos. Quedan en caché en el servidor durante 1 hora, identificadas por un hash de tu SteamID64, para no repetir la consulta a Steam. Después se borran.',
                 'No hay cuentas ni tabla de usuarios. No guardamos SteamIDs en registros (logs) ni en analítica.',
                 'Para cuidar el límite de la API de Steam, contamos cuántas consultas llegan desde cada IP. Ese contador usa un hash de la IP y dura un minuto.',
             ],

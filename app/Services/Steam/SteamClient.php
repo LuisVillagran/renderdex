@@ -104,6 +104,36 @@ class SteamClient
     }
 
     /**
+     * AppIDs de la lista de deseados, en caché durante una hora.
+     *
+     * IWishlistService no está en la documentación oficial de la Steam Web API, así que cualquier
+     * respuesta inesperada se trata como "Steam no disponible" y no afecta a la biblioteca.
+     * Una lista privada y una vacía responden igual (sin "items"), así que no se distinguen.
+     *
+     * @return list<int>
+     *
+     * @throws PrivateProfileException
+     * @throws SteamUnavailableException
+     */
+    public function wishlist(string $steamId): array
+    {
+        return Cache::remember('steam:wishlist:'.hash('sha256', $steamId), self::LIBRARY_TTL_SECONDS, function () use ($steamId) {
+            $items = $this->get('IWishlistService/GetWishlist/v1/', ['steamid' => $steamId])['response']['items'] ?? null;
+
+            if (! is_array($items) || $items === []) {
+                throw new PrivateProfileException('The wishlist is private or empty.');
+            }
+
+            return collect($items)
+                ->pluck('appid')
+                ->filter(fn ($appid) => is_int($appid) && $appid > 0)
+                ->unique()
+                ->values()
+                ->all();
+        });
+    }
+
+    /**
      * @param  array<string, string|int>  $query
      * @return array<string, mixed>
      *

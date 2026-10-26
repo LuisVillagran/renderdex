@@ -24,6 +24,26 @@ class LibraryMatcher
     public function __construct(private TitleNormalizer $normalizer) {}
 
     /**
+     * Cruza una lista de deseados. Steam solo entrega AppIDs, así que el cruce es solo por AppID
+     * y el nombre sale de la wiki; los que no están en la wiki quedan con un nombre genérico.
+     *
+     * @param  list<int>  $appids
+     * @return list<LibraryEntry>
+     */
+    public function matchWishlist(array $appids): array
+    {
+        $placeholders = array_map(fn (int $appid) => new OwnedGame(appid: $appid, name: '', playtimeMinutes: 0), $appids);
+        $byAppid = $this->gamesByAppid($placeholders);
+
+        return array_map(function (int $appid) use ($byAppid) {
+            $game = $byAppid->get($appid);
+            $name = $game?->title ?? __('library.wishlist.unknown_game', ['appid' => $appid]);
+
+            return new LibraryEntry(new OwnedGame(appid: $appid, name: $name, playtimeMinutes: 0), $game, $game ? MatchSource::AppId : null);
+        }, $appids);
+    }
+
+    /**
      * Como {@see match()}, pero recuerda qué juego de la wiki corresponde a cada AppID para no
      * repetir el cruce en cada clic de filtro: después solo hace falta cargar esos juegos por ID.
      * La clave incluye la lista de AppIDs, así que si la biblioteca cambia se vuelve a cruzar.

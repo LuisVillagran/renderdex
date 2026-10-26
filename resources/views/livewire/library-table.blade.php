@@ -21,7 +21,24 @@
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex flex-col gap-3">
             <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('library.eyebrow')" /></p>
-            <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('library.heading') }}</h1>
+            <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ $isWishlist ? __('library.wishlist.heading') : __('library.heading') }}</h1>
+            <div class="flex border-b border-line font-mono text-xs uppercase" role="group" aria-label="{{ __('library.tabs.label') }}">
+                @foreach (['library' => __('library.tabs.library'), 'wishlist' => __('library.tabs.wishlist')] as $option => $label)
+                    <button
+                        type="button"
+                        wire:key="tab-{{ $option }}"
+                        wire:click="showTab('{{ $option }}')"
+                        aria-pressed="{{ $tab === $option ? 'true' : 'false' }}"
+                        @class([
+                            'focus-ring -mb-px border-b-2 px-3 py-2 transition',
+                            'border-accent text-accent' => $tab === $option,
+                            'border-transparent text-muted hover:text-fg' => $tab !== $option,
+                        ])
+                    >
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-muted">
                 <span><span aria-hidden="true">steamid=</span><span class="sr-only">SteamID </span><span class="text-fg">{{ $steamId }}</span></span>
                 <button
@@ -49,7 +66,13 @@
         </p>
     @endif
 
-    @if ($error === 'private')
+    @if ($error === 'wishlist_private')
+        <section class="frame flex flex-col gap-2 p-6" role="alert">
+            <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_WISHLIST_EMPTY</p>
+            <h2 class="font-display text-xl font-semibold">{{ __('library.wishlist.private.title') }}</h2>
+            <p class="text-muted">{{ __('library.wishlist.private.body') }}</p>
+        </section>
+    @elseif ($error === 'private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
             <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_PRIVATE_PROFILE</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.private.title') }}</h2>
@@ -147,7 +170,7 @@
                         <thead class="border-b border-line-strong text-left">
                             <tr>
                                 <th scope="col" class="hidden py-3 pr-1 pl-4 sm:table-cell"><span class="sr-only">{{ __('library.table.cover') }}</span></th>
-                                @foreach (['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
+                                @foreach ($isWishlist ? ['name' => __('library.table.name')] : ['name' => __('library.table.name'), 'playtime' => __('library.table.playtime')] as $column => $label)
                                     <th scope="col" aria-sort="{{ $ariaSort($column) }}" @class(['px-3 py-3 font-normal', 'hidden text-right sm:table-cell' => $column === 'playtime'])>
                                         <button type="button" wire:click="sortBy('{{ $column }}')" class="focus-ring label inline-flex items-center gap-1 hover:text-fg!" aria-label="{{ __('library.table.sort_by', ['column' => $label]) }}">
                                             {{ $label }} <span aria-hidden="true" class="text-accent">{{ $sortIndicator($column) ?: '↕' }}</span>
@@ -174,7 +197,11 @@
                                                     <span class="font-medium">{{ $entry->owned->name }}</span>
                                                 @endif
                                                 <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
-                                                    <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                                                    @if ($isWishlist)
+                                                        <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
+                                                    @else
+                                                        <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                                                    @endif
                                                     @if ($entry->game)
                                                         @if ($recentlyChanged->has($entry->game->id))
                                                             <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-bold text-accent uppercase">● {{ __('changes.badge') }}</a>
@@ -190,14 +217,16 @@
                                             <x-technology-compact :game="$entry->game" :name="$entry->owned->name" :gpu-profile="$gpuProfile" :highlighted-vendor="$highlightedVendor" />
                                         </div>
                                     </td>
-                                    <td class="hidden px-3 py-3 text-right align-top font-mono text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
-                                        {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
-                                    </td>
+                                    @unless ($isWishlist)
+                                        <td class="hidden px-3 py-3 text-right align-top font-mono text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
+                                            {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
+                                        </td>
+                                    @endunless
                                     <x-technology-cells :game="$entry->game" :row-key="$entry->owned->appid" :name="$entry->owned->name" :gpu-profile="$gpuProfile" :highlighted-vendor="$highlightedVendor" />
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ 3 + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-mono text-sm text-muted">
+                                    <td colspan="{{ ($isWishlist ? 2 : 3) + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-mono text-sm text-muted">
                                         <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
                                     </td>
                                 </tr>
@@ -233,7 +262,7 @@
 
         <div class="flex flex-col gap-3 border-t border-line pt-5 text-sm text-muted">
             <x-support-legend />
-            <p>{{ __('home.privacy_help.family_sharing') }}</p>
+            <p>{{ $isWishlist ? __('library.wishlist.note') : __('home.privacy_help.family_sharing') }}</p>
         </div>
     @endif
 </div>

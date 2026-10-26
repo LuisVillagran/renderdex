@@ -26,6 +26,22 @@ return [
         'ray_tracing' => ['label' => 'Ray tracing', 'hint' => 'Cualquier marca'],
     ],
 
+    'tabs' => [
+        'label' => 'Qué mostrar',
+        'library' => 'Biblioteca',
+        'wishlist' => 'Lista de deseados',
+    ],
+
+    'wishlist' => [
+        'heading' => 'Tu lista de deseados, por tecnología',
+        'unknown_game' => 'Juego de Steam :appid',
+        'note' => 'La lista de deseados se consulta solo cuando abres esta pestaña. Steam la entrega sin nombres: los tomamos de la wiki, así que los juegos que no están en ella aparecen como "Juego de Steam".',
+        'private' => [
+            'title' => 'No vemos ningún juego en la lista de deseados',
+            'body' => 'Está vacía o es privada: Steam responde igual en ambos casos. La lista de deseados sigue la privacidad de los "Detalles del juego" de tu perfil.',
+        ],
+    ],
+
     'gpu' => [
         'label' => 'Mi GPU',
         'help' => 'Resalta las columnas de tu marca.',

@@ -450,3 +450,53 @@ it('marks games the wiki changed this week', function () {
         ->assertViewHas('recentlyChanged', fn ($ids) => $ids->has($hades->id) && ! $ids->has($dota->id))
         ->assertSee(__('changes.badge'));
 });
+
+it('shows the wishlist with names from the wiki, without asking Steam for it until the tab is opened', function () {
+    Http::preventStrayRequests();
+    wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes]);
+    fakeOwnedGames([[570, 'Dota 2', 600]]);
+    Http::fake([
+        'api.steampowered.com/IWishlistService/GetWishlist/v1/*' => Http::response(jsonFixture('steam/wishlist')),
+    ]);
+
+    $component = Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID]);
+    Http::assertNotSent(fn ($request) => str_contains($request->url(), 'IWishlistService'));
+
+    $component->call('showTab', 'wishlist')
+        ->assertSet('tab', 'wishlist')
+        ->assertSee(__('library.wishlist.heading'))
+        ->assertSee('Juego de Steam 999999')
+        ->assertSee('https://store.steampowered.com/app/999999/')
+        ->assertDontSee('Dota 2');
+
+    expect(listedNames($component))->toBe(['Cyberpunk 2077', 'Juego de Steam 999999', 'Juego de Steam 1145360']);
+});
+
+it('explains a private wishlist without breaking the library tab', function () {
+    fakeOwnedGames([[570, 'Dota 2']]);
+    Http::fake([
+        'api.steampowered.com/IWishlistService/GetWishlist/v1/*' => Http::response(jsonFixture('steam/wishlist-private')),
+    ]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('showTab', 'wishlist')
+        ->assertSee(__('library.wishlist.private.title'))
+        ->call('showTab', 'library')
+        ->assertSee('Dota 2')
+        ->call('showTab', 'not-a-tab')
+        ->assertSet('tab', 'library');
+});
+
+it('does not sort the wishlist by playtime', function () {
+    fakeOwnedGames([[570, 'Dota 2']]);
+    Http::fake([
+        'api.steampowered.com/IWishlistService/GetWishlist/v1/*' => Http::response(jsonFixture('steam/wishlist')),
+    ]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('sortBy', 'playtime')
+        ->call('showTab', 'wishlist')
+        ->assertSet('sort', 'name')
+        ->call('sortBy', 'playtime')
+        ->assertSet('sort', 'name');
+});

@@ -207,3 +207,35 @@ it('uses a SteamID64 as is without calling Steam', function () {
     expect($steamId)->toBe(TEST_STEAM_ID);
     Http::assertNothingSent();
 });
+
+it('returns the wishlist app ids and caches them for an hour', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'api.steampowered.com/IWishlistService/GetWishlist/v1/*' => Http::response(jsonFixture('steam/wishlist')),
+    ]);
+
+    expect((new SteamClient)->wishlist(TEST_STEAM_ID))->toBe([1091500, 1145360, 999999])
+        ->and((new SteamClient)->wishlist(TEST_STEAM_ID))->toBe([1091500, 1145360, 999999]);
+
+    Http::assertSentCount(1);
+    Http::assertSent(fn (Request $request) => $request['steamid'] === TEST_STEAM_ID);
+});
+
+it('reports a private or empty wishlist, without caching it', function () {
+    Http::fake([
+        'api.steampowered.com/IWishlistService/GetWishlist/v1/*' => Http::sequence()
+            ->push(jsonFixture('steam/wishlist-private'))
+            ->push(jsonFixture('steam/wishlist')),
+    ]);
+
+    expect(fn () => (new SteamClient)->wishlist(TEST_STEAM_ID))->toThrow(PrivateProfileException::class);
+    expect((new SteamClient)->wishlist(TEST_STEAM_ID))->toHaveCount(3);
+});
+
+it('reports Steam as unavailable when the undocumented wishlist endpoint fails', function () {
+    Http::fake([
+        'api.steampowered.com/IWishlistService/GetWishlist/v1/*' => Http::response('Not Found', 404),
+    ]);
+
+    expect(fn () => (new SteamClient)->wishlist(TEST_STEAM_ID))->toThrow(SteamUnavailableException::class);
+});

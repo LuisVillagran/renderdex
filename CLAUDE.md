@@ -73,6 +73,12 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
    - `LibraryMatcher::matchCached()` recuerda 1 hora qué juego corresponde a cada AppID (clave: hash del SteamID64 + la lista de AppIDs), así que cada clic de filtro solo carga esos juegos por ID.
 5. Las portadas se cargan desde el CDN de Steam, con `loading="lazy"` y un fallback si fallan.
 
+### 2a. Lista de deseados
+- Pestaña "Lista de deseados" en `/u/{steamid64}` (`?vista=wishlist`). Steam solo se consulta al abrirla.
+- `SteamClient::wishlist()` usa `IWishlistService/GetWishlist/v1`, que **no está documentado oficialmente**: cualquier respuesta inesperada se trata como "Steam no disponible" y no afecta a la pestaña de la biblioteca. Caché de 1 hora por hash del SteamID64. Lista privada y vacía responden igual (sin `items`), así que el mensaje explica ambos casos.
+- Steam solo entrega AppIDs: `LibraryMatcher::matchWishlist()` cruza por AppID y toma el nombre de la wiki; los demás aparecen como "Juego de Steam <AppID>" con enlace a la tienda. Sin llamadas extra a Steam. Sin horas jugadas, así que no hay orden por horas ni "Ayuda a completarlo".
+- `DemoSteamClient` usa `resources/demo/steam-wishlist.json`.
+
 ### 2b. Inicio de sesión con Steam
 - Usa **"Sign in through Steam"** (OpenID 2.0) con Socialite y `socialiteproviders/steam`. La contraseña la escribe el usuario en Steam; Renderdex nunca la ve ni la guarda.
 - **Para qué sirve:** solo para identificar al usuario sin que tenga que copiar su URL. Steam devuelve el **SteamID64** y luego se sigue el mismo flujo de la consulta normal (pasos 2 a 5).

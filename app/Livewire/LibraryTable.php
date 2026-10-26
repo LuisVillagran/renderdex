@@ -26,6 +26,8 @@ class LibraryTable extends Component
 
     public const PER_PAGE = 25;
 
+    public const TABS = ['library', 'wishlist'];
+
     #[Locked]
     public string $steamId;
 
@@ -35,14 +37,34 @@ class LibraryTable extends Component
     #[Url(as: 'dir', except: 'asc')]
     public string $direction = 'asc';
 
+    /** Biblioteca o lista de deseados; la lista solo se pide a Steam al abrir su pestaña. */
+    #[Url(as: 'vista', except: 'library')]
+    public string $tab = 'library';
+
     public function mount(string $steamId): void
     {
         $this->steamId = $steamId;
     }
 
+    public function showTab(string $tab): void
+    {
+        if (! in_array($tab, self::TABS, true)) {
+            return;
+        }
+
+        $this->tab = $tab;
+
+        // Las horas no existen en la lista de deseados.
+        if ($tab === 'wishlist' && $this->sort === 'playtime') {
+            $this->reset('sort', 'direction');
+        }
+
+        $this->resetPage();
+    }
+
     public function sortBy(string $column): void
     {
-        if (! in_array($column, LibraryBrowser::SORTS, true)) {
+        if (! in_array($column, LibraryBrowser::SORTS, true) || ($column === 'playtime' && $this->tab === 'wishlist')) {
             return;
         }
 
@@ -61,11 +83,14 @@ class LibraryTable extends Component
     {
         $error = null;
         $entries = [];
+        $isWishlist = $this->tab === 'wishlist';
 
         try {
-            $entries = $matcher->matchCached($this->steamId, $steam->ownedGames($this->steamId));
+            $entries = $isWishlist
+                ? $matcher->matchWishlist($steam->wishlist($this->steamId))
+                : $matcher->matchCached($this->steamId, $steam->ownedGames($this->steamId));
         } catch (PrivateProfileException) {
-            $error = 'private';
+            $error = $isWishlist ? 'wishlist_private' : 'private';
         } catch (SteamUnavailableException) {
             $error = 'unavailable';
         }
@@ -83,9 +108,11 @@ class LibraryTable extends Component
                 ->pluck('game_id')
                 ->flip(),
             'error' => $error,
+            'isWishlist' => $isWishlist,
             'isDemo' => $steam->isDemo(),
             'stats' => $browser->stats($entries, $filter->gpu),
-            'missingData' => $browser->mostPlayedWithoutData($entries),
+            // En la lista de deseados no hay horas jugadas para priorizar.
+            'missingData' => $isWishlist ? collect() : $browser->mostPlayedWithoutData($entries),
             'games' => new LengthAwarePaginator(
                 $pageEntries,
                 $results->count(),
