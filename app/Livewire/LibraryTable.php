@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\WithTechnologyFilters;
+use App\Models\GameChange;
 use App\Services\Library\LibraryBrowser;
 use App\Services\Library\LibraryMatcher;
 use App\Services\Steam\Exceptions\PrivateProfileException;
@@ -72,14 +73,21 @@ class LibraryTable extends Component
         $filter = $this->technologyFilter();
         $results = $browser->browse($entries, $this->search, $filter, $this->sort, $this->direction);
         $page = $this->getPage();
+        $pageEntries = $results->forPage($page, self::PER_PAGE)->values();
 
         return view('livewire.library-table', [
+            // Juegos de esta página con cambios en la wiki esta semana, para marcarlos como novedad.
+            'recentlyChanged' => GameChange::recent()
+                ->whereIn('game_id', $pageEntries->map(fn ($entry) => $entry->game?->id)->filter()->values())
+                ->distinct()
+                ->pluck('game_id')
+                ->flip(),
             'error' => $error,
             'isDemo' => $steam->isDemo(),
             'stats' => $browser->stats($entries, $filter->gpu),
             'missingData' => $browser->mostPlayedWithoutData($entries),
             'games' => new LengthAwarePaginator(
-                $results->forPage($page, self::PER_PAGE)->values(),
+                $pageEntries,
                 $results->count(),
                 self::PER_PAGE,
                 $page,

@@ -46,6 +46,14 @@ class Game extends Model
     }
 
     /**
+     * @return HasMany<GameChange, $this>
+     */
+    public function changes(): HasMany
+    {
+        return $this->hasMany(GameChange::class);
+    }
+
+    /**
      * Clave de la ficha: "<pcgw_page_id>-<slug>". Se usa el ID de la wiki y no el nuestro
      * porque sobrevive a un `pcgw:sync --fresh` sobre una base vacía.
      */

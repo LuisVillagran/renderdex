@@ -72,6 +72,8 @@
         })();
     </script>
 
+    {{ $head ?? '' }}
+
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -96,13 +98,17 @@
             @endunless
 
             <div class="flex shrink-0 items-center gap-2 sm:gap-4">
-                <a href="{{ route('catalog') }}" @class([
-                    'focus-ring px-2 py-1 font-mono text-xs uppercase hover:text-accent',
-                    'text-accent' => request()->routeIs('catalog'),
-                    'text-muted' => ! request()->routeIs('catalog'),
-                ]) @if (request()->routeIs('catalog')) aria-current="page" @endif>
-                    {{ __('layout.header.catalog') }}
-                </a>
+                <nav aria-label="{{ __('layout.header.nav') }}" class="flex items-center">
+                    @foreach (['catalog' => __('layout.header.catalog'), 'changes.index' => __('layout.header.changes')] as $route => $label)
+                        <a href="{{ route($route) }}" @class([
+                            'focus-ring px-2 py-1 font-mono text-xs uppercase hover:text-accent',
+                            'text-accent' => request()->routeIs($route),
+                            'text-muted' => ! request()->routeIs($route),
+                        ]) @if (request()->routeIs($route)) aria-current="page" @endif>
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </nav>
 
                 @if ($steamUser = session('steam_user'))
                     <div class="flex items-center gap-1 sm:gap-3">

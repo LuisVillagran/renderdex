@@ -44,6 +44,7 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
   - Los campos que empiezan con `_` deben llevar alias (`Game._pageID=PageID`).
 - **Campos:** `Video.Upscaling` y `Video.Frame_gen` son listas (delimitador `,`) de tecnologías con versión; `Video.Ray_tracing` es un estado. Se verifican con `action=cargofields&table=Video`. Hay respaldo en `config/pcgw.php`.
 - **Guardado:** hace upsert en `games` y `game_steam_appids`. `Steam_AppID` es un campo lista (`115300,42680,42690`): una página puede tener varios AppIDs, y ~20% no tiene ninguno. Si un AppID aparece en dos páginas, gana la última sincronizada.
+- **Novedades:** antes del upsert, `PcgwGameImporter` compara con lo que había y guarda en `game_changes` cada tecnología agregada, quitada o con versión más nueva (`App\Enums\ChangeType`). Solo en juegos que ya existían: el sync inicial no registra nada. Se muestran en `/novedades` (agrupado por día y juego, filtrable por capacidad), en `/novedades.atom`, en la ficha de cada juego y como "Novedad" en la biblioteca (cambios de los últimos 7 días). El texto aclara que es lo que **documentó la wiki**, no la fecha del parche.
 - **Sync inicial grande:** la wiki tiene decenas de miles de páginas.
   - El sync debe ser **reanudable**: guarda el último offset procesado en la tabla `sync_runs`.
   - Muestra avance en consola (barra de progreso).
@@ -166,6 +167,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
   - Control: synced_at.
 - `game_steam_appids`: steam_appid (unique, index), game_id (FK).
 - `sync_runs`: id, started_at, finished_at, last_offset, pages_processed, status, error (text).
+- `game_changes`: id, game_id (FK, cascade), technology, type (`added`/`removed`/`upgraded`), previous_version, version, detected_at (index).
 - La biblioteca del usuario **no se guarda** en la base de datos. Solo vive en caché con TTL.
 
 ---

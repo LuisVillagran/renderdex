@@ -34,6 +34,7 @@ return [
         'edit' => 'Completar en PCGamingWiki',
     ],
 
+    'changes' => 'Cambios documentados en la wiki',
     'missing' => '¿Falta algo o está desactualizado?',
     'edit' => 'Edítalo en PCGamingWiki',
     'credit' => 'Datos de :pcgw bajo licencia :license, actualizados el :date.',

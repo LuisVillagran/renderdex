@@ -9,6 +9,9 @@ use Illuminate\Http\RedirectResponse;
 
 class GameController extends Controller
 {
+    /** Últimos cambios de la wiki que se muestran en la ficha. */
+    public const CHANGES_SHOWN = 10;
+
     /**
      * Ficha de un juego. La URL lleva el ID de la wiki y un slug que solo sirve para leerla:
      * si el slug no coincide (p. ej. la wiki renombró la página), se redirige a la canónica.
@@ -25,6 +28,7 @@ class GameController extends Controller
             'game' => $model,
             'appid' => $model->primarySteamAppid(),
             'supported' => $summary->labels($model),
+            'changes' => $model->changes()->orderByDesc('detected_at')->orderBy('id')->limit(self::CHANGES_SHOWN)->get(),
         ]);
     }
 }

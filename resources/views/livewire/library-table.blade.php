@@ -176,6 +176,9 @@
                                                 <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
                                                     <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
                                                     @if ($entry->game)
+                                                        @if ($recentlyChanged->has($entry->game->id))
+                                                            <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-bold text-accent uppercase">● {{ __('changes.badge') }}</a>
+                                                        @endif
                                                         <a href="{{ $entry->game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
                                                         @if ($entry->matchedBy === MatchSource::Title)
                                                             <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>

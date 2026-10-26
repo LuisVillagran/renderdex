@@ -94,6 +94,19 @@
                     @endforeach
                 </dl>
             </section>
+            @if ($changes->isNotEmpty())
+                <section aria-labelledby="changes-title" class="flex flex-col gap-4">
+                    <h2 id="changes-title" class="label">{{ __('game.changes') }}</h2>
+                    <ol class="flex flex-col gap-2 border-l border-line pl-4">
+                        @foreach ($changes as $change)
+                            <li class="flex flex-wrap items-center gap-3">
+                                <time datetime="{{ $change->detected_at->toDateString() }}" class="font-mono text-xs text-muted">{{ $change->detected_at->isoFormat('LL') }}</time>
+                                <x-change-label :change="$change" />
+                            </li>
+                        @endforeach
+                    </ol>
+                </section>
+            @endif
         @else
             <section class="frame flex flex-col items-start gap-3 p-6" aria-labelledby="no-data-title">
                 <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_NO_RENDER_DATA</p>

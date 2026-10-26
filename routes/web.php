@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChangesController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SitemapController;
@@ -11,6 +12,8 @@ Route::view('/juegos', 'catalog')->name('catalog');
 Route::get('/juegos/{game}', [GameController::class, 'show'])
     ->where('game', '\d+(?:-[a-z0-9-]+)?')
     ->name('games.show');
+Route::get('/novedades', [ChangesController::class, 'index'])->name('changes.index');
+Route::get('/novedades.atom', [ChangesController::class, 'feed'])->name('changes.feed');
 Route::view('/privacidad', 'privacy')->name('privacy');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');

@@ -5,6 +5,7 @@ use App\Enums\Technology;
 use App\Enums\Vendor;
 use App\Livewire\LibraryTable;
 use App\Models\Game;
+use App\Models\GameChange;
 use App\Models\GameSteamAppid;
 use App\Providers\AppServiceProvider;
 use App\Services\Steam\DemoSteamClient;
@@ -436,4 +437,16 @@ it('sorts by the number of supported technologies, most first', function () {
         ->assertSet('direction', 'desc');
 
     expect(listedNames($component))->toBe(['Cyberpunk 2077', 'Dota 2', 'Stardew Valley']);
+});
+
+it('marks games the wiki changed this week', function () {
+    $hades = wikiGame(1145360, 'Hades', ['fsr' => Support::Yes]);
+    $dota = wikiGame(570, 'Dota 2', ['fsr' => Support::Yes]);
+    GameChange::factory()->for($hades)->create();
+    GameChange::factory()->for($dota)->create(['detected_at' => now()->subDays(8)]);
+    fakeOwnedGames([[1145360, 'Hades'], [570, 'Dota 2']]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->assertViewHas('recentlyChanged', fn ($ids) => $ids->has($hades->id) && ! $ids->has($dota->id))
+        ->assertSee(__('changes.badge'));
 });

@@ -1,6 +1,6 @@
 {!! '<'.'?xml version="1.0" encoding="UTF-8"?>' !!}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    @foreach (['home', 'catalog', 'privacy'] as $route)
+    @foreach (['home', 'catalog', 'changes.index', 'privacy'] as $route)
         <url>
             <loc>{{ route($route) }}</loc>
         </url>
