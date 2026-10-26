@@ -69,6 +69,7 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 4. Cruzar la biblioteca con la base de datos local (`App\Services\Library\LibraryMatcher`):
    - Primero por Steam AppID (`game_steam_appids`).
    - **Respaldo por nombre** para los que no coinciden: título exacto normalizado (`App\Services\TitleNormalizer`: minúsculas, sin ™ ® ©, apóstrofes/guiones unificados, espacios colapsados) contra `games.normalized_title`, **solo** entre juegos sin ningún AppID en la wiki y **solo** si hay un único candidato. Nunca coincidencias parciales ("Cyberpunk 2077" ≠ "Cyberpunk 2077: Ultimate Edition"). Cubre vacíos de la wiki como Euro Truck Simulator 2.
+   - `LibraryMatcher::matchCached()` recuerda 1 hora qué juego corresponde a cada AppID (clave: hash del SteamID64 + la lista de AppIDs), así que cada clic de filtro solo carga esos juegos por ID.
 5. Las portadas se cargan desde el CDN de Steam, con `loading="lazy"` y un fallback si fallan.
 
 ### 2b. Inicio de sesión con Steam
@@ -180,7 +181,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
   - **Columna "En tu GPU"** (`x-gpu-summary`): con una generación elegida, reemplaza las 4 columnas por marca. Muestra lo mejor usable de cada capacidad (primero la tecnología de tu marca) y, debajo, lo que el juego trae pero tu GPU no puede usar. "Ver todas las tecnologías" vuelve a mostrar las columnas por marca (`renderdex.all-technologies`).
   - Tabla con portada, nombre (enlace a su ficha), enlace a la wiki, horas jugadas y versiones detectadas. Las columnas de tecnologías salen de `x-technology-headers`, `x-technology-cells` y `x-technology-compact` (móvil), compartidos con el catálogo.
   - **Vacíos honestos:** un juego sin datos ocupa una sola celda "Sin datos en la wiki · completar ↗" (`x-no-data`: edición de su página o, si no la tiene, el buscador de la wiki) en vez de 8 "?". Primero se listan los juegos con datos; "Solo juegos con datos" oculta el resto. Debajo de la tabla, "Ayuda a completarlo" sugiere tus 5 juegos más jugados sin datos.
-  - **Filtros** (`x-technology-filters` + `App\Services\TechnologyFilter`): 3 botones por intención (`?cap=`: reescalado, generación de frames, RT; dentro de cada una, cualquier tecnología; con GPU, solo las usables), "Solo juegos con datos" (`?data=1`) y las 8 tecnologías exactas plegadas en "Más filtros" (`?tech=`). Búsqueda por nombre y orden por nombre u horas.
+  - **Filtros** (`x-technology-filters` + `App\Services\TechnologyFilter`): 3 botones por intención (`?cap=`: reescalado, generación de frames, RT; dentro de cada una, cualquier tecnología; con GPU, solo las usables), "Solo juegos con datos" (`?data=1`) y las 8 tecnologías exactas plegadas en "Más filtros" (`?tech=`). Búsqueda por nombre y orden por nombre, horas o "más tecnologías primero" (con GPU, solo las usables).
 - **Pie de página:**
   - Crédito a PCGamingWiki con licencia CC BY-NC-SA 3.0.
   - Fecha del último sync.

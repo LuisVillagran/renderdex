@@ -2,6 +2,7 @@
 
 namespace App\Services\Library;
 
+use App\Enums\Availability;
 use App\Enums\Capability;
 use App\Enums\GpuProfile;
 use App\Enums\Support;
@@ -17,7 +18,7 @@ use Illuminate\Support\Collection;
  */
 class LibraryBrowser
 {
-    public const SORTS = ['name', 'playtime'];
+    public const SORTS = ['name', 'playtime', 'technologies'];
 
     /** Cuántos juegos sin datos se sugieren para completar en la wiki. */
     public const MISSING_DATA_SUGGESTIONS = 5;
@@ -80,16 +81,16 @@ class LibraryBrowser
 
         $descending = $direction === 'desc';
         $byName = fn (LibraryEntry $a, LibraryEntry $b) => strnatcasecmp($a->owned->name, $b->owned->name);
+        $byNumber = fn (callable $number) => fn (LibraryEntry $a, LibraryEntry $b) => $descending
+            ? $number($b) <=> $number($a)
+            : $number($a) <=> $number($b);
 
         return $results->sortBy([
             fn (LibraryEntry $a, LibraryEntry $b) => $this->hasData($b) <=> $this->hasData($a),
             ...match (in_array($sort, self::SORTS, true) ? $sort : 'name') {
-                'playtime' => [
-                    fn (LibraryEntry $a, LibraryEntry $b) => $descending
-                        ? $b->owned->playtimeMinutes <=> $a->owned->playtimeMinutes
-                        : $a->owned->playtimeMinutes <=> $b->owned->playtimeMinutes,
-                    $byName,
-                ],
+                'playtime' => [$byNumber(fn (LibraryEntry $entry) => $entry->owned->playtimeMinutes), $byName],
+                // Con GPU, cuenta solo lo que se puede usar en ella.
+                'technologies' => [$byNumber(fn (LibraryEntry $entry) => $this->technologyCount($entry, $filter->gpu)), $byName],
                 default => [fn (LibraryEntry $a, LibraryEntry $b) => $descending ? $byName($b, $a) : $byName($a, $b)],
             },
         ])->values();
@@ -114,6 +115,15 @@ class LibraryBrowser
     public function hasData(LibraryEntry $entry): bool
     {
         return (bool) $entry->game?->has_data;
+    }
+
+    private function technologyCount(LibraryEntry $entry, ?GpuProfile $gpu): int
+    {
+        return collect(Technology::cases())
+            ->filter(fn (Technology $technology) => $gpu === null
+                ? $this->supports($entry, $technology)
+                : $this->gpus->availability($entry->game, $gpu, $technology) === Availability::Usable)
+            ->count();
     }
 
     private function hasCapability(LibraryEntry $entry, Capability $capability, ?GpuProfile $gpu): bool

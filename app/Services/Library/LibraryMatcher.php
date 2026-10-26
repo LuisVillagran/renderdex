@@ -8,6 +8,7 @@ use App\Models\GameSteamAppid;
 use App\Services\Steam\OwnedGame;
 use App\Services\TitleNormalizer;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Cruza la biblioteca de Steam con los juegos sincronizados desde PCGamingWiki.
@@ -17,7 +18,53 @@ class LibraryMatcher
     /** Margen bajo el límite de parámetros por consulta de PostgreSQL (65.535). */
     private const CHUNK_SIZE = 5000;
 
+    /** Igual que la caché de la biblioteca en SteamClient. */
+    public const CACHE_TTL_SECONDS = 3600;
+
     public function __construct(private TitleNormalizer $normalizer) {}
+
+    /**
+     * Como {@see match()}, pero recuerda qué juego de la wiki corresponde a cada AppID para no
+     * repetir el cruce en cada clic de filtro: después solo hace falta cargar esos juegos por ID.
+     * La clave incluye la lista de AppIDs, así que si la biblioteca cambia se vuelve a cruzar.
+     *
+     * @param  list<OwnedGame>  $ownedGames
+     * @return list<LibraryEntry> En el mismo orden que la biblioteca.
+     */
+    public function matchCached(string $steamId, array $ownedGames): array
+    {
+        $appids = implode(',', array_map(fn (OwnedGame $owned) => $owned->appid, $ownedGames));
+        $key = 'library-match:'.hash('sha256', $steamId.'|'.$appids);
+
+        $fresh = null;
+        $links = Cache::remember($key, self::CACHE_TTL_SECONDS, function () use ($ownedGames, &$fresh) {
+            $fresh = $this->match($ownedGames);
+
+            return collect($fresh)
+                ->filter(fn (LibraryEntry $entry) => $entry->game !== null)
+                ->mapWithKeys(fn (LibraryEntry $entry) => [$entry->owned->appid => [$entry->game->id, $entry->matchedBy->value]])
+                ->all();
+        });
+
+        if ($fresh !== null) {
+            return $fresh;
+        }
+
+        $games = collect($links)
+            ->pluck(0)
+            ->unique()
+            ->chunk(self::CHUNK_SIZE)
+            ->flatMap(fn (Collection $ids) => Game::whereIn('id', $ids->values())->get())
+            ->keyBy('id');
+
+        return array_map(function (OwnedGame $owned) use ($links, $games) {
+            [$gameId, $source] = $links[$owned->appid] ?? [null, null];
+            $game = $gameId !== null ? $games->get($gameId) : null;
+
+            // Si el juego desapareció de la base (p. ej. un sync --fresh), queda sin página.
+            return new LibraryEntry($owned, $game, $game ? MatchSource::from($source) : null);
+        }, $ownedGames);
+    }
 
     /**
      * @param  list<OwnedGame>  $ownedGames

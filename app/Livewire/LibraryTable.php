@@ -49,8 +49,8 @@ class LibraryTable extends Component
             $this->direction = $this->direction === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sort = $column;
-            // Lo más útil primero: nombres de la A a la Z, y los juegos más jugados.
-            $this->direction = $column === 'playtime' ? 'desc' : 'asc';
+            // Lo más útil primero: nombres de la A a la Z, los más jugados y los que soportan más.
+            $this->direction = $column === 'name' ? 'asc' : 'desc';
         }
 
         $this->resetPage();
@@ -62,7 +62,7 @@ class LibraryTable extends Component
         $entries = [];
 
         try {
-            $entries = $matcher->match($steam->ownedGames($this->steamId));
+            $entries = $matcher->matchCached($this->steamId, $steam->ownedGames($this->steamId));
         } catch (PrivateProfileException) {
             $error = 'private';
         } catch (SteamUnavailableException) {

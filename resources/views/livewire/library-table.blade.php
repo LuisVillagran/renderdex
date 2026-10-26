@@ -121,12 +121,23 @@
                 },
             }"
         >
-            @if ($gpuProfile)
-                <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden self-end font-mono text-xs text-muted uppercase hover:text-accent lg:inline-flex">
-                    <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
-                    <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
+                <button
+                    type="button"
+                    wire:click="sortBy('technologies')"
+                    aria-pressed="{{ $sort === 'technologies' ? 'true' : 'false' }}"
+                    @class(['focus-ring inline-flex items-center gap-1 uppercase hover:text-accent', 'text-accent' => $sort === 'technologies', 'text-muted' => $sort !== 'technologies'])
+                >
+                    {{ __('library.table.sort_technologies') }} <span aria-hidden="true">{{ $sortIndicator('technologies') ?: '↕' }}</span>
                 </button>
-            @endif
+
+                @if ($gpuProfile)
+                    <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden text-muted uppercase hover:text-accent lg:inline-flex">
+                        <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
+                        <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
+                    </button>
+                @endif
+            </div>
 
             <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
                 <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>

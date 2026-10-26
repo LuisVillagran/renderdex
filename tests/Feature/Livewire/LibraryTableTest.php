@@ -424,3 +424,16 @@ it('limits library pages per IP and explains it in Spanish', function () {
         ->assertTooManyRequests()
         ->assertSee(__('errors.429.title'));
 });
+
+it('sorts by the number of supported technologies, most first', function () {
+    wikiGame(570, 'Dota 2', ['fsr' => Support::Yes]);
+    wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes, 'fsr' => Support::Yes, 'ray_tracing' => Support::Yes]);
+    wikiGame(413150, 'Stardew Valley', ['ray_tracing' => Support::No]);
+    fakeOwnedGames([[570, 'Dota 2'], [1091500, 'Cyberpunk 2077'], [413150, 'Stardew Valley']]);
+
+    $component = Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('sortBy', 'technologies')
+        ->assertSet('direction', 'desc');
+
+    expect(listedNames($component))->toBe(['Cyberpunk 2077', 'Dota 2', 'Stardew Valley']);
+});

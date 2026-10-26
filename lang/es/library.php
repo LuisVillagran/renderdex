@@ -58,6 +58,7 @@ return [
         'hours' => ':hours h',
         'sort_by' => 'Ordenar por :column',
         'technologies' => 'Tecnologías',
+        'sort_technologies' => 'Más tecnologías primero',
     ],
 
     'wiki_link' => 'Ver :name en PCGamingWiki',
