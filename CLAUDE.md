@@ -90,7 +90,13 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 - Búsqueda contra `games.search_title` (`App\Services\SearchKey`: `TitleNormalizer` + sin puntuación, `&` → `and`, números romanos sueltos → dígitos). Todas las palabras deben aparecer, en cualquier orden. Orden: título exacto, los que empiezan con el texto, los que contienen la frase y después el resto; a igualdad, primero los que tienen datos (`has_data`, columna generada) y AppID. Los comodines `%` y `_` se buscan como texto. Sin texto, primero los juegos con más tecnologías en `Yes`.
 - Si nada coincide, respaldo por similitud con **`pg_trgm`** (`<%` / `word_similarity`, índice GIN) y la UI avisa que son resultados aproximados. `TitleNormalizer` no cambia: el cruce de bibliotecas sigue siendo conservador.
 - Mismos filtros y selector "Mi GPU" que la biblioteca (trait `App\Livewire\Concerns\WithTechnologyFilters` y componentes `x-gpu-selector` y `x-technology-filters`).
-- Cada juego enlaza a PCGamingWiki y, si tiene AppID, a su página en la tienda de Steam (enlace normal, sin afiliados).
+- Cada juego enlaza a su ficha, a PCGamingWiki y, si tiene AppID, a su página en la tienda de Steam (enlace normal, sin afiliados).
+
+### 2d. Ficha por juego y SEO
+- Ruta `/juegos/{pcgw_page_id}-{slug}` (`GameController@show`, `Game::url()`). Se usa el ID de la wiki porque sobrevive a un sync `--fresh`; si el slug no coincide, redirige 301 a la canónica.
+- Muestra las 8 tecnologías con versiones, el texto crudo de la wiki, crédito CC BY-NC-SA y enlaces a la wiki (ver y editar) y a la tienda. `App\Services\SupportSummary` arma el resumen ("DLSS 4, DLSS MFG y Ray Tracing") para el texto y los metadatos.
+- Título, descripción, canonical y `og:image` (header de Steam) propios. Sin datos (`has_data = false`): invita a completar la wiki y lleva `noindex`.
+- `/sitemap.xml` solo con los juegos con datos; `/robots.txt` es una ruta para dar la URL absoluta del sitemap. Las bibliotecas (`/u/{id}`) llevan `noindex`.
 - El inicio tiene un formulario GET hacia `/juegos?q=`, y el header un enlace "Buscar juegos".
 
 ### 3. Casos borde (cada uno con su mensaje claro en la UI)

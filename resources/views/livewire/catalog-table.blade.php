@@ -74,14 +74,19 @@
                             <td class="px-3 py-3">
                                 <div class="flex flex-col gap-2">
                                     <div class="flex flex-col gap-0.5">
-                                        <a href="https://www.pcgamingwiki.com/w/index.php?curid={{ $game->pcgw_page_id }}" rel="noopener" title="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
+                                        <a href="{{ $game->url() }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
                                             {!! $highlight($game->title) !!}
                                         </a>
-                                        @if ($appid)
-                                            <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $game->title]) }}" class="focus-ring self-start font-mono text-[0.7rem] text-muted uppercase hover:text-accent">
-                                                {{ __('catalog.store_link') }} ↗
+                                        <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted uppercase">
+                                            <a href="{{ $game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring hover:text-accent">
+                                                {{ __('catalog.wiki_link') }} ↗
                                             </a>
-                                        @endif
+                                            @if ($appid)
+                                                <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $game->title]) }}" class="focus-ring hover:text-accent">
+                                                    {{ __('catalog.store_link') }} ↗
+                                                </a>
+                                            @endif
+                                        </span>
                                     </div>
 
                                     {{-- Sin espacio para las columnas por marca: las píldoras van bajo el nombre. --}}

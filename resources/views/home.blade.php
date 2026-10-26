@@ -98,7 +98,7 @@
                                 <li class="animate-rise flex flex-col gap-3 px-4 py-4" style="--delay: {{ $rowDelay }}ms">
                                     <div class="flex items-center gap-3">
                                         <x-game-cover :appid="$appid->steam_appid" />
-                                        <span class="font-display text-lg leading-tight font-semibold">{{ $appid->game->title }}</span>
+                                        <a href="{{ $appid->game->url() }}" class="focus-ring font-display text-lg leading-tight font-semibold decoration-accent underline-offset-4 hover:text-accent hover:underline">{{ $appid->game->title }}</a>
                                     </div>
                                     <div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-[auto_auto_auto_1fr]">
                                         @foreach (Technology::byVendor() as $vendor => $technologies)

@@ -1,7 +1,9 @@
-@props(['title' => null])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'noindex' => false])
 
 @php
     $fullTitle = $title ? $title.' · '.config('app.name') : config('app.name');
+    $description ??= __('layout.description');
+    $canonical ??= url()->current();
 @endphp
 
 <!DOCTYPE html>
@@ -10,7 +12,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $fullTitle }}</title>
-    <meta name="description" content="{{ __('layout.description') }}">
+    <meta name="description" content="{{ $description }}">
+    <link rel="canonical" href="{{ $canonical }}">
+    @if ($noindex)
+        <meta name="robots" content="noindex">
+    @endif
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#f1eee6" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0b0b0a" media="(prefers-color-scheme: dark)">
@@ -20,12 +26,16 @@
     <meta property="og:site_name" content="{{ config('app.name') }}">
     <meta property="og:locale" content="es_ES">
     <meta property="og:title" content="{{ $fullTitle }}">
-    <meta property="og:description" content="{{ __('layout.description') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ asset('images/og.png') }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="{{ __('layout.og_image_alt') }}">
+    <meta property="og:description" content="{{ $description }}">
+    <meta property="og:url" content="{{ $canonical }}">
+    @if ($image)
+        <meta property="og:image" content="{{ $image }}">
+    @else
+        <meta property="og:image" content="{{ asset('images/og.png') }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ __('layout.og_image_alt') }}">
+    @endif
     <meta name="twitter:card" content="summary_large_image">
 
     {{-- Va en línea y antes de los estilos: aplica el tema antes de pintar, sin parpadeo. --}}

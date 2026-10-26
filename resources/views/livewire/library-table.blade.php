@@ -148,7 +148,7 @@
                                     <div class="flex flex-col gap-2">
                                         <div class="flex flex-col gap-0.5">
                                             @if ($entry->game)
-                                                <a href="https://www.pcgamingwiki.com/w/index.php?curid={{ $entry->game->pcgw_page_id }}" rel="noopener" title="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
+                                                <a href="{{ $entry->game->url() }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
                                                     {{ $entry->owned->name }}
                                                 </a>
                                             @else
@@ -158,8 +158,11 @@
                                                 <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
                                                 @if (! $entry->game)
                                                     <span>{{ __('library.no_wiki_page') }}</span>
-                                                @elseif ($entry->matchedBy === MatchSource::Title)
-                                                    <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
+                                                @else
+                                                    <a href="{{ $entry->game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
+                                                    @if ($entry->matchedBy === MatchSource::Title)
+                                                        <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
+                                                    @endif
                                                 @endif
                                             </span>
                                         </div>
