@@ -226,7 +226,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
 ## Convenciones
 
 - Código, nombres de clases, variables, rutas y commits en **inglés**.
-- Textos de la UI en `lang/es/` (idioma principal) y `lang/en/`, siempre con las mismas claves (lo verifica `tests/Feature/LocaleTest.php`). `AppHttpMiddlewareSetLocale` elige el idioma: `?lang=` (se recuerda en la sesión) → sesión → `Accept-Language` → `es`. Las URLs no cambian. Selector ES/EN en el header (`x-locale-switcher`). Los tests usan español por defecto (`tests/TestCase.php`).
+- Textos de la UI en `lang/es/` (idioma principal) y `lang/en/`, siempre con las mismas claves (lo verifica `tests/Feature/LocaleTest.php`). `App\Http\Middleware\SetLocale` elige el idioma: `?lang=` (se recuerda en la sesión) → sesión → `Accept-Language` → `es`. Las URLs no cambian. Selector ES/EN en el header (`x-locale-switcher`). Los tests usan español por defecto (`tests/TestCase.php`).
 - Comentarios en español, solo donde aporten (el porqué, no el qué).
 - Componentes Livewire chicos. La lógica de negocio va en `Services/`, no en los componentes.
 - Licencia del código: **MIT** (archivo `LICENSE`). No aplica a los datos de PCGamingWiki.
@@ -351,6 +351,16 @@ php artisan test
   - Rediseño visual completo (ver "Estilo visual" en UI), revisado con capturas en modo oscuro, claro y móvil.
   - Rate limiting: `throttle:steam` (30/min por IP) en `/u/{steamid64}` y en el callback de login; `LibraryLookup` limita a 10 búsquedas/min por IP (hash). Páginas 429 y 404 en español.
   - `/privacidad`, Open Graph (`public/images/og.png`), skip link y contraste WCAG AA verificado.
+- [ ] Etapa 5b: Mejoras (implementadas y con tests, 313 en verde, octubre de 2026; falta la prueba manual en un navegador real)
+  - Búsqueda precisa con `pg_trgm` y vista previa en el header y el inicio.
+  - Ficha por juego, `sitemap.xml` y `robots.txt`.
+  - "¿Qué puedo activar en mi GPU?" por generación, con la columna "En tu GPU".
+  - UI más simple: filtros por intención, vacíos honestos, inicio centrado en la búsqueda.
+  - Caché del cruce de la biblioteca y orden "más tecnologías primero".
+  - Novedades del sync (`/novedades`, feed Atom y marca "Novedad").
+  - Lista de deseados.
+  - Versión en inglés.
+  - **Pendiente de revisar a mano:** teclado en la vista previa del buscador (flechas, Enter, Esc, `/`), "Ver todas las tecnologías", el selector de generación con `localStorage`, el header con buscador + navegación + idioma + tema en anchos medianos, y la pestaña de lista de deseados con una cuenta real (el endpoint no está documentado).
 - [ ] Etapa 6: Publicación
 
 ===
