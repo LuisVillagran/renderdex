@@ -1,5 +1,6 @@
+@inject('summary', \App\Services\SupportSummary::class)
+
 @php
-    use App\Enums\Technology;
     use Illuminate\Support\Number;
 @endphp
 
@@ -68,38 +69,25 @@
             </div>
 
             @if ($showcase->isNotEmpty())
-                <figure class="flex flex-col gap-3 lg:mt-14">
-                    <div class="frame relative overflow-hidden">
-                        <span class="scanline z-10" style="--delay: 1400ms" aria-hidden="true"></span>
-                        <div class="flex items-center justify-between gap-4 border-b border-line px-4 py-2">
-                            <p class="font-mono text-xs">
-                                <span class="text-accent" aria-hidden="true">$</span>
-                                <span class="sr-only">{{ __('home.preview.label') }}:</span>
-                                <span class="animate-type" style="--chars: {{ mb_strlen(__('home.preview.command')) }}; --delay: 300ms" aria-hidden="true">{{ __('home.preview.command') }}</span><span class="animate-blink ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 bg-fg" aria-hidden="true"></span>
-                            </p>
-                            <p class="label" aria-hidden="true">{{ trans_choice('home.preview.rows', $showcase->count()) }}</p>
-                        </div>
-
-                        <ul class="divide-y divide-line">
-                            @foreach ($showcase as $appid)
-                                @php $rowDelay = 1100 + $loop->index * 260; @endphp
-                                <li class="animate-rise flex flex-col gap-3 px-4 py-4" style="--delay: {{ $rowDelay }}ms">
-                                    <div class="flex items-center gap-3">
-                                        <x-game-cover :appid="$appid->steam_appid" :cover="$appid->game->cover_url" :title="$appid->game->title" size="md" />
-                                        <a href="{{ $appid->game->url() }}" class="focus-ring font-display text-lg leading-tight font-semibold decoration-accent underline-offset-4 hover:text-accent hover:underline">{{ $appid->game->title }}</a>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-[auto_auto_auto_1fr]">
-                                        @foreach (Technology::byVendor() as $vendor => $technologies)
-                                            <div class="flex flex-col gap-1">
-                                                <span class="label text-[0.625rem]" aria-hidden="true">{{ __('technologies.group.'.$vendor) }}</span>
-                                                <x-tech-pills :game="$appid->game" :technologies="$technologies" :delay="$rowDelay + 150 + $loop->index * 90" class="flex-nowrap" />
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
+                {{-- Mosaico de portadas reales: cada una muestra lo que soporta según la wiki. --}}
+                <figure class="flex flex-col gap-3 lg:mt-6">
+                    <ul class="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+                        @foreach ($showcase as $appid)
+                            @php $labels = $summary->labels($appid->game); @endphp
+                            <li class="animate-rise" style="--delay: {{ 150 + $loop->index * 70 }}ms">
+                                <a href="{{ $appid->game->url() }}" class="group focus-ring relative block ring-1 ring-line transition hover:ring-accent" aria-label="{{ $appid->game->title }}">
+                                    <x-game-cover :appid="$appid->steam_appid" :cover="$appid->game->cover_url" :title="$appid->game->title" size="card" class="ring-0!" />
+                                    @if ($labels !== [])
+                                        <span class="absolute inset-x-0 bottom-0 flex gap-1 overflow-hidden border-t border-line bg-canvas/90 px-1.5 py-1" aria-hidden="true">
+                                            @foreach (array_slice($labels, 0, 2) as $label)
+                                                <span class="border border-accent/60 bg-accent/12 px-1 font-mono text-[0.6rem] leading-4 whitespace-nowrap text-accent">{{ $label }}</span>
+                                            @endforeach
+                                        </span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
                     <figcaption class="font-mono text-xs text-muted">
                         <span class="text-accent" aria-hidden="true">↳</span> {{ __('home.preview.caption') }}
                     </figcaption>

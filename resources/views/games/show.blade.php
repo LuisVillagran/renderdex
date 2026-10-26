@@ -30,12 +30,26 @@
             </ol>
         </nav>
 
-        <header class="grid items-start gap-6 sm:grid-cols-[auto_1fr] sm:gap-10">
-            <div class="frame self-start p-1.5" data-reveal>
+        <header class="relative isolate">
+            @if ($appid)
+                {{-- Banda con el arte panorámico de Steam; si no existe, se quita y queda solo el espacio. --}}
+                <div class="absolute inset-x-0 top-0 -z-10 h-44 overflow-hidden border border-line bg-raised sm:h-64" aria-hidden="true">
+                    <img
+                        src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{{ $appid }}/library_hero.jpg"
+                        alt=""
+                        class="size-full object-cover opacity-60"
+                        onerror="this.parentElement.remove()"
+                    >
+                    <div class="absolute inset-0 bg-canvas/35"></div>
+                </div>
+            @endif
+
+            <div @class(['grid items-end gap-6 sm:grid-cols-[auto_1fr] sm:gap-10', 'pt-20 sm:px-8 sm:pt-32' => $appid])>
+            <div class="frame w-fit self-start bg-canvas p-1.5 shadow-[0_0_0_6px_var(--rd-canvas)]" data-reveal>
                 <x-game-cover :appid="$appid" :cover="$game->cover_url" :title="$game->title" size="lg" :alt="__('game.cover_alt', ['title' => $game->title])" />
             </div>
 
-            <div class="flex flex-col gap-4 sm:pt-2">
+            <div class="flex flex-col gap-4 sm:pb-2">
                 <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('game.eyebrow')" /></p>
                 <h1 class="font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{{ $game->title }}</h1>
 
@@ -55,6 +69,7 @@
                         </a>
                     @endif
                 </div>
+            </div>
             </div>
         </header>
 
@@ -106,7 +121,7 @@
             @endif
         @else
             <section class="frame flex flex-col items-start gap-3 p-6" aria-labelledby="no-data-title">
-                <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_NO_RENDER_DATA</p>
+                <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_NO_RENDER_DATA</p>
                 <h2 id="no-data-title" class="font-display text-xl font-semibold">{{ __('game.no_data.title') }}</h2>
                 <p class="max-w-2xl text-muted">{{ __('game.no_data.body') }}</p>
                 <a href="{{ $game->wikiEditUrl() }}" rel="noopener" class="focus-ring bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">

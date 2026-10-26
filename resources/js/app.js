@@ -63,33 +63,6 @@ function countUp() {
     });
 }
 
-/** Texto mono que se "decodifica": caracteres al azar que se resuelven de izquierda a derecha. */
-function decode() {
-    const glyphs = '01<>/\\_#%=+*';
-
-    document.querySelectorAll('[data-decode]').forEach((element) => {
-        const final = element.textContent;
-        const duration = 500 + final.length * 15;
-        const start = performance.now();
-
-        const tick = (now) => {
-            const progress = Math.min((now - start) / duration, 1);
-            const revealed = Math.floor(final.length * progress);
-
-            element.textContent =
-                progress < 1
-                    ? [...final].map((char, index) => (index < revealed || char === ' ' ? char : glyphs[Math.floor(Math.random() * glyphs.length)])).join('')
-                    : final;
-
-            if (progress < 1) {
-                requestAnimationFrame(tick);
-            }
-        };
-
-        requestAnimationFrame(tick);
-    });
-}
-
 /** Marca con data-revealed los elementos [data-reveal] cuando entran en pantalla (el CSS anima la entrada). */
 function revealOnScroll() {
     const elements = document.querySelectorAll('[data-reveal]');
@@ -121,7 +94,6 @@ function start() {
 
     if (!reducedMotion.matches) {
         countUp();
-        decode();
     }
 }
 

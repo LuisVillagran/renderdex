@@ -192,47 +192,10 @@
  * que se decodifica (resources/js/app.js). Con prefers-reduced-motion se muestra el
  * estado final sin animar (ver el bloque del final).
  */
-@keyframes rd-type {
-    from {
-        width: 0;
-    }
-}
-
 @keyframes rd-rise {
     from {
         opacity: 0;
         transform: translateY(6px);
-    }
-}
-
-@keyframes rd-ignite {
-    0% {
-        opacity: 0.2;
-        filter: grayscale(1);
-    }
-
-    55% {
-        filter: brightness(1.7);
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-@keyframes rd-scan {
-    0% {
-        top: 0;
-        opacity: 0;
-    }
-
-    10% {
-        opacity: 1;
-    }
-
-    100% {
-        top: 100%;
-        opacity: 0;
     }
 }
 
@@ -258,36 +221,9 @@
     }
 }
 
-/* Texto que se "tipea": requiere fuente mono y --chars con la cantidad de caracteres. */
-@utility animate-type {
-    display: inline-block;
-    overflow: hidden;
-    white-space: nowrap;
-    vertical-align: bottom;
-    width: calc(var(--chars) * 1ch);
-    animation: rd-type 0.8s steps(var(--chars)) var(--delay, 0ms) both;
-}
-
 /* Entrada escalonada: cada elemento define su --delay. */
 @utility animate-rise {
     animation: rd-rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0ms) both;
-}
-
-/* Las píldoras se "encienden" una a una. */
-@utility animate-ignite {
-    animation: rd-ignite 0.5s ease-out var(--delay, 0ms) both;
-}
-
-/* Línea de escaneo que barre su contenedor (relative) una sola vez. */
-@utility scanline {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    pointer-events: none;
-    background: linear-gradient(90deg, transparent, var(--rd-accent), transparent);
-    box-shadow: 0 0 12px var(--rd-accent);
-    animation: rd-scan 1.6s ease-in-out var(--delay, 0ms) both;
 }
 
 /* El texto se "renderiza" de izquierda a derecha, en pasos, línea por línea. */
@@ -378,7 +314,4 @@
         opacity: 0.6;
     }
 
-    .scanline {
-        display: none;
-    }
 }

@@ -1,4 +1,4 @@
-{{-- Texto que se "decodifica" al cargar (resources/js/app.js). Los lectores de pantalla leen la copia fija. --}}
+{{-- Etiqueta mono de sección. Antes se "decodificaba" al cargar; ahora es fija para no competir con las portadas. --}}
 @props(['text'])
 
-<span data-decode aria-hidden="true" {{ $attributes }}>{{ $text }}</span><span class="sr-only">{{ $text }}</span>
+<span {{ $attributes }}>{{ $text }}</span>

@@ -39,14 +39,43 @@
                     <span class="ml-2">{{ __('catalog.top_hint') }}</span>
                 @endif
             </p>
-            @if ($gpuProfile)
-                <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden uppercase hover:text-accent lg:inline-flex">
-                    <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
-                    <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
-                </button>
-            @endif
+            <div class="flex items-center gap-4">
+                @if ($gpuProfile && $layout === 'table')
+                    <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden uppercase hover:text-accent lg:inline-flex">
+                        <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
+                        <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
+                    </button>
+                @endif
+                <x-view-switcher :layout="$layout" />
+            </div>
         </div>
 
+        @if ($layout === 'grid')
+            <div class="relative" wire:loading.class="opacity-70">
+                <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
+                @if ($games->isEmpty())
+                    <p class="frame px-3 py-14 text-center font-mono text-sm text-muted">
+                        <span class="text-accent" aria-hidden="true">∅ </span>{{ __('catalog.no_results') }}
+                    </p>
+                @else
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-5">
+                        @foreach ($games as $game)
+                            @php $appid = $game->steamAppids->first()?->steam_appid; @endphp
+                            <li wire:key="catalog-card-{{ $game->id }}" class="animate-rise" style="--delay: {{ $loop->index * 25 }}ms">
+                                <x-game-card :game="$game" :appid="$appid" :name="$game->title" :gpu-profile="$gpuProfile" :query="$needle">
+                                    <x-slot:meta>
+                                        <a href="{{ $game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
+                                        @if ($appid)
+                                            <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $game->title]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
+                                        @endif
+                                    </x-slot:meta>
+                                </x-game-card>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        @else
         <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
             <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
             <div class="overflow-x-auto">
@@ -103,6 +132,7 @@
                 </table>
             </div>
         </div>
+        @endif
     </div>
 
     {{ $games->links() }}

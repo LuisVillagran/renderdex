@@ -51,6 +51,12 @@ return [
         'nothing_usable' => 'Nothing usable on your GPU',
     ],
 
+    'layout' => [
+        'label' => 'View',
+        'grid' => 'Grid',
+        'table' => 'Table',
+    ],
+
     'filters' => [
         'label' => 'Exact technologies',
         'capabilities' => 'I want to play with',
@@ -74,7 +80,8 @@ return [
         'hours' => ':hours h',
         'sort_by' => 'Sort by :column',
         'technologies' => 'Technologies',
-        'sort_technologies' => 'Most technologies first',
+        'sort_technologies' => 'Most technologies',
+        'sort_label' => 'Sort',
     ],
 
     'wiki_link' => 'View :name on PCGamingWiki',

@@ -24,9 +24,6 @@ return [
     ],
 
     'preview' => [
-        'label' => 'Preview',
-        'command' => 'renderdex scan --preview',
-        'rows' => ':count row|:count rows',
         'caption' => 'Real wiki data, just as you will see it in your library.',
     ],
 

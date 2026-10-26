@@ -65,6 +65,7 @@ it('lists every game with its support and a link to its wiki page', function () 
     fakeOwnedGames([[1091500, 'Cyberpunk 2077', 5410]]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('setLayout', 'table')
         ->assertSee('Cyberpunk 2077')
         ->assertSee('https://www.pcgamingwiki.com/w/index.php?curid='.$cyberpunk->pcgw_page_id)
         ->assertSee($cyberpunk->url())
@@ -82,6 +83,7 @@ it('loads vertical covers lazily, falling back to the wiki cover and to initials
     fakeOwnedGames([[570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('setLayout', 'table')
         ->assertSeeHtml('steam/apps/570/library_600x900.jpg')
         ->assertSeeHtml('loading="lazy"')
         ->assertSeeHtml('thumb/1/1a/Dota_2_cover.jpg/120px-Dota_2_cover.jpg')
@@ -225,6 +227,7 @@ it('counts what the chosen GPU generation can really use and shows it in its own
     fakeOwnedGames([[1091500, 'Cyberpunk 2077'], [570, 'Dota 2']]);
 
     Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('setLayout', 'table')
         ->call('selectGpu', 'nvidia')
         ->call('selectGpuModel', 'rtx20-30')
         ->assertSet('gpuModel', 'rtx20-30')
@@ -501,4 +504,16 @@ it('does not sort the wishlist by playtime', function () {
         ->assertSet('sort', 'name')
         ->call('sortBy', 'playtime')
         ->assertSet('sort', 'name');
+});
+
+it('shows the library as a grid of covers with playtime and what the GPU can use', function () {
+    wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes, 'dlss_fg' => Support::Yes, 'fsr' => Support::Yes, 'upscaling_tech' => 'DLSS 4,FSR 3.1']);
+    fakeOwnedGames([[1091500, 'Cyberpunk 2077', 5410]]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->assertSet('layout', 'grid')
+        ->assertSee('90,2 h')
+        ->assertSee('DLSS 4')
+        ->call('restoreGpu', 'amd', 'rx6000')
+        ->assertSee('FSR 3.1');
 });

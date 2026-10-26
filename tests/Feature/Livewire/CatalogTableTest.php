@@ -27,6 +27,7 @@ it('links each game to its wiki page and, when it has an app id, to the Steam st
     Game::factory()->create(['title' => 'Not On Steam']);
 
     Livewire::test(CatalogTable::class)
+        ->call('setLayout', 'table')
         ->assertSee('https://www.pcgamingwiki.com/w/index.php?curid='.$cyberpunk->pcgw_page_id)
         ->assertSee($cyberpunk->url())
         ->assertSee('https://store.steampowered.com/app/1091500/')
@@ -41,6 +42,7 @@ it('searches by name and highlights the match', function () {
     Game::factory()->create(['title' => 'Celeste']);
 
     Livewire::test(CatalogTable::class)
+        ->call('setLayout', 'table')
         ->set('search', 'wilds')
         ->assertSee('Outer')
         ->assertDontSee('Celeste')
@@ -90,6 +92,7 @@ it('shows what the chosen GPU can use in its own column', function () {
     Game::factory()->create(['title' => 'Cyberpunk 2077', 'dlss' => Support::Yes, 'dlss_mfg' => Support::Yes, 'dlss_fg' => Support::Yes, 'upscaling_tech' => 'DLSS 4']);
 
     Livewire::test(CatalogTable::class)
+        ->call('setLayout', 'table')
         ->call('restoreGpu', 'nvidia', 'rtx50')
         ->assertSee('En tu RTX 50')
         ->assertSee('DLSS 4')
@@ -110,4 +113,31 @@ it('offers the catalog from the home page and the header', function () {
         ->assertSee(__('home.catalog.title'))
         ->assertSee('action="'.route('catalog').'"', escape: false)
         ->assertSee(__('layout.header.catalog'));
+});
+
+it('shows a grid of covers by default, with what each game supports on top of the cover', function () {
+    $cyberpunk = Game::factory()->create(['title' => 'Cyberpunk 2077', 'dlss' => Support::Yes, 'ray_tracing' => Support::Yes, 'upscaling_tech' => 'DLSS 4']);
+    GameSteamAppid::factory()->for($cyberpunk)->create(['steam_appid' => 1091500]);
+    Game::factory()->create(['title' => 'Obscure Game']);
+
+    Livewire::test(CatalogTable::class)
+        ->assertSet('layout', 'grid')
+        ->assertSeeHtml('aria-label="Cyberpunk 2077"')
+        ->assertSeeHtml('steam/apps/1091500/library_600x900.jpg')
+        ->assertSee('DLSS 4')
+        ->assertSee('Ray Tracing')
+        ->assertSee(__('library.no_data'))
+        ->set('search', 'cyber')
+        ->assertSeeHtml('<mark class="bg-accent/20 text-fg">Cyber</mark>punk 2077');
+});
+
+it('switches between grid and table and ignores unknown layouts', function () {
+    Livewire::test(CatalogTable::class)
+        ->call('setLayout', 'table')
+        ->assertSet('layout', 'table')
+        ->assertSeeHtml('<table')
+        ->call('setLayout', 'carousel')
+        ->assertSet('layout', 'table')
+        ->call('setLayout', 'grid')
+        ->assertDontSeeHtml('<table');
 });

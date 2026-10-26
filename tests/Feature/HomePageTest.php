@@ -89,7 +89,7 @@ it('previews real games from the wiki and how many games it documents', function
 
     $response->assertOk();
     $response->assertSee(__('home.eyebrow', ['count' => 5]));
-    $response->assertSeeInOrder(['Showcase One', 'DLSS (reescalado) 4.5:', 'Showcase Two']);
+    $response->assertSeeInOrder(['Showcase One', 'DLSS 4.5', 'Showcase Two']);
     $response->assertSee("steam/apps/{$first}/library_600x900.jpg", escape: false);
 });
 
@@ -97,7 +97,7 @@ it('hides the preview until the wiki has been synced', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertDontSee(__('home.preview.label'));
+    $response->assertDontSee(__('home.preview.caption'));
     $response->assertDontSee(__('home.eyebrow', ['count' => 0]));
 });
 

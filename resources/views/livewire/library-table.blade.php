@@ -68,20 +68,20 @@
 
     @if ($error === 'wishlist_private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_WISHLIST_EMPTY</p>
+            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_WISHLIST_EMPTY</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.wishlist.private.title') }}</h2>
             <p class="text-muted">{{ __('library.wishlist.private.body') }}</p>
         </section>
     @elseif ($error === 'private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_PRIVATE_PROFILE</p>
+            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_PRIVATE_PROFILE</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.private.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.private.body') }}</p>
             <p class="text-muted">{{ __('home.privacy_help.steps') }}</p>
         </section>
     @elseif ($error === 'unavailable')
         <section class="frame flex flex-col items-start gap-3 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true" data-decode>ERR_STEAM_TIMEOUT</p>
+            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_STEAM_TIMEOUT</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.unavailable.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.unavailable.body') }}</p>
             <button type="button" wire:click="$refresh" class="focus-ring bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">
@@ -132,7 +132,7 @@
 
         <x-technology-filters :filter="$filter" :has-active-filters="$hasActiveFilters" :search="$search" :placeholder="__('library.search.placeholder')" />
 
-        {{-- Tabla. `all` muestra las columnas por marca además de "En tu GPU"; se recuerda en el navegador. --}}
+        {{-- Cuadrícula o tabla. En la tabla, `all` muestra las columnas por marca además de "En tu GPU"; se recuerda en el navegador. --}}
         <div
             class="flex flex-col gap-3"
             x-data="{
@@ -144,24 +144,66 @@
                 },
             }"
         >
-            <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
-                <button
-                    type="button"
-                    wire:click="sortBy('technologies')"
-                    aria-pressed="{{ $sort === 'technologies' ? 'true' : 'false' }}"
-                    @class(['focus-ring inline-flex items-center gap-1 uppercase hover:text-accent', 'text-accent' => $sort === 'technologies', 'text-muted' => $sort !== 'technologies'])
-                >
-                    {{ __('library.table.sort_technologies') }} <span aria-hidden="true">{{ $sortIndicator('technologies') ?: '↕' }}</span>
-                </button>
+            <div class="flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+                {{-- En la tabla también se ordena desde los encabezados; en la cuadrícula, solo desde aquí. --}}
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label="{{ __('library.table.sort_label') }}">
+                    <span class="label">{{ __('library.table.sort_label') }}</span>
+                    @foreach (array_filter(['name' => __('library.table.name'), 'playtime' => $isWishlist ? null : __('library.table.playtime'), 'technologies' => __('library.table.sort_technologies')]) as $column => $label)
+                        <button
+                            type="button"
+                            wire:key="sort-{{ $column }}"
+                            wire:click="sortBy('{{ $column }}')"
+                            aria-pressed="{{ $sort === $column ? 'true' : 'false' }}"
+                            @class(['focus-ring inline-flex items-center gap-1 uppercase hover:text-accent', 'text-accent' => $sort === $column, 'text-muted' => $sort !== $column])
+                        >
+                            {{ $label }} <span aria-hidden="true">{{ $sortIndicator($column) ?: '↕' }}</span>
+                        </button>
+                    @endforeach
+                </div>
 
-                @if ($gpuProfile)
-                    <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden text-muted uppercase hover:text-accent lg:inline-flex">
-                        <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
-                        <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
-                    </button>
-                @endif
+                <div class="flex items-center gap-4">
+                    @if ($gpuProfile && $layout === 'table')
+                        <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden text-muted uppercase hover:text-accent lg:inline-flex">
+                            <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
+                            <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
+                        </button>
+                    @endif
+                    <x-view-switcher :layout="$layout" />
+                </div>
             </div>
 
+            @if ($layout === 'grid')
+                <div class="relative" wire:loading.class="opacity-70">
+                    <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
+                    @if ($games->isEmpty())
+                        <p class="frame px-3 py-14 text-center font-mono text-sm text-muted">
+                            <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
+                        </p>
+                    @else
+                        <ul class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-5">
+                            @foreach ($games as $entry)
+                                <li wire:key="card-{{ $entry->owned->appid }}" class="animate-rise" style="--delay: {{ $loop->index * 25 }}ms">
+                                    <x-game-card :game="$entry->game" :appid="$entry->owned->appid" :name="$entry->owned->name" :gpu-profile="$gpuProfile">
+                                        <x-slot:meta>
+                                            @if ($isWishlist)
+                                                <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
+                                            @elseif ($entry->owned->playtimeMinutes > 0)
+                                                <span>{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                                            @endif
+                                            @if ($entry->game && $recentlyChanged->has($entry->game->id))
+                                                <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-bold text-accent uppercase">● {{ __('changes.badge') }}</a>
+                                            @endif
+                                            @if ($entry->matchedBy === MatchSource::Title)
+                                                <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
+                                            @endif
+                                        </x-slot:meta>
+                                    </x-game-card>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            @else
             <div class="frame relative overflow-hidden" wire:loading.class="opacity-70">
                 <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
                 <div class="overflow-x-auto">
@@ -242,6 +284,7 @@
                     </table>
                 </div>
             </div>
+            @endif
         </div>
 
         {{ $games->links() }}

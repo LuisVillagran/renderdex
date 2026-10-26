@@ -41,6 +41,16 @@ trait WithTechnologyFilters
     /** Generación dentro de la marca ({@see GpuProfile}); null si solo se eligió la marca. */
     public ?string $gpuModel = null;
 
+    /** Cuadrícula de portadas o tabla. Se recuerda en localStorage; ver x-view-switcher. */
+    public string $layout = 'grid';
+
+    public function setLayout(string $layout): void
+    {
+        if (in_array($layout, ['grid', 'table'], true)) {
+            $this->layout = $layout;
+        }
+    }
+
     public function updatedSearch(): void
     {
         $this->resetPage();

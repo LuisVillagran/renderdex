@@ -24,9 +24,6 @@ return [
     ],
 
     'preview' => [
-        'label' => 'Vista previa',
-        'command' => 'renderdex scan --preview',
-        'rows' => ':count fila|:count filas',
         'caption' => 'Datos reales de la wiki, tal como los verás en tu biblioteca.',
     ],
 

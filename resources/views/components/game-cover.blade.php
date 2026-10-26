@@ -13,7 +13,7 @@
     $steam = fn (string $file) => "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$appid}/{$file}";
     $sources = array_values(array_filter([
         $appid ? $steam('library_600x900.jpg') : null,
-        $cover ? PcgwCover::thumbnail($cover, $size === 'lg' ? 480 : 120) : null,
+        $cover ? PcgwCover::thumbnail($cover, match ($size) { 'lg' => 480, 'card' => 300, default => 120 }) : null,
         $appid ? $steam('header.jpg') : null,
     ]));
 
@@ -34,6 +34,7 @@
             'xs' => 'w-8',
             'md' => 'w-14',
             'lg' => 'w-40 sm:w-56',
+            'card' => 'w-full',
             default => 'w-10 sm:w-12',
         },
     ]) }}
@@ -45,7 +46,7 @@
             match ($size) {
                 'xs' => 'text-[0.6rem]',
                 'md' => 'text-base',
-                'lg' => 'text-5xl',
+                'lg', 'card' => 'text-5xl',
                 default => 'text-xs',
             },
         ])
@@ -58,7 +59,7 @@
             alt="{{ $alt }}"
             loading="lazy"
             decoding="async"
-            class="absolute inset-0 size-full object-cover"
+            class="absolute inset-0 size-full object-cover transition duration-500 ease-out group-hover:scale-[1.04]"
             onerror="const next = JSON.parse(this.dataset.fallbacks); if (next.length) { this.dataset.fallbacks = JSON.stringify(next.slice(1)); this.src = next[0]; } else { this.remove(); }"
         >
     @endif
