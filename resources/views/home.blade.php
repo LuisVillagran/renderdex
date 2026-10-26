@@ -9,14 +9,13 @@
         <section class="grid items-start gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
             <div class="flex flex-col gap-7">
                 @if ($gameCount > 0)
-                    <p class="font-mono text-xs text-muted">
-                        <span class="text-accent" aria-hidden="true">//</span>
+                    <p class="text-sm font-semibold text-accent">
                         <x-decode :text="__('home.eyebrow', ['count' => Number::format($gameCount)])" />
                     </p>
                 @endif
 
                 <h1 class="font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.5rem]">
-                    {!! __('home.title', ['technologies' => '<span class="text-render">'.e(__('home.title_technologies')).'</span>']) !!}
+                    {!! __('home.title', ['technologies' => '<span class="text-accent">'.e(__('home.title_technologies')).'</span>']) !!}
                 </h1>
                 <p class="max-w-xl text-lg text-muted">{{ __('home.intro') }}</p>
 
@@ -41,7 +40,7 @@
                     <div class="flex flex-col gap-4 p-4 sm:p-5">
                         <div class="flex flex-col gap-3">
                             @if ($steamUser = session('steam_user'))
-                                <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring self-start bg-accent px-5 py-2.5 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">
+                                <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring rounded self-start bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent hover:brightness-110">
                                     {{ __('home.steam_login.open_library') }} →
                                 </a>
                             @else
@@ -55,7 +54,7 @@
 
                         {{-- Alternativa para quien no quiere iniciar sesión: plegada para no competir con el botón. --}}
                         <details class="group border-t border-line pt-4">
-                            <summary class="focus-ring flex cursor-pointer list-none items-center gap-2 font-mono text-xs text-muted uppercase hover:text-fg">
+                            <summary class="focus-ring flex cursor-pointer list-none items-center gap-2 text-sm text-muted hover:text-fg">
                                 <span class="text-accent group-open:hidden" aria-hidden="true">+</span>
                                 <span class="hidden text-accent group-open:inline" aria-hidden="true">−</span>
                                 {{ __('home.access.paste_profile') }}
@@ -75,12 +74,12 @@
                         @foreach ($showcase as $appid)
                             @php $labels = $summary->labels($appid->game); @endphp
                             <li class="animate-rise" style="--delay: {{ 150 + $loop->index * 70 }}ms">
-                                <a href="{{ $appid->game->url() }}" class="group focus-ring relative block ring-1 ring-line transition hover:ring-accent" aria-label="{{ $appid->game->title }}">
+                                <a href="{{ $appid->game->url() }}" class="group focus-ring relative block overflow-hidden rounded-md ring-1 ring-line transition duration-200 hover:-translate-y-1 hover:ring-accent hover:shadow-[0_12px_24px_-12px_rgb(0_0_0/0.55)]" aria-label="{{ $appid->game->title }}">
                                     <x-game-cover :appid="$appid->steam_appid" :cover="$appid->game->cover_url" :title="$appid->game->title" size="card" class="ring-0!" />
                                     @if ($labels !== [])
                                         <span class="absolute inset-x-0 bottom-0 flex gap-1 overflow-hidden border-t border-line bg-canvas/90 px-1.5 py-1" aria-hidden="true">
                                             @foreach (array_slice($labels, 0, 2) as $label)
-                                                <span class="border border-accent/60 bg-accent/12 px-1 font-mono text-[0.6rem] leading-4 whitespace-nowrap text-accent">{{ $label }}</span>
+                                                <span class="rounded-sm border border-accent/60 bg-accent/12 px-1 font-mono text-[0.6rem] leading-4 whitespace-nowrap text-accent">{{ $label }}</span>
                                             @endforeach
                                         </span>
                                     @endif
@@ -96,7 +95,7 @@
         </section>
 
         <section class="flex flex-col gap-8" aria-labelledby="how-title">
-            <h2 id="how-title" class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('home.how.title')" /></h2>
+            <h2 id="how-title" class="font-display text-2xl font-semibold tracking-tight"><x-decode :text="__('home.how.title')" /></h2>
             <ol class="grid gap-10 sm:grid-cols-3 sm:gap-6">
                 @foreach (__('home.how.steps') as $step)
                     <li class="flex flex-col gap-3" data-reveal style="--delay: {{ $loop->index * 140 }}ms">
@@ -116,7 +115,7 @@
         </section>
 
         <section aria-labelledby="faq-title" class="flex flex-col gap-8">
-            <h2 id="faq-title" class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('home.faq_title')" /></h2>
+            <h2 id="faq-title" class="font-display text-2xl font-semibold tracking-tight"><x-decode :text="__('home.faq_title')" /></h2>
             <dl class="grid border-y border-line sm:grid-cols-2">
                 @foreach ([
                     [__('home.privacy_help.title'), __('home.privacy_help.steps')],

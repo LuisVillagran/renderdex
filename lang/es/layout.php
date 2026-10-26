@@ -3,6 +3,7 @@
 return [
 
     'description' => 'Descubre qué juegos de tu biblioteca de Steam soportan DLSS, FSR, XeSS y Ray Tracing, sin instalarlos.',
+    'tagline' => 'reescalado y ray tracing de tu biblioteca',
     'skip_to_content' => 'Saltar al contenido',
     'og_image_alt' => 'Renderdex: ¿qué juegos de tu biblioteca soportan DLSS, FSR, XeSS y Ray Tracing?',
 

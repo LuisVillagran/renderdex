@@ -3,7 +3,7 @@
     role="group"
     aria-label="{{ __('layout.theme.label') }}"
     x-data="{ theme: window.renderdexTheme?.get() ?? 'system' }"
-    class="flex border border-line-strong"
+    class="flex overflow-hidden rounded border border-line-strong"
 >
     @foreach (['system' => '◐', 'light' => '☀', 'dark' => '☾'] as $option => $icon)
         <button
@@ -12,10 +12,10 @@
             x-bind:aria-pressed="theme === '{{ $option }}'"
             x-bind:class="theme === '{{ $option }}' ? 'bg-accent text-on-accent' : 'text-muted hover:bg-raised hover:text-fg'"
             title="{{ __('layout.theme.'.$option) }}"
-            @class(['focus-ring flex items-center gap-1.5 px-2 py-1 font-mono text-[0.7rem] font-bold uppercase', 'border-l border-line-strong' => ! $loop->first])
+            @class(['focus-ring flex items-center gap-1.5 px-2 py-1 text-xs font-semibold', 'border-l border-line-strong' => ! $loop->first])
         >
             <span aria-hidden="true">{{ $icon }}</span>
-            <span class="sr-only sm:not-sr-only">{{ __('layout.theme.'.$option) }}</span>
+            <span class="sr-only xl:not-sr-only">{{ __('layout.theme.'.$option) }}</span>
         </button>
     @endforeach
 </div>

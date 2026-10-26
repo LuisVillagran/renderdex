@@ -42,8 +42,9 @@
     }"
 >
     <legend class="label mb-2">{{ __('library.gpu.label') }}</legend>
-    <div class="flex flex-col gap-2 sm:flex-row">
-        <div class="grid grid-cols-4 border border-line-strong bg-panel">
+    <div class="flex flex-col gap-2">
+        {{-- gap-px sobre el color del borde: separadores que funcionan en 4 columnas y en 2×2. --}}
+        <div class="grid grid-cols-4 gap-px overflow-hidden rounded border border-line-strong bg-line-strong lg:grid-cols-2">
             @foreach (['nvidia', 'amd', 'intel', 'all'] as $option)
                 <button
                     type="button"
@@ -51,10 +52,9 @@
                     x-on:click="chooseGpu('{{ $option }}')"
                     aria-pressed="{{ $gpu === $option ? 'true' : 'false' }}"
                     @class([
-                        'focus-ring px-3 py-2 font-mono text-xs font-bold uppercase transition active:translate-y-px sm:px-5',
-                        'border-l border-line-strong' => ! $loop->first,
+                        'focus-ring px-2 py-2 text-sm font-semibold transition active:translate-y-px',
                         'bg-accent text-on-accent' => $gpu === $option,
-                        'text-muted hover:bg-raised hover:text-fg' => $gpu !== $option,
+                        'bg-panel text-muted hover:bg-raised hover:text-fg' => $gpu !== $option,
                     ])
                 >
                     {{ __('technologies.vendor.'.$option) }}
@@ -63,14 +63,14 @@
         </div>
 
         @if ($profiles !== [])
-            <div class="flex items-center">
+            <div class="flex">
                 <label for="gpu-model" class="sr-only">{{ __('gpu.model_label') }}</label>
                 <select
                     id="gpu-model"
                     wire:key="gpu-model-{{ $gpu }}"
                     x-on:change="chooseModel($event.target.value)"
                     @class([
-                        'focus-ring h-full border bg-panel px-3 py-2 font-mono text-xs uppercase',
+                        'focus-ring w-full rounded border bg-panel px-3 py-2 text-sm',
                         'border-accent text-accent' => $gpuModel !== null,
                         'border-line-strong text-muted' => $gpuModel === null,
                     ])

@@ -8,23 +8,23 @@
 }
 
 /*
- * Estética de instrumento de medición: fondo casi negro, líneas finas, esquinas rectas
- * y un único color de señal (ámbar de fósforo), lejos del verde, rojo y azul de
- * NVIDIA, AMD e Intel para no sugerir afiliación. En modo claro, papel técnico.
+ * Estética de lanzador de juegos: fondo gris pizarra frío, paneles con esquinas apenas
+ * redondeadas y las portadas como protagonistas. Un único color de señal (ámbar), lejos
+ * del verde, rojo y azul de NVIDIA, AMD e Intel, y del azul de Steam, para no sugerir
+ * afiliación. En modo claro, gris azulado muy claro.
  *
  * El tema lo resuelve un script en el <head> (ver layout): pone data-theme="light|dark"
  * según la elección guardada o el sistema. La media query solo cubre a quien no tiene JS.
  */
 :root {
     color-scheme: light;
-    --rd-canvas: #f1eee6;
-    --rd-panel: #f8f6f0;
-    --rd-raised: #e6e2d7;
-    --rd-line: #d1ccbe;
-    --rd-line-strong: #8a8476;
-    --rd-mark: rgb(20 20 18 / 0.12);
-    --rd-fg: #141412;
-    --rd-muted: #5a564d;
+    --rd-canvas: #eef1f5;
+    --rd-panel: #f8fafc;
+    --rd-raised: #e2e7ee;
+    --rd-line: #d3d9e1;
+    --rd-line-strong: #7c8696;
+    --rd-fg: #12161c;
+    --rd-muted: #4f5866;
     --rd-accent: #9c4700;
     --rd-on-accent: #ffffff;
     --rd-warn: #7a4f00;
@@ -34,16 +34,15 @@
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
         color-scheme: dark;
-        --rd-canvas: #0b0b0a;
-        --rd-panel: #111110;
-        --rd-raised: #1b1b19;
-        --rd-line: #2a2a27;
-        --rd-line-strong: #64625a;
-        --rd-mark: rgb(236 235 228 / 0.09);
-        --rd-fg: #ecebe4;
-        --rd-muted: #93918a;
+        --rd-canvas: #111419;
+        --rd-panel: #171b22;
+        --rd-raised: #1f242d;
+        --rd-line: #29303a;
+        --rd-line-strong: #566070;
+        --rd-fg: #e7eaef;
+        --rd-muted: #9aa3b0;
         --rd-accent: #ffb224;
-        --rd-on-accent: #0b0b0a;
+        --rd-on-accent: #111419;
         --rd-warn: #f5c26b;
         --rd-danger: #ff8a7a;
     }
@@ -52,16 +51,15 @@
 /* Los mismos valores que arriba: aplican cuando se elige "Oscuro" con el sistema en claro. */
 :root[data-theme='dark'] {
     color-scheme: dark;
-    --rd-canvas: #0b0b0a;
-    --rd-panel: #111110;
-    --rd-raised: #1b1b19;
-    --rd-line: #2a2a27;
-    --rd-line-strong: #64625a;
-    --rd-mark: rgb(236 235 228 / 0.09);
-    --rd-fg: #ecebe4;
-    --rd-muted: #93918a;
+    --rd-canvas: #111419;
+    --rd-panel: #171b22;
+    --rd-raised: #1f242d;
+    --rd-line: #29303a;
+    --rd-line-strong: #566070;
+    --rd-fg: #e7eaef;
+    --rd-muted: #9aa3b0;
     --rd-accent: #ffb224;
-    --rd-on-accent: #0b0b0a;
+    --rd-on-accent: #111419;
     --rd-warn: #f5c26b;
     --rd-danger: #ff8a7a;
 }
@@ -105,42 +103,15 @@
     }
 }
 
-/* Marcas de registro (+) cada 96px, como en una lámina de corte. */
-@utility bg-marks {
-    background-color: var(--rd-mark);
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M48 43v11M42.5 48.5h11' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E");
-    mask-position: center top;
-}
-
-/* Panel con borde fino y escuadras en las cuatro esquinas. */
+/* Panel: borde fino y esquinas apenas redondeadas; al pasar el mouse, el borde toma el acento. */
 @utility frame {
-    --tick: var(--rd-line-strong);
     border: 1px solid var(--rd-line);
-    background:
-        linear-gradient(var(--tick), var(--tick)) top left / 9px 1px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) top left / 1px 9px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) top right / 9px 1px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) top right / 1px 9px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) bottom left / 9px 1px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) bottom left / 1px 9px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) bottom right / 9px 1px no-repeat,
-        linear-gradient(var(--tick), var(--tick)) bottom right / 1px 9px no-repeat,
-        var(--rd-panel);
-    background-origin: border-box;
-    transition: background-size 0.25s steps(5);
+    border-radius: 0.375rem;
+    background-color: var(--rd-panel);
+    transition: border-color 0.2s;
 
-    /* Las escuadras se extienden al pasar el mouse, como al enfocar un instrumento. */
     &:hover {
-        --tick: var(--rd-accent);
-        background-size:
-            16px 1px,
-            1px 16px,
-            16px 1px,
-            1px 16px,
-            16px 1px,
-            1px 16px,
-            16px 1px,
-            1px 16px;
+        border-color: var(--rd-line-strong);
     }
 }
 
@@ -159,6 +130,8 @@
 /* Barra segmentada: la pista y el relleno comparten el mismo patrón para que los segmentos coincidan. */
 @utility meter {
     height: 0.5rem;
+    border-radius: 0.125rem;
+    overflow: hidden;
     background-image: repeating-linear-gradient(90deg, var(--rd-raised) 0 5px, transparent 5px 7px);
 }
 
@@ -170,13 +143,11 @@
     animation: rd-meter 0.9s steps(24, end) 0.2s both;
 }
 
-/* Etiqueta técnica: mono, chica, en mayúsculas. */
+/* Etiqueta de sección o de campo: texto chico y semibold, sin mayúsculas. */
 @utility label {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    line-height: 1rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 600;
     color: var(--rd-muted);
 }
 

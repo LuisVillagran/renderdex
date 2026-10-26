@@ -4,7 +4,7 @@
 <div
     role="group"
     aria-label="{{ __('library.layout.label') }}"
-    class="flex border border-line-strong"
+    class="flex overflow-hidden rounded border border-line-strong"
     x-data="{
         init() {
             let saved = null;
@@ -26,7 +26,7 @@
             x-on:click="choose('{{ $option }}')"
             aria-pressed="{{ $layout === $option ? 'true' : 'false' }}"
             @class([
-                'focus-ring flex items-center gap-1.5 px-2.5 py-1 font-mono text-[0.7rem] font-bold uppercase',
+                'focus-ring flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold',
                 'border-l border-line-strong' => ! $loop->first,
                 'bg-accent text-on-accent' => $layout === $option,
                 'text-muted hover:bg-raised hover:text-fg' => $layout !== $option,

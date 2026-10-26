@@ -105,7 +105,7 @@ it('describes the page for link previews with Open Graph', function () {
     $response = $this->get(route('home'));
 
     $response->assertOk();
-    $response->assertSee('<meta property="og:title" content="Renderdex">', escape: false);
+    $response->assertSee('<meta property="og:title" content="Renderdex · reescalado y ray tracing de tu biblioteca">', escape: false);
     $response->assertSee('<meta property="og:description" content="'.e(__('layout.description')).'">', escape: false);
     $response->assertSee('<meta property="og:image" content="'.asset('images/og.png').'">', escape: false);
     $response->assertSee('<meta name="twitter:card" content="summary_large_image">', escape: false);

@@ -29,7 +29,7 @@
 <span
     wire:ignore
     {{ $attributes->class([
-        'relative isolate block aspect-[2/3] shrink-0 overflow-hidden bg-raised ring-1 ring-line',
+        'relative isolate block aspect-[2/3] shrink-0 overflow-hidden rounded-sm bg-raised ring-1 ring-line',
         match ($size) {
             'xs' => 'w-8',
             'md' => 'w-14',

@@ -1,7 +1,7 @@
 @props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'noindex' => false])
 
 @php
-    $fullTitle = $title ? $title.' · '.config('app.name') : config('app.name');
+    $fullTitle = $title ? $title.' · '.config('app.name') : config('app.name').' · '.__('layout.tagline');
     $description ??= __('layout.description');
     $canonical ??= url()->current();
 @endphp
@@ -18,8 +18,8 @@
         <meta name="robots" content="noindex">
     @endif
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#f1eee6" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0b0b0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111419" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
 
     <meta property="og:type" content="website">
@@ -53,7 +53,7 @@
                 const theme = choice === 'light' || choice === 'dark' ? choice : (systemDark.matches ? 'dark' : 'light');
                 document.documentElement.dataset.theme = theme;
                 document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
-                    meta.content = theme === 'dark' ? '#0b0b0a' : '#f1eee6';
+                    meta.content = theme === 'dark' ? '#111419' : '#eef1f5';
                 });
             };
 
@@ -82,12 +82,11 @@
         {{ __('layout.skip_to_content') }}
     </a>
 
-    <div class="bg-marks pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
 
-    <header class="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-sm">
-        <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+    <header class="sticky top-0 z-20 border-b border-line bg-panel">
+        <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
             <a href="{{ route('home') }}" class="focus-ring shrink-0" aria-label="{{ __('layout.header.home') }}">
-                <x-logo />
+                <x-logo tagline />
             </a>
 
             {{-- En /juegos ya hay un buscador en la página: no se repite. --}}
@@ -101,8 +100,8 @@
                 <nav aria-label="{{ __('layout.header.nav') }}" class="flex items-center">
                     @foreach (['catalog' => __('layout.header.catalog'), 'changes.index' => __('layout.header.changes')] as $route => $label)
                         <a href="{{ route($route) }}" @class([
-                            'focus-ring px-2 py-1 font-mono text-xs uppercase hover:text-accent',
-                            'text-accent' => request()->routeIs($route),
+                            'focus-ring rounded px-3 py-1.5 text-sm font-medium transition hover:bg-raised hover:text-fg',
+                            'bg-raised text-fg' => request()->routeIs($route),
                             'text-muted' => ! request()->routeIs($route),
                         ]) @if (request()->routeIs($route)) aria-current="page" @endif>
                             {{ $label }}
@@ -112,16 +111,16 @@
 
                 @if ($steamUser = session('steam_user'))
                     <div class="flex items-center gap-1 sm:gap-3">
-                        <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 px-2 py-1 hover:bg-raised">
+                        <a href="{{ route('library.show', $steamUser['steam_id']) }}" class="focus-ring flex items-center gap-2 rounded px-2 py-1 hover:bg-raised">
                             @if ($steamUser['avatar'])
-                                <img src="{{ $steamUser['avatar'] }}" alt="{{ __('layout.header.avatar_alt', ['name' => $steamUser['name']]) }}" width="28" height="28" class="size-7 ring-1 ring-line-strong">
+                                <img src="{{ $steamUser['avatar'] }}" alt="{{ __('layout.header.avatar_alt', ['name' => $steamUser['name']]) }}" width="28" height="28" class="size-7 rounded-sm ring-1 ring-line-strong">
                             @endif
                             <span class="max-w-32 truncate text-sm font-medium sm:max-w-none">{{ $steamUser['name'] ?? __('layout.header.your_account') }}</span>
                         </a>
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="focus-ring px-2 py-1 font-mono text-xs text-muted uppercase hover:bg-raised hover:text-fg">
+                            <button type="submit" class="focus-ring rounded px-2 py-1 text-sm text-muted hover:bg-raised hover:text-fg">
                                 {{ __('auth.logout') }}
                             </button>
                         </form>
@@ -144,7 +143,8 @@
     <footer class="border-t border-line bg-canvas text-sm">
         <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 md:flex-row md:items-end md:justify-between">
             <div class="flex flex-col gap-3">
-                <x-logo :cursor="false" />
+                <x-logo />
+                <p class="text-sm text-muted">{{ __('layout.tagline') }}</p>
                 <p class="max-w-md text-muted">
                     {!! __('layout.footer.data_credit', [
                         'pcgw' => '<a href="https://www.pcgamingwiki.com/" class="text-fg underline decoration-line-strong underline-offset-4 hover:decoration-accent" rel="noopener">PCGamingWiki</a>',
@@ -154,7 +154,7 @@
                 <p class="text-muted">{{ __('layout.footer.not_affiliated') }}</p>
             </div>
 
-            <nav aria-label="{{ __('layout.footer.nav') }}" class="flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs uppercase">
+            <nav aria-label="{{ __('layout.footer.nav') }}" class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
                 <a href="{{ route('privacy') }}" class="focus-ring text-muted hover:text-accent">{{ __('layout.footer.privacy') }}</a>
                 <a href="{{ config('app.repository_url') }}" class="focus-ring text-muted hover:text-accent" rel="noopener">{{ __('layout.footer.repository') }} ↗</a>
             </nav>

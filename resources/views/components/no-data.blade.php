@@ -9,6 +9,6 @@
 @endphp
 
 <span {{ $attributes->class(['inline-flex flex-wrap items-center gap-x-2 font-mono text-[0.7rem] text-muted']) }}>
-    <span class="border border-dashed border-line-strong px-1.5 leading-[1.125rem]">{{ $game ? __('library.no_data') : __('library.no_wiki_page') }}</span>
-    <a href="{{ $completeUrl }}" rel="noopener" aria-label="{{ __('library.complete_label', ['name' => $name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('library.complete') }} ↗</a>
+    <span class="rounded-sm border border-dashed border-line-strong px-1.5 leading-[1.125rem]">{{ $game ? __('library.no_data') : __('library.no_wiki_page') }}</span>
+    <a href="{{ $completeUrl }}" rel="noopener" aria-label="{{ __('library.complete_label', ['name' => $name]) }}" class="focus-ring hover:text-accent">{{ __('library.complete') }} ↗</a>
 </span>

@@ -12,7 +12,7 @@
 @endphp
 
 <span {{ $attributes->class([
-    'inline-flex items-center gap-1 border px-1.5 font-mono text-[0.7rem] leading-[1.125rem] font-medium whitespace-nowrap',
+    'inline-flex items-center gap-1 rounded-sm border px-1.5 font-mono text-[0.7rem] leading-[1.125rem] font-medium whitespace-nowrap',
     'border-accent/60 bg-accent/12 text-accent' => $change->type !== ChangeType::Removed,
     'border-line-strong text-muted line-through decoration-muted/70' => $change->type === ChangeType::Removed,
 ]) }}>

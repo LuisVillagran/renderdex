@@ -20,9 +20,9 @@
     {{-- Encabezado y selector "Mi GPU" --}}
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex flex-col gap-3">
-            <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('library.eyebrow')" /></p>
+            <p class="text-sm font-semibold text-accent"><x-decode :text="__('library.eyebrow')" /></p>
             <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ $isWishlist ? __('library.wishlist.heading') : __('library.heading') }}</h1>
-            <div class="flex border-b border-line font-mono text-xs uppercase" role="group" aria-label="{{ __('library.tabs.label') }}">
+            <div class="flex border-b border-line text-sm" role="group" aria-label="{{ __('library.tabs.label') }}">
                 @foreach (['library' => __('library.tabs.library'), 'wishlist' => __('library.tabs.wishlist')] as $option => $label)
                     <button
                         type="button"
@@ -45,7 +45,7 @@
                     type="button"
                     x-data="{ copied: false }"
                     x-on:click="navigator.clipboard.writeText(@js(route('library.show', $steamId))); copied = true; setTimeout(() => copied = false, 2000)"
-                    class="focus-ring inline-flex items-center gap-1.5 border border-line-strong px-2 py-1 uppercase hover:border-accent hover:text-fg"
+                    class="focus-ring inline-flex items-center gap-1.5 border border-line-strong px-2 py-1 hover:border-accent hover:text-fg"
                 >
                     <svg class="size-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.6 3.4a3.5 3.5 0 0 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .75.75 0 1 1 1.06-1.06 2 2 0 0 0 2.83 0l2.5-2.5a2 2 0 0 0-2.83-2.83l-.88.88a.75.75 0 1 1-1.06-1.06l.88-.88Zm-5.2 5.2a3.5 3.5 0 0 1 4.95 0 .75.75 0 1 1-1.06 1.06 2 2 0 0 0-2.83 0l-2.5 2.5a2 2 0 1 0 2.83 2.83l.88-.88a.75.75 0 1 1 1.06 1.06l-.88.88a3.5 3.5 0 0 1-4.95-4.95l2.5-2.5Z" /></svg>
                     <span x-show="! copied">{{ __('library.share') }}</span>
@@ -53,10 +53,6 @@
                 </button>
             </div>
         </div>
-
-        @unless ($error)
-            <x-gpu-selector :gpu="$gpu" :gpu-model="$gpuModel" />
-        @endunless
     </div>
 
     @if ($isDemo)
@@ -84,7 +80,7 @@
             <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_STEAM_TIMEOUT</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.unavailable.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.unavailable.body') }}</p>
-            <button type="button" wire:click="$refresh" class="focus-ring bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">
+            <button type="button" wire:click="$refresh" class="focus-ring rounded bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:brightness-110">
                 {{ __('library.errors.unavailable.retry') }} ↻
             </button>
         </section>
@@ -130,11 +126,12 @@
             </dl>
         </section>
 
-        <x-technology-filters :filter="$filter" :has-active-filters="$hasActiveFilters" :search="$search" :placeholder="__('library.search.placeholder')" />
+        <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
+        <x-technology-filters :filter="$filter" :has-active-filters="$hasActiveFilters" :gpu="$gpu" :gpu-model="$gpuModel" />
 
         {{-- Cuadrícula o tabla. En la tabla, `all` muestra las columnas por marca además de "En tu GPU"; se recuerda en el navegador. --}}
         <div
-            class="flex flex-col gap-3"
+            class="flex min-w-0 flex-col gap-4"
             x-data="{
                 all: false,
                 init() { try { this.all = localStorage.getItem('renderdex.all-technologies') === '1' } catch (e) {} },
@@ -144,7 +141,9 @@
                 },
             }"
         >
-            <div class="flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+            <x-name-search :placeholder="__('library.search.placeholder')" />
+
+            <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
                 {{-- En la tabla también se ordena desde los encabezados; en la cuadrícula, solo desde aquí. --}}
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label="{{ __('library.table.sort_label') }}">
                     <span class="label">{{ __('library.table.sort_label') }}</span>
@@ -154,7 +153,7 @@
                             wire:key="sort-{{ $column }}"
                             wire:click="sortBy('{{ $column }}')"
                             aria-pressed="{{ $sort === $column ? 'true' : 'false' }}"
-                            @class(['focus-ring inline-flex items-center gap-1 uppercase hover:text-accent', 'text-accent' => $sort === $column, 'text-muted' => $sort !== $column])
+                            @class(['focus-ring inline-flex items-center gap-1 hover:text-accent', 'text-accent' => $sort === $column, 'text-muted' => $sort !== $column])
                         >
                             {{ $label }} <span aria-hidden="true">{{ $sortIndicator($column) ?: '↕' }}</span>
                         </button>
@@ -163,7 +162,7 @@
 
                 <div class="flex items-center gap-4">
                     @if ($gpuProfile && $layout === 'table')
-                        <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden text-muted uppercase hover:text-accent lg:inline-flex">
+                        <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden text-muted hover:text-accent lg:inline-flex">
                             <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
                             <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
                         </button>
@@ -180,18 +179,18 @@
                             <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
                         </p>
                     @else
-                        <ul class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-5">
+                        <ul class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:gap-x-5">
                             @foreach ($games as $entry)
                                 <li wire:key="card-{{ $entry->owned->appid }}" class="animate-rise" style="--delay: {{ $loop->index * 25 }}ms">
                                     <x-game-card :game="$entry->game" :appid="$entry->owned->appid" :name="$entry->owned->name" :gpu-profile="$gpuProfile">
                                         <x-slot:meta>
                                             @if ($isWishlist)
-                                                <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
+                                                <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
                                             @elseif ($entry->owned->playtimeMinutes > 0)
                                                 <span>{{ $hours($entry->owned->playtimeMinutes) }}</span>
                                             @endif
                                             @if ($entry->game && $recentlyChanged->has($entry->game->id))
-                                                <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-bold text-accent uppercase">● {{ __('changes.badge') }}</a>
+                                                <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-semibold text-accent">● {{ __('changes.badge') }}</a>
                                             @endif
                                             @if ($entry->matchedBy === MatchSource::Title)
                                                 <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
@@ -247,15 +246,15 @@
                                                 @endif
                                                 <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
                                                     @if ($isWishlist)
-                                                        <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
+                                                        <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
                                                     @else
                                                         <span class="sm:hidden">{{ $hours($entry->owned->playtimeMinutes) }}</span>
                                                     @endif
                                                     @if ($entry->game)
                                                         @if ($recentlyChanged->has($entry->game->id))
-                                                            <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-bold text-accent uppercase">● {{ __('changes.badge') }}</a>
+                                                            <a href="{{ route('changes.index') }}" title="{{ __('changes.badge_help') }}" class="focus-ring font-semibold text-accent">● {{ __('changes.badge') }}</a>
                                                         @endif
-                                                        <a href="{{ $entry->game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
+                                                        <a href="{{ $entry->game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $entry->owned->name]) }}" class="focus-ring hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
                                                         @if ($entry->matchedBy === MatchSource::Title)
                                                             <span class="text-warn" title="{{ __('library.matched_by_title_help') }}">≈ {{ __('library.matched_by_title') }}</span>
                                                         @endif
@@ -285,9 +284,10 @@
                 </div>
             </div>
             @endif
-        </div>
 
-        {{ $games->links() }}
+            {{ $games->links() }}
+        </div>
+        </div>
 
         @if ($missingData->isNotEmpty())
             <section class="frame flex flex-col gap-4 p-5" aria-labelledby="missing-data-title">

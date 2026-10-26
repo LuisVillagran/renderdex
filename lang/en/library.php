@@ -58,6 +58,7 @@ return [
     ],
 
     'filters' => [
+        'title' => 'Filters',
         'label' => 'Exact technologies',
         'capabilities' => 'I want to play with',
         'capabilities_on_gpu' => 'I want to play with, on my :gpu',

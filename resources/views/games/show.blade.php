@@ -24,7 +24,7 @@
     <article class="flex flex-col gap-10">
         <nav aria-label="{{ __('game.breadcrumb') }}" class="font-mono text-xs text-muted">
             <ol class="flex flex-wrap items-center gap-2">
-                <li><a href="{{ route('catalog') }}" class="focus-ring uppercase hover:text-accent">{{ __('layout.header.catalog') }}</a></li>
+                <li><a href="{{ route('catalog') }}" class="focus-ring hover:text-accent">{{ __('layout.header.catalog') }}</a></li>
                 <li aria-hidden="true" class="text-accent">›</li>
                 <li><span aria-current="page" class="text-fg">{{ $game->title }}</span></li>
             </ol>
@@ -50,7 +50,7 @@
             </div>
 
             <div class="flex flex-col gap-4 sm:pb-2">
-                <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('game.eyebrow')" /></p>
+                <p class="text-sm font-semibold text-accent"><x-decode :text="__('game.eyebrow')" /></p>
                 <h1 class="font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{{ $game->title }}</h1>
 
                 @if ($game->has_data)
@@ -60,11 +60,11 @@
                 @endif
 
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ $game->wikiUrl() }}" rel="noopener" class="focus-ring border border-accent px-4 py-2 font-mono text-xs font-bold text-accent uppercase transition hover:bg-accent hover:text-on-accent">
+                    <a href="{{ $game->wikiUrl() }}" rel="noopener" class="focus-ring rounded border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent hover:text-on-accent">
                         {{ __('game.wiki_link') }} ↗
                     </a>
                     @if ($appid)
-                        <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" class="focus-ring border border-line-strong px-4 py-2 font-mono text-xs text-muted uppercase transition hover:border-fg hover:text-fg">
+                        <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" class="focus-ring rounded border border-line-strong px-4 py-2 text-sm text-muted transition hover:border-fg hover:text-fg">
                             {{ __('game.store_link') }} ↗
                         </a>
                     @endif
@@ -124,7 +124,7 @@
                 <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_NO_RENDER_DATA</p>
                 <h2 id="no-data-title" class="font-display text-xl font-semibold">{{ __('game.no_data.title') }}</h2>
                 <p class="max-w-2xl text-muted">{{ __('game.no_data.body') }}</p>
-                <a href="{{ $game->wikiEditUrl() }}" rel="noopener" class="focus-ring bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent uppercase hover:brightness-110">
+                <a href="{{ $game->wikiEditUrl() }}" rel="noopener" class="focus-ring rounded bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:brightness-110">
                     {{ __('game.no_data.edit') }} ↗
                 </a>
             </section>

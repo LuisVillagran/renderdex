@@ -15,11 +15,11 @@
     <div class="flex flex-col gap-10">
         <header class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div class="flex max-w-2xl flex-col gap-3">
-                <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('changes.eyebrow')" /></p>
+                <p class="text-sm font-semibold text-accent"><x-decode :text="__('changes.eyebrow')" /></p>
                 <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('changes.heading') }}</h1>
                 <p class="text-muted">{{ __('changes.intro') }}</p>
             </div>
-            <a href="{{ route('changes.feed') }}" class="focus-ring self-start border border-line-strong px-3 py-1.5 font-mono text-xs text-muted uppercase hover:border-accent hover:text-accent lg:self-end">
+            <a href="{{ route('changes.feed') }}" class="focus-ring rounded self-start border border-line-strong px-3 py-1.5 text-sm text-muted hover:border-accent hover:text-accent lg:self-end">
                 {{ __('changes.feed') }} ↗
             </a>
         </header>
@@ -31,7 +31,7 @@
                     href="{{ route('changes.index', $option ? ['cap' => $option->value] : []) }}"
                     @if ($isActive) aria-current="page" @endif
                     @class([
-                        'focus-ring border px-2.5 py-1 uppercase transition',
+                        'focus-ring rounded border px-2.5 py-1 transition',
                         'border-accent bg-accent/12 text-accent' => $isActive,
                         'border-line-strong text-muted hover:border-fg hover:text-fg' => ! $isActive,
                     ])

@@ -13,13 +13,13 @@
                 spellcheck="false"
                 aria-describedby="profile-help @error('profile') profile-error @enderror"
                 @error('profile') aria-invalid="true" @enderror
-                class="w-full border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent aria-invalid:border-danger"
+                class="w-full rounded border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent aria-invalid:border-danger"
             >
         </div>
 
         <button
             type="submit"
-            class="focus-ring border border-accent bg-accent px-5 py-2.5 font-mono text-sm font-bold text-on-accent uppercase transition hover:brightness-110 active:translate-y-px disabled:opacity-60 sm:-ml-px"
+            class="focus-ring border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 active:translate-y-px disabled:opacity-60 sm:-ml-px"
             wire:loading.attr="disabled"
         >
             <span wire:loading.remove wire:target="lookup">{{ __('lookup.submit') }} ↵</span>

@@ -6,21 +6,18 @@
 @endphp
 
 <div class="flex flex-col gap-8">
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div class="flex max-w-xl flex-col gap-3">
-            <p class="font-mono text-xs text-muted uppercase"><span class="text-accent" aria-hidden="true">//</span> <x-decode :text="__('catalog.eyebrow')" /></p>
-            <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('catalog.heading') }}</h1>
-            <p class="text-muted">{{ __('catalog.intro') }}</p>
-        </div>
-
-        <x-gpu-selector :gpu="$gpu" :gpu-model="$gpuModel" />
+    <div class="flex max-w-2xl flex-col gap-3">
+        <p class="text-sm font-semibold text-accent"><x-decode :text="__('catalog.eyebrow')" /></p>
+        <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('catalog.heading') }}</h1>
+        <p class="text-muted">{{ __('catalog.intro') }}</p>
     </div>
 
-    <x-technology-filters :filter="$filter" :has-active-filters="$hasActiveFilters" :search="$search" :placeholder="__('catalog.search.placeholder')" />
+    <div class="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
+    <x-technology-filters :filter="$filter" :has-active-filters="$hasActiveFilters" :gpu="$gpu" :gpu-model="$gpuModel" />
 
     {{-- `all` muestra las columnas por marca además de "En tu GPU"; se recuerda en el navegador. --}}
     <div
-        class="flex flex-col gap-3"
+        class="flex min-w-0 flex-col gap-4"
         x-data="{
             all: false,
             init() { try { this.all = localStorage.getItem('renderdex.all-technologies') === '1' } catch (e) {} },
@@ -30,6 +27,8 @@
             },
         }"
     >
+        <x-name-search :placeholder="__('catalog.search.placeholder')" />
+
         <div class="flex flex-wrap items-baseline justify-between gap-2 font-mono text-xs text-muted">
             <p role="status">
                 <span class="text-fg">{{ trans_choice('catalog.results', $games->total(), ['count' => Number::format($games->total())]) }}</span>
@@ -41,7 +40,7 @@
             </p>
             <div class="flex items-center gap-4">
                 @if ($gpuProfile && $layout === 'table')
-                    <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden uppercase hover:text-accent lg:inline-flex">
+                    <button type="button" x-on:click="toggleAll()" x-bind:aria-pressed="all ? 'true' : 'false'" class="focus-ring hidden hover:text-accent lg:inline-flex">
                         <span x-show="! all">{{ __('library.gpu.show_all') }} +</span>
                         <span x-show="all" x-cloak>{{ __('library.gpu.show_less') }} −</span>
                     </button>
@@ -58,15 +57,15 @@
                         <span class="text-accent" aria-hidden="true">∅ </span>{{ __('catalog.no_results') }}
                     </p>
                 @else
-                    <ul class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-5">
+                    <ul class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:gap-x-5">
                         @foreach ($games as $game)
                             @php $appid = $game->steamAppids->first()?->steam_appid; @endphp
                             <li wire:key="catalog-card-{{ $game->id }}" class="animate-rise" style="--delay: {{ $loop->index * 25 }}ms">
                                 <x-game-card :game="$game" :appid="$appid" :name="$game->title" :gpu-profile="$gpuProfile" :query="$needle">
                                     <x-slot:meta>
-                                        <a href="{{ $game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
+                                        <a href="{{ $game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring hover:text-accent">{{ __('catalog.wiki_link') }} ↗</a>
                                         @if ($appid)
-                                            <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $game->title]) }}" class="focus-ring uppercase hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
+                                            <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $game->title]) }}" class="focus-ring hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
                                         @endif
                                     </x-slot:meta>
                                 </x-game-card>
@@ -104,7 +103,7 @@
                                             <a href="{{ $game->url() }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
                                                 <x-highlight :text="$game->title" :query="$needle" />
                                             </a>
-                                            <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted uppercase">
+                                            <span class="flex flex-wrap gap-x-3 text-xs text-muted">
                                                 <a href="{{ $game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring hover:text-accent">
                                                     {{ __('catalog.wiki_link') }} ↗
                                                 </a>
@@ -133,9 +132,10 @@
             </div>
         </div>
         @endif
-    </div>
 
-    {{ $games->links() }}
+        {{ $games->links() }}
+    </div>
+    </div>
 
     <x-support-legend class="border-t border-line pt-5 text-sm text-muted" />
 </div>

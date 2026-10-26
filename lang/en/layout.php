@@ -3,6 +3,7 @@
 return [
 
     'description' => 'Find out which games in your Steam library support DLSS, FSR, XeSS and Ray Tracing, without installing them.',
+    'tagline' => 'upscaling and ray tracing for your library',
     'skip_to_content' => 'Skip to content',
     'og_image_alt' => 'Renderdex: which games in your library support DLSS, FSR, XeSS and Ray Tracing?',
 

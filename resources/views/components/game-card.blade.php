@@ -29,7 +29,7 @@
     <a
         @if ($game) href="{{ $game->url() }}" @endif
         @class([
-            'focus-ring relative block outline-offset-2 ring-1 ring-line transition',
+            'focus-ring relative block overflow-hidden rounded-md outline-offset-2 ring-1 ring-line transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_12px_24px_-12px_rgb(0_0_0/0.55)]',
             'hover:ring-accent' => $game,
         ])
         @if ($game) aria-label="{{ $name }}" @else aria-hidden="true" tabindex="-1" @endif
@@ -39,9 +39,9 @@
         {{-- Franja sólida, sin degradado: se lee igual sobre cualquier portada. --}}
         <span class="absolute inset-x-0 bottom-0 flex items-center gap-1 overflow-hidden border-t border-line bg-canvas/90 px-2 py-1.5">
             @forelse ($visible as $chip)
-                <span class="border border-accent/60 bg-accent/12 px-1.5 font-mono text-[0.65rem] leading-[1.125rem] font-medium whitespace-nowrap text-accent">{{ $chip }}</span>
+                <span class="rounded-sm border border-accent/60 bg-accent/12 px-1.5 font-mono text-[0.65rem] leading-[1.125rem] font-medium whitespace-nowrap text-accent">{{ $chip }}</span>
             @empty
-                <span class="border border-dashed border-line-strong px-1.5 font-mono text-[0.65rem] leading-[1.125rem] whitespace-nowrap text-muted">
+                <span class="rounded-sm border border-dashed border-line-strong px-1.5 font-mono text-[0.65rem] leading-[1.125rem] whitespace-nowrap text-muted">
                     {{ match (true) {
                         ! $game => __('library.no_wiki_page'),
                         ! $hasData => __('library.no_data'),

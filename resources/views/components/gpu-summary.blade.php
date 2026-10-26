@@ -18,7 +18,7 @@
     @if ($summary['usable'] !== [])
         <ul class="flex flex-wrap gap-1" aria-label="{{ __('library.gpu.column', ['gpu' => $gpu->label()]) }}">
             @foreach ($summary['usable'] as $item)
-                <li class="inline-flex items-center border border-accent/60 bg-accent/12 px-1.5 font-mono text-[0.7rem] leading-[1.125rem] font-medium whitespace-nowrap text-accent">
+                <li class="inline-flex items-center rounded-sm border border-accent/60 bg-accent/12 px-1.5 font-mono text-[0.7rem] leading-[1.125rem] font-medium whitespace-nowrap text-accent">
                     {{ trim(__('technologies.label.'.$item['technology']->value).' '.$item['version']) }}
                 </li>
             @endforeach

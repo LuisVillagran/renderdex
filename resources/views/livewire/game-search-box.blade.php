@@ -37,7 +37,7 @@
 
     <div class="flex flex-col gap-2 sm:flex-row sm:gap-0">
         <div class="relative flex min-w-0 flex-1">
-            <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 font-mono text-sm text-accent" aria-hidden="true">›</span>
+            <svg class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.38 9.84l3.14 3.14a.75.75 0 1 0 1.06-1.06l-3.14-3.14A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd" /></svg>
             <input
                 id="{{ $inputId }}"
                 x-ref="input"
@@ -59,7 +59,7 @@
                 autocomplete="off"
                 spellcheck="false"
                 @class([
-                    'w-full border border-line-strong bg-canvas pl-7 font-mono placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent',
+                    'w-full rounded border border-line-strong bg-canvas pl-9 placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent',
                     'py-1.5 pr-8 text-xs' => $compact,
                     'py-2.5 pr-3 text-sm' => ! $compact,
                 ])
@@ -70,7 +70,7 @@
         </div>
 
         @unless ($compact)
-            <button type="submit" class="focus-ring border border-accent px-5 py-2.5 font-mono text-sm font-bold text-accent uppercase transition hover:bg-accent hover:text-on-accent active:translate-y-px sm:-ml-px">
+            <button type="submit" class="focus-ring rounded border border-accent px-5 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent hover:text-on-accent active:translate-y-px sm:-ml-px">
                 {{ __('search.submit') }} ↵
             </button>
         @endunless
@@ -122,7 +122,7 @@
         </ul>
 
         @if ($suggestions->isNotEmpty())
-            <button type="submit" class="focus-ring border-t border-line px-3 py-2 text-left font-mono text-xs text-accent uppercase hover:bg-raised">
+            <button type="submit" class="focus-ring border-t border-line px-3 py-2 text-left text-sm font-medium text-accent hover:bg-raised">
                 {{ __('search.see_all', ['query' => trim($query)]) }} →
             </button>
         @endif
