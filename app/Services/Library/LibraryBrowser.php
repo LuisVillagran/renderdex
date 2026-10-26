@@ -4,6 +4,7 @@ namespace App\Services\Library;
 
 use App\Enums\Support;
 use App\Enums\Technology;
+use App\Services\SearchKey;
 use Illuminate\Support\Collection;
 
 /**
@@ -13,6 +14,8 @@ use Illuminate\Support\Collection;
 class LibraryBrowser
 {
     public const SORTS = ['name', 'playtime'];
+
+    public function __construct(private SearchKey $searchKey) {}
 
     /**
      * @param  list<LibraryEntry>  $entries
@@ -40,13 +43,16 @@ class LibraryBrowser
      */
     public function browse(array $entries, string $search, array $technologies, string $sort, string $direction): Collection
     {
-        $search = mb_strtolower(trim($search));
+        // Igual que el catálogo: todas las palabras, en cualquier orden y sin puntuación.
+        $words = $this->searchKey->words($this->searchKey->make($search));
         $technologies = $this->validTechnologies($technologies);
 
         $results = collect($entries)
-            ->when($search !== '', fn (Collection $entries) => $entries->filter(
-                fn (LibraryEntry $entry) => str_contains(mb_strtolower($entry->owned->name), $search),
-            ))
+            ->when($words !== [], fn (Collection $entries) => $entries->filter(function (LibraryEntry $entry) use ($words) {
+                $name = $this->searchKey->make($entry->owned->name);
+
+                return collect($words)->every(fn (string $word) => str_contains($name, $word));
+            }))
             ->filter(fn (LibraryEntry $entry) => collect($technologies)->every(
                 fn (Technology $technology) => $this->supports($entry, $technology),
             ));

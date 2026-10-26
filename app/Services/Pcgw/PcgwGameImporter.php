@@ -5,6 +5,7 @@ namespace App\Services\Pcgw;
 use App\Models\Game;
 use App\Models\GameSteamAppid;
 use App\Services\FeatureClassifier;
+use App\Services\SearchKey;
 use App\Services\TitleNormalizer;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ class PcgwGameImporter
     public function __construct(
         private FeatureClassifier $classifier,
         private TitleNormalizer $normalizer,
+        private SearchKey $searchKey,
     ) {}
 
     /**
@@ -35,7 +37,7 @@ class PcgwGameImporter
             Game::upsert(
                 $games->map(fn (PcgwGame $game) => $this->gameRow($game, $syncedAt))->values()->all(),
                 uniqueBy: ['pcgw_page_id'],
-                update: ['title', 'normalized_title', 'dlss', 'dlss_fg', 'dlss_mfg', 'fsr', 'fsr_fg', 'xess', 'xess_fg', 'ray_tracing', 'upscaling_tech', 'frame_gen_tech', 'synced_at'],
+                update: ['title', 'normalized_title', 'search_title', 'dlss', 'dlss_fg', 'dlss_mfg', 'fsr', 'fsr_fg', 'xess', 'xess_fg', 'ray_tracing', 'upscaling_tech', 'frame_gen_tech', 'synced_at'],
             );
 
             $gameIds = Game::whereIn('pcgw_page_id', $games->keys())->pluck('id', 'pcgw_page_id');
@@ -70,6 +72,7 @@ class PcgwGameImporter
             'pcgw_page_id' => $game->pageId,
             'title' => $game->title,
             'normalized_title' => $this->normalizer->normalize($game->title),
+            'search_title' => $this->searchKey->make($game->title),
             ...$support,
             'upscaling_tech' => $game->upscaling,
             'frame_gen_tech' => $game->frameGen,

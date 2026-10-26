@@ -22,6 +22,7 @@ class Game extends Model
         'pcgw_page_id',
         'title',
         'normalized_title',
+        'search_title',
         'dlss',
         'dlss_fg',
         'dlss_mfg',
@@ -58,6 +59,7 @@ class Game extends Model
             'xess' => Support::class,
             'xess_fg' => Support::class,
             'ray_tracing' => Support::class,
+            'has_data' => 'boolean',
             'synced_at' => 'datetime',
         ];
     }

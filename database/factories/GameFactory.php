@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\Support;
 use App\Enums\Technology;
 use App\Models\Game;
+use App\Services\SearchKey;
 use App\Services\TitleNormalizer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,6 +29,7 @@ class GameFactory extends Factory
             'pcgw_page_id' => fake()->unique()->numberBetween(1, 9_999_999),
             'title' => fake()->unique()->words(3, true),
             'normalized_title' => fn (array $attributes) => (new TitleNormalizer)->normalize($attributes['title']),
+            'search_title' => fn (array $attributes) => (new SearchKey(new TitleNormalizer))->make($attributes['title']),
             ...$unknownSupport,
             'upscaling_tech' => null,
             'frame_gen_tech' => null,

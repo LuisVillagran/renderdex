@@ -20,9 +20,11 @@ class CatalogTable extends Component
     public function render(CatalogSearch $catalog): View
     {
         $technologies = $this->validFilters();
+        $results = $catalog->search($this->search, $technologies, $this->getPage());
 
         return view('livewire.catalog-table', [
-            'games' => $catalog->search($this->search, $technologies, $this->getPage()),
+            'games' => $results->games,
+            'approximate' => $results->approximate,
             'activeFilters' => array_map(fn (Technology $technology) => $technology->value, $technologies),
             'highlightedVendor' => $this->highlightedVendor(),
         ]);

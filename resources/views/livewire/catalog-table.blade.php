@@ -8,20 +8,18 @@
     // En pantallas chicas, con una marca elegida, solo se muestran sus tecnologías y Ray Tracing.
     $compactGroups = $highlightedVendor ? array_intersect_key($groups, array_flip([$highlightedVendor->value, Vendor::All->value])) : $groups;
 
-    // Resalta lo buscado dentro del título; todo se escapa antes de armar el HTML.
+    // Resalta cada palabra buscada dentro del título; todo se escapa antes de armar el HTML.
     $needle = trim($search);
-    $highlight = function (string $title) use ($needle): string {
-        $position = $needle === '' ? false : mb_stripos($title, $needle);
-
-        if ($position === false) {
+    $words = preg_split('/\s+/u', $needle, flags: PREG_SPLIT_NO_EMPTY) ?: [];
+    $pattern = $words === [] ? null : '/('.implode('|', array_map(fn (string $word) => preg_quote($word, '/'), $words)).')/iu';
+    $highlight = function (string $title) use ($pattern): string {
+        if ($pattern === null) {
             return e($title);
         }
 
-        $length = mb_strlen($needle);
-
-        return e(mb_substr($title, 0, $position))
-            .'<mark class="bg-accent/20 text-fg">'.e(mb_substr($title, $position, $length)).'</mark>'
-            .e(mb_substr($title, $position + $length));
+        return collect(preg_split($pattern, $title, flags: PREG_SPLIT_DELIM_CAPTURE) ?: [$title])
+            ->map(fn (string $part, int $index) => $index % 2 === 1 ? '<mark class="bg-accent/20 text-fg">'.e($part).'</mark>' : e($part))
+            ->implode('');
     };
 @endphp
 
@@ -40,7 +38,9 @@
 
     <p class="flex flex-wrap items-baseline justify-between gap-2 font-mono text-xs text-muted" role="status">
         <span><span class="text-fg">{{ trans_choice('catalog.results', $games->total(), ['count' => Number::format($games->total())]) }}</span></span>
-        @if ($needle === '')
+        @if ($approximate && $games->total() > 0)
+            <span class="text-warn">≈ {{ __('catalog.approximate', ['query' => $needle]) }}</span>
+        @elseif ($needle === '')
             <span>{{ __('catalog.top_hint') }}</span>
         @endif
     </p>

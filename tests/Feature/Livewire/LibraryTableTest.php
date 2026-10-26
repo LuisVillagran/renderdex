@@ -118,6 +118,15 @@ it('searches by name ignoring case', function () {
     expect(listedNames($component))->toBe(['Cyberpunk 2077']);
 });
 
+it('searches by words in any order, ignoring punctuation', function () {
+    fakeOwnedGames([[292030, 'The Witcher® 3: Wild Hunt'], [570, 'Dota 2']]);
+
+    $component = Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->set('search', 'wild hunt witcher 3');
+
+    expect(listedNames($component))->toBe(['The Witcher® 3: Wild Hunt']);
+});
+
 it('shows only games that support every selected technology', function () {
     wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes, 'fsr' => Support::Yes]);
     wikiGame(570, 'Dota 2', ['dlss' => Support::No, 'fsr' => Support::Yes]);
@@ -200,9 +209,9 @@ it('goes back to the first page when the search changes', function () {
 
     $component = Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
         ->call('gotoPage', 2)
-        ->set('search', 'Game 0');
+        ->set('search', 'Game 07');
 
-    expect(listedNames($component))->toHaveCount(9);
+    expect(listedNames($component))->toBe(['Game 07']);
 });
 
 it('preselects the filter of the chosen GPU vendor and highlights its columns', function (string $gpu, array $filters, ?Vendor $highlighted) {

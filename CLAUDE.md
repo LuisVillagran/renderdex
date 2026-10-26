@@ -87,7 +87,8 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 
 ### 2c. Modo catálogo (sin cuenta)
 - Ruta `/juegos` (`App\Livewire\CatalogTable` + `App\Services\Catalog\CatalogSearch`): busca en todos los juegos de la wiki, p. ej. antes de comprar uno. No pide perfil ni sesión, y solo lee la base local: nunca llama a Steam ni a la wiki.
-- Búsqueda contra `normalized_title`. Orden: título exacto, luego los que empiezan con el texto y después el resto; los comodines `%` y `_` se buscan como texto. Sin texto, primero los juegos con más tecnologías en `Yes`.
+- Búsqueda contra `games.search_title` (`App\Services\SearchKey`: `TitleNormalizer` + sin puntuación, `&` → `and`, números romanos sueltos → dígitos). Todas las palabras deben aparecer, en cualquier orden. Orden: título exacto, los que empiezan con el texto, los que contienen la frase y después el resto; a igualdad, primero los que tienen datos (`has_data`, columna generada) y AppID. Los comodines `%` y `_` se buscan como texto. Sin texto, primero los juegos con más tecnologías en `Yes`.
+- Si nada coincide, respaldo por similitud con **`pg_trgm`** (`<%` / `word_similarity`, índice GIN) y la UI avisa que son resultados aproximados. `TitleNormalizer` no cambia: el cruce de bibliotecas sigue siendo conservador.
 - Mismos filtros y selector "Mi GPU" que la biblioteca (trait `App\Livewire\Concerns\WithTechnologyFilters` y componentes `x-gpu-selector` y `x-technology-filters`).
 - Cada juego enlaza a PCGamingWiki y, si tiene AppID, a su página en la tienda de Steam (enlace normal, sin afiliados).
 - El inicio tiene un formulario GET hacia `/juegos?q=`, y el header un enlace "Buscar juegos".
@@ -198,6 +199,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
   - Debe existir una **política de privacidad** que explique qué se consulta, que no se almacena, y qué datos guarda la sesión al iniciar con Steam (SteamID64, nombre y avatar, solo mientras dure la sesión).
   - Solo se consultan datos de un perfil cuando el propio usuario lo pide.
   - El límite es de 100.000 llamadas diarias: aplicar **rate limiting por IP** en la ruta de consulta (`RateLimiter`).
+- Los tests corren sobre PostgreSQL (`renderdex_test` en local, servicio en el CI), nunca SQLite: la búsqueda usa `pg_trgm`.
 - Los tests **nunca** llaman a APIs reales. Usar `Http::fake()` con fixtures JSON en `tests/Fixtures/`.
 - No guardar SteamIDs en logs ni en analítica.
 
@@ -234,7 +236,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
 **Plataforma por definir antes de la etapa 6.** Las opciones son un VPS (por ejemplo con Laravel Forge o configurado a mano), Laravel Cloud o Railway. No elegir sin consultar.
 
 Requisitos, sea cual sea:
-- PHP 8.4+ y PostgreSQL.
+- PHP 8.4+ y PostgreSQL, con la extensión `pg_trgm` disponible (la migración la crea; es "trusted").
 - Cron cada minuto para `schedule:run`.
 - Un worker de colas permanente.
 - HTTPS.

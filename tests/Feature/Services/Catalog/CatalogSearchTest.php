@@ -8,7 +8,7 @@ use App\Services\Catalog\CatalogSearch;
 
 function catalogTitles(string $query, array $technologies = [], int $page = 1): array
 {
-    return app(CatalogSearch::class)->search($query, $technologies, $page)->pluck('title')->all();
+    return app(CatalogSearch::class)->search($query, $technologies, $page)->games->pluck('title')->all();
 }
 
 it('ranks the exact title first, then titles that start with the query, then the rest', function () {
@@ -25,6 +25,60 @@ it('ignores case, extra spaces and trademark symbols in the query', function () 
 
     expect(catalogTitles('  DIABLO   iv '))->toBe(['Diablo® IV'])
         ->and(catalogTitles('Diablo® IV'))->toBe(['Diablo® IV']);
+});
+
+it('ignores punctuation and accepts the words in any order', function () {
+    Game::factory()->create(['title' => 'The Witcher 3: Wild Hunt']);
+    Game::factory()->create(['title' => 'The Witcher 2: Assassins of Kings']);
+
+    expect(catalogTitles('witcher 3 wild hunt'))->toBe(['The Witcher 3: Wild Hunt'])
+        ->and(catalogTitles('wild hunt witcher'))->toBe(['The Witcher 3: Wild Hunt']);
+});
+
+it('matches roman numerals and digits both ways', function () {
+    Game::factory()->create(['title' => 'Grand Theft Auto V']);
+    Game::factory()->create(['title' => 'DOOM 2']);
+
+    expect(catalogTitles('grand theft auto 5'))->toBe(['Grand Theft Auto V'])
+        ->and(catalogTitles('doom ii'))->toBe(['DOOM 2']);
+});
+
+it('ranks games with wiki data and a Steam app id first among equal matches', function () {
+    Game::factory()->create(['title' => 'Doom A']);
+    $withAppid = Game::factory()->create(['title' => 'Doom B']);
+    GameSteamAppid::factory()->for($withAppid)->create();
+    Game::factory()->create(['title' => 'Doom C', 'dlss' => Support::Yes]);
+
+    expect(catalogTitles('doom'))->toBe(['Doom C', 'Doom B', 'Doom A']);
+});
+
+it('falls back to similar titles when nothing matches, for typos', function () {
+    Game::factory()->create(['title' => 'Cyberpunk 2077']);
+    Game::factory()->create(['title' => 'Celeste']);
+
+    $results = app(CatalogSearch::class)->search('cyberpnk', []);
+
+    expect($results->approximate)->toBeTrue()
+        ->and($results->games->pluck('title')->all())->toBe(['Cyberpunk 2077']);
+});
+
+it('does not mark exact matches as approximate', function () {
+    Game::factory()->create(['title' => 'Cyberpunk 2077']);
+
+    expect(app(CatalogSearch::class)->search('cyberpunk', [])->approximate)->toBeFalse();
+});
+
+it('suggests the best matches for the search preview', function () {
+    Game::factory()->create(['title' => 'Hades II']);
+    Game::factory()->create(['title' => 'Hades']);
+    Game::factory()->create(['title' => 'Celeste']);
+
+    $search = app(CatalogSearch::class);
+
+    expect($search->suggest('hades')->pluck('title')->all())->toBe(['Hades', 'Hades II'])
+        ->and($search->suggest('hades', limit: 1)->pluck('title')->all())->toBe(['Hades'])
+        ->and($search->suggest('hadez')->pluck('title')->all())->toContain('Hades')
+        ->and($search->suggest('  '))->toBeEmpty();
 });
 
 it('searches percent signs and underscores as plain text', function () {
@@ -58,7 +112,7 @@ it('lists the games with the most supported technologies first when there is no 
 it('paginates the results', function () {
     Game::factory()->count(CatalogSearch::PER_PAGE + 3)->create();
 
-    $secondPage = app(CatalogSearch::class)->search('', [], 2);
+    $secondPage = app(CatalogSearch::class)->search('', [], 2)->games;
 
     expect($secondPage->total())->toBe(CatalogSearch::PER_PAGE + 3)
         ->and($secondPage->count())->toBe(3);
@@ -69,7 +123,7 @@ it('loads the app ids in the order the wiki lists them', function () {
     GameSteamAppid::factory()->for($game)->create(['steam_appid' => 115300]);
     GameSteamAppid::factory()->for($game)->create(['steam_appid' => 42680]);
 
-    $result = app(CatalogSearch::class)->search('modern warfare', [])->first();
+    $result = app(CatalogSearch::class)->search('modern warfare', [])->games->first();
 
     expect($result->steamAppids->first()->steam_appid)->toBe(115300);
 });
