@@ -36,7 +36,7 @@
         </div>
 
         @unless ($error)
-            <x-gpu-selector :gpu="$gpu" :has-filters="$activeFilters !== []" />
+            <x-gpu-selector :gpu="$gpu" :gpu-model="$gpuModel" :has-filters="$activeFilters !== []" />
         @endunless
     </div>
 
@@ -64,6 +64,18 @@
             </button>
         </section>
     @else
+        @if ($gpuStats)
+            <p class="flex gap-3 border-l-2 border-accent pl-4 text-sm" role="status">
+                <span class="shrink-0 font-mono text-xs leading-5 font-bold text-accent" aria-hidden="true">GPU</span>
+                <span>{{ __('gpu.summary', [
+                    'gpu' => $gpuProfile->label(),
+                    'upscaling' => trans_choice('gpu.games', $gpuStats['upscaling'], ['count' => Number::format($gpuStats['upscaling'])]),
+                    'frame_gen' => trans_choice('gpu.games', $gpuStats['frame_gen'], ['count' => Number::format($gpuStats['frame_gen'])]),
+                    'ray_tracing' => trans_choice('gpu.games', $gpuStats['ray_tracing'], ['count' => Number::format($gpuStats['ray_tracing'])]),
+                ]) }}</span>
+            </p>
+        @endif
+
         {{-- Estadísticas: una sola lectura, dividida en celdas como un panel de instrumentos. --}}
         <section aria-label="{{ __('library.stats.label') }}">
             <dl class="grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-5">

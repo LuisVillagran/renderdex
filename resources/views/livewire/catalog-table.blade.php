@@ -19,7 +19,7 @@
             <p class="text-muted">{{ __('catalog.intro') }}</p>
         </div>
 
-        <x-gpu-selector :gpu="$gpu" :has-filters="$activeFilters !== []" />
+        <x-gpu-selector :gpu="$gpu" :gpu-model="$gpuModel" :has-filters="$activeFilters !== []" />
     </div>
 
     <x-technology-filters :active-filters="$activeFilters" :search="$search" :placeholder="__('catalog.search.placeholder')" />

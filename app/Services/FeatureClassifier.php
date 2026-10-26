@@ -43,9 +43,10 @@ class FeatureClassifier
     /**
      * La versión más alta de un reescalador en la lista, p. ej. "4" para FSR en "FSR 2.1,FSR 4".
      *
+     * @param  string|null  $below  Solo versiones menores que esta, p. ej. "4" para quedarse con FSR 3.x.
      * @return string|null Null si la tecnología no aparece con versión o no es un reescalador.
      */
-    public function latestVersion(?string $upscaling, Technology $technology): ?string
+    public function latestVersion(?string $upscaling, Technology $technology, ?string $below = null): ?string
     {
         if (! in_array($technology, [Technology::Dlss, Technology::Fsr, Technology::Xess], true)) {
             return null;
@@ -54,6 +55,7 @@ class FeatureClassifier
         return collect($this->parseList($upscaling))
             ->map(fn (string $value) => preg_match('/^'.$technology->value.'\s+(\d+(?:\.\d+)*)$/', $value, $matches) === 1 ? $matches[1] : null)
             ->filter()
+            ->when($below !== null, fn ($versions) => $versions->filter(fn (string $version) => version_compare($version, $below, '<')))
             ->sort(fn (string $a, string $b) => version_compare($a, $b))
             ->last();
     }

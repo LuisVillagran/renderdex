@@ -72,8 +72,11 @@ class LibraryTable extends Component
 
         $results = $browser->browse($entries, $this->search, $this->filters, $this->sort, $this->direction);
         $page = $this->getPage();
+        $gpuProfile = $this->gpuProfile();
 
         return view('livewire.library-table', [
+            'gpuProfile' => $gpuProfile,
+            'gpuStats' => $gpuProfile ? $browser->gpuStats($entries, $gpuProfile) : null,
             'error' => $error,
             'isDemo' => $steam->isDemo(),
             'stats' => $browser->stats($entries),

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concerns;
 
+use App\Enums\GpuProfile;
 use App\Enums\Technology;
 use App\Enums\Vendor;
 use Livewire\Attributes\Url;
@@ -29,6 +30,9 @@ trait WithTechnologyFilters
 
     /** Se recuerda en localStorage desde el navegador; ver la vista. */
     public string $gpu = 'all';
+
+    /** Generación dentro de la marca ({@see GpuProfile}); null si solo se eligió la marca. */
+    public ?string $gpuModel = null;
 
     public function updatedSearch(): void
     {
@@ -65,10 +69,41 @@ trait WithTechnologyFilters
 
         $this->gpu = $gpu;
 
+        // La generación elegida solo vale para su marca.
+        if ($this->gpuProfile() === null) {
+            $this->gpuModel = null;
+        }
+
         if ($preselectFilters) {
             $this->filters = array_map(fn (Technology $technology) => $technology->value, self::GPU_FILTERS[$gpu]);
             $this->resetPage();
         }
+    }
+
+    /**
+     * @param  string  $model  Valor de {@see GpuProfile}, o vacío para "sin especificar".
+     */
+    public function selectGpuModel(string $model): void
+    {
+        $profile = GpuProfile::tryFrom($model);
+
+        $this->gpuModel = $profile?->vendor()->value === $this->gpu ? $profile->value : null;
+    }
+
+    /**
+     * Restaura lo guardado en localStorage en un solo viaje al servidor.
+     */
+    public function restoreGpu(string $gpu, string $model, bool $preselectFilters): void
+    {
+        $this->selectGpu($gpu, $preselectFilters);
+        $this->selectGpuModel($model);
+    }
+
+    protected function gpuProfile(): ?GpuProfile
+    {
+        $profile = GpuProfile::tryFrom((string) $this->gpuModel);
+
+        return $profile?->vendor()->value === $this->gpu ? $profile : null;
     }
 
     /**

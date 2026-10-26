@@ -175,7 +175,8 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
 - **Resultados:**
   - URL compartible: `/u/{steamid64}`.
   - Estadísticas arriba: total de juegos y cuántos soportan cada tecnología.
-  - **Selector "Mi GPU": NVIDIA / AMD / Intel / Todas.** Resalta las columnas de esa marca y preselecciona sus filtros. La elección se recuerda en `localStorage`.
+  - **Selector "Mi GPU": NVIDIA / AMD / Intel / Todas.** Resalta las columnas de esa marca y preselecciona sus filtros. La elección se recuerda en `localStorage` (`renderdex.gpu`).
+  - **Generación** opcional dentro de la marca (`App\Enums\GpuProfile`: RTX 50, RTX 40, RTX 20/30, GTX 10/16, RX 9000, RX 7000, RX 6000, RX 5000, Arc), en `renderdex.gpu-model`. `App\Services\GpuCapabilities` (clase pura, con las fuentes en el docblock) cruza el soporte del juego con el hardware y devuelve `App\Enums\Availability`: `Usable`, `Depends` (XeSS FG fuera de Arc: solo si el juego usa XeSS 2.1+), `NeedsOtherGpu` (con el requisito, p. ej. "Requiere RTX 40"), `NotSupported` o `Unknown`. También da la versión que vas a usar (FSR 4 solo en RX 9000/7000; las demás usan el respaldo 3.x). Con una generación elegida, la biblioteca resume cuántos juegos tienen reescalado, generación de frames y RT usables (`App\Enums\Capability`).
   - Tabla con portada, nombre (enlace a su página en PCGamingWiki), horas jugadas, columnas por tecnología agrupadas por marca y versiones detectadas.
   - Chips de filtro combinables, búsqueda por nombre y orden por nombre u horas.
 - **Pie de página:**

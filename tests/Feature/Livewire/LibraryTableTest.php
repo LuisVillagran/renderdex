@@ -215,6 +215,44 @@ it('goes back to the first page when the search changes', function () {
     expect(listedNames($component))->toBe(['Game 07']);
 });
 
+it('summarizes what the chosen GPU generation can really use', function () {
+    wikiGame(1091500, 'Cyberpunk 2077', ['dlss' => Support::Yes, 'dlss_fg' => Support::Yes, 'ray_tracing' => Support::Yes]);
+    wikiGame(570, 'Dota 2', ['fsr' => Support::Yes, 'fsr_fg' => Support::Yes]);
+    fakeOwnedGames([[1091500, 'Cyberpunk 2077'], [570, 'Dota 2']]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('selectGpu', 'nvidia', false)
+        ->call('selectGpuModel', 'rtx20-30')
+        ->assertSet('gpuModel', 'rtx20-30')
+        // Reescalado en los dos (DLSS y FSR), FG solo por FSR (DLSS FG requiere RTX 40) y RT en uno.
+        ->assertViewHas('gpuStats', ['upscaling' => 2, 'frame_gen' => 1, 'ray_tracing' => 1])
+        ->assertSee('Con tu RTX 20 / 30: reescalado en 2 juegos, generación de frames en 1 juego y ray tracing en 1 juego.');
+});
+
+it('drops the GPU generation when it does not belong to the chosen vendor', function () {
+    fakeOwnedGames([[570, 'Dota 2']]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('selectGpu', 'amd', false)
+        ->call('selectGpuModel', 'rtx40')
+        ->assertSet('gpuModel', null)
+        ->call('selectGpuModel', 'rx6000')
+        ->assertSet('gpuModel', 'rx6000')
+        ->call('selectGpu', 'nvidia', false)
+        ->assertSet('gpuModel', null)
+        ->assertViewHas('gpuStats', null);
+});
+
+it('restores the saved vendor and generation in one request', function () {
+    fakeOwnedGames([[570, 'Dota 2']]);
+
+    Livewire::test(LibraryTable::class, ['steamId' => TEST_STEAM_ID])
+        ->call('restoreGpu', 'intel', 'arc', true)
+        ->assertSet('gpu', 'intel')
+        ->assertSet('gpuModel', 'arc')
+        ->assertSet('filters', ['xess']);
+});
+
 it('preselects the filter of the chosen GPU vendor and highlights its columns', function (string $gpu, array $filters, ?Vendor $highlighted) {
     fakeOwnedGames([[570, 'Dota 2']]);
 

@@ -2,8 +2,12 @@
 
 namespace App\Services\Library;
 
+use App\Enums\Availability;
+use App\Enums\Capability;
+use App\Enums\GpuProfile;
 use App\Enums\Support;
 use App\Enums\Technology;
+use App\Services\GpuCapabilities;
 use App\Services\SearchKey;
 use Illuminate\Support\Collection;
 
@@ -15,7 +19,27 @@ class LibraryBrowser
 {
     public const SORTS = ['name', 'playtime'];
 
-    public function __construct(private SearchKey $searchKey) {}
+    public function __construct(
+        private SearchKey $searchKey,
+        private GpuCapabilities $gpus,
+    ) {}
+
+    /**
+     * Cuántos juegos tienen cada capacidad que tu GPU puede usar de verdad.
+     *
+     * @param  list<LibraryEntry>  $entries
+     * @return array<string, int> Indexado por el valor de {@see Capability}.
+     */
+    public function gpuStats(array $entries, GpuProfile $gpu): array
+    {
+        return collect(Capability::cases())
+            ->mapWithKeys(fn (Capability $capability) => [
+                $capability->value => collect($entries)->filter(fn (LibraryEntry $entry) => collect($capability->technologies())->contains(
+                    fn (Technology $technology) => $this->gpus->availability($entry->game, $gpu, $technology) === Availability::Usable,
+                ))->count(),
+            ])
+            ->all();
+    }
 
     /**
      * @param  list<LibraryEntry>  $entries
