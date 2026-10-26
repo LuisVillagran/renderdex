@@ -43,8 +43,8 @@ return [
             'title' => 'Cookies y almacenamiento local',
             'items' => [
                 'Como cualquier sitio hecho con Laravel, cada visita tiene una cookie de sesión y una de protección contra CSRF. Son necesarias para que el sitio funcione.',
-                'La sesión se guarda en el servidor junto con la IP y el navegador desde los que se abrió, y se borra tras 2 horas de inactividad.',
-                'Tu elección de "Mi GPU" se guarda en el almacenamiento local de tu navegador (localStorage). Solo se usa para resaltar las columnas de tu marca y no se guarda en el servidor.',
+                'La sesión se guarda en el servidor junto con la IP y el navegador desde los que se abrió, y se borra tras 2 horas de inactividad. Si eliges un idioma, se recuerda en la sesión.',
+                'Tu elección de "Mi GPU" (marca y generación), el tema de colores y si prefieres ver todas las tecnologías se guardan en el almacenamiento local de tu navegador (localStorage). Solo se usan para mostrarte la página así y no se guardan en el servidor.',
                 'No usamos cookies de terceros, analítica ni publicidad.',
             ],
         ],

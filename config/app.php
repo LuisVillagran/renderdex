@@ -84,6 +84,9 @@ return [
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
+    // Idiomas de la interfaz (lang/es y lang/en); el primero es el de la configuración por defecto.
+    'supported_locales' => ['es', 'en'],
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*

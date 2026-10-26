@@ -28,6 +28,7 @@ return [
 
     'feed_title' => 'Renderdex · Novedades',
     'feed_entry' => ':game: :changes',
+    'feed_rights' => 'Datos de PCGamingWiki, CC BY-NC-SA 3.0',
 
     'badge' => 'Novedad',
     'badge_help' => 'La wiki documentó cambios en este juego en los últimos 7 días.',

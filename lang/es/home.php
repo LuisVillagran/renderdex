@@ -43,7 +43,7 @@ return [
             ],
             [
                 'title' => 'Filtra por tu GPU',
-                'body' => 'Elige NVIDIA, AMD o Intel y ve de un vistazo qué juegos aprovechan tu tarjeta.',
+                'body' => 'Elige tu marca y tu generación de GPU, y ve qué puedes activar de verdad en cada juego.',
             ],
         ],
     ],

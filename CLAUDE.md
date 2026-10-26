@@ -226,7 +226,7 @@ docs/arquitectura.md              # diagrama (Mermaid) + decisiones
 ## Convenciones
 
 - Código, nombres de clases, variables, rutas y commits en **inglés**.
-- Textos de la UI en **español**, en archivos de `lang/es/`. Deja todo preparado para agregar `lang/en/` más adelante.
+- Textos de la UI en `lang/es/` (idioma principal) y `lang/en/`, siempre con las mismas claves (lo verifica `tests/Feature/LocaleTest.php`). `AppHttpMiddlewareSetLocale` elige el idioma: `?lang=` (se recuerda en la sesión) → sesión → `Accept-Language` → `es`. Las URLs no cambian. Selector ES/EN en el header (`x-locale-switcher`). Los tests usan español por defecto (`tests/TestCase.php`).
 - Comentarios en español, solo donde aporten (el porqué, no el qué).
 - Componentes Livewire chicos. La lógica de negocio va en `Services/`, no en los componentes.
 - Licencia del código: **MIT** (archivo `LICENSE`). No aplica a los datos de PCGamingWiki.

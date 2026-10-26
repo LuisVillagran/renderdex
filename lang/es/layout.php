@@ -16,6 +16,12 @@ return [
         'my_library' => 'Mi biblioteca',
     ],
 
+    'locale' => [
+        'label' => 'Idioma',
+        'es' => 'Español',
+        'en' => 'English',
+    ],
+
     'theme' => [
         'label' => 'Tema de colores',
         'system' => 'Auto',

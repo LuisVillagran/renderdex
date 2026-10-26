@@ -9,7 +9,7 @@
     });
 @endphp
 {!! '<'.'?xml version="1.0" encoding="UTF-8"?>' !!}
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="es">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ app()->getLocale() }}">
     <title>{{ __('changes.feed_title') }}</title>
     <subtitle>{{ __('changes.description') }}</subtitle>
     <id>{{ route('changes.index') }}</id>
@@ -17,7 +17,7 @@
     <link rel="alternate" href="{{ route('changes.index') }}"/>
     <updated>{{ ($changes->first()?->detected_at ?? now())->toAtomString() }}</updated>
     <author><name>{{ config('app.name') }}</name></author>
-    <rights>Datos de PCGamingWiki, CC BY-NC-SA 3.0</rights>
+    <rights>{{ __('changes.feed_rights') }}</rights>
     @foreach ($entries as $key => $entryChanges)
         @php $game = $entryChanges->first()->game; @endphp
         <entry>
