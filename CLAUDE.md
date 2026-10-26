@@ -97,7 +97,7 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
 - Muestra las 8 tecnologías con versiones, el texto crudo de la wiki, crédito CC BY-NC-SA y enlaces a la wiki (ver y editar) y a la tienda. `App\Services\SupportSummary` arma el resumen ("DLSS 4, DLSS MFG y Ray Tracing") para el texto y los metadatos.
 - Título, descripción, canonical y `og:image` (header de Steam) propios. Sin datos (`has_data = false`): invita a completar la wiki y lleva `noindex`.
 - `/sitemap.xml` solo con los juegos con datos; `/robots.txt` es una ruta para dar la URL absoluta del sitemap. Las bibliotecas (`/u/{id}`) llevan `noindex`.
-- El inicio tiene un formulario GET hacia `/juegos?q=`, y el header un enlace "Buscar juegos".
+- **Buscador con vista previa** (`App\Livewire\GameSearchBox` + `CatalogSearch::suggest()`): en el inicio y en el header (desde `md`; en `/juegos` no, porque la página ya tiene el suyo). Es un formulario GET hacia `/juegos?q=`, así que funciona sin JS. Combobox ARIA con flechas, Enter (abre la ficha activa o envía) y Esc; atajo `/` en el header si la página no tiene su propia búsqueda. Desde 2 caracteres y 60 consultas/min por IP (hash). El header mantiene el enlace "Buscar juegos" para móvil.
 
 ### 3. Casos borde (cada uno con su mensaje claro en la UI)
 - **Perfil no encontrado:** la vanity no se resuelve o el ID es inválido.

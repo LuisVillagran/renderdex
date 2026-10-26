@@ -22,7 +22,6 @@ return [
     'catalog' => [
         'title' => '¿Vas a comprar un juego?',
         'body' => 'Búscalo en el catálogo completo, sin cuenta ni perfil de Steam.',
-        'submit' => 'Buscar',
     ],
 
     'preview' => [

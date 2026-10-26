@@ -8,19 +8,7 @@
     // En pantallas chicas, con una marca elegida, solo se muestran sus tecnologías y Ray Tracing.
     $compactGroups = $highlightedVendor ? array_intersect_key($groups, array_flip([$highlightedVendor->value, Vendor::All->value])) : $groups;
 
-    // Resalta cada palabra buscada dentro del título; todo se escapa antes de armar el HTML.
     $needle = trim($search);
-    $words = preg_split('/\s+/u', $needle, flags: PREG_SPLIT_NO_EMPTY) ?: [];
-    $pattern = $words === [] ? null : '/('.implode('|', array_map(fn (string $word) => preg_quote($word, '/'), $words)).')/iu';
-    $highlight = function (string $title) use ($pattern): string {
-        if ($pattern === null) {
-            return e($title);
-        }
-
-        return collect(preg_split($pattern, $title, flags: PREG_SPLIT_DELIM_CAPTURE) ?: [$title])
-            ->map(fn (string $part, int $index) => $index % 2 === 1 ? '<mark class="bg-accent/20 text-fg">'.e($part).'</mark>' : e($part))
-            ->implode('');
-    };
 @endphp
 
 <div class="flex flex-col gap-8">
@@ -75,7 +63,7 @@
                                 <div class="flex flex-col gap-2">
                                     <div class="flex flex-col gap-0.5">
                                         <a href="{{ $game->url() }}" class="focus-ring self-start font-medium decoration-accent underline-offset-4 hover:text-accent hover:underline">
-                                            {!! $highlight($game->title) !!}
+                                            <x-highlight :text="$game->title" :query="$needle" />
                                         </a>
                                         <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted uppercase">
                                             <a href="{{ $game->wikiUrl() }}" rel="noopener" aria-label="{{ __('library.wiki_link', ['name' => $game->title]) }}" class="focus-ring hover:text-accent">

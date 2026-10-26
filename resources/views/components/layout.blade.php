@@ -84,11 +84,18 @@
 
     <header class="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-sm">
         <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-            <a href="{{ route('home') }}" class="focus-ring" aria-label="{{ __('layout.header.home') }}">
+            <a href="{{ route('home') }}" class="focus-ring shrink-0" aria-label="{{ __('layout.header.home') }}">
                 <x-logo />
             </a>
 
-            <div class="flex items-center gap-2 sm:gap-4">
+            {{-- En /juegos ya hay un buscador en la página: no se repite. --}}
+            @unless (request()->routeIs('catalog'))
+                <div class="hidden max-w-sm flex-1 md:block">
+                    <livewire:game-search-box compact input-id="header-search" />
+                </div>
+            @endunless
+
+            <div class="flex shrink-0 items-center gap-2 sm:gap-4">
                 <a href="{{ route('catalog') }}" @class([
                     'focus-ring px-2 py-1 font-mono text-xs uppercase hover:text-accent',
                     'text-accent' => request()->routeIs('catalog'),
@@ -113,8 +120,6 @@
                             </button>
                         </form>
                     </div>
-                @else
-                    <p class="label hidden lg:block" aria-hidden="true">{{ __('layout.header.tagline') }}</p>
                 @endif
 
                 <x-theme-switcher />
