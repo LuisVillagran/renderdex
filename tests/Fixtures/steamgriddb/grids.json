@@ -1,0 +1,39 @@
+{
+    "success": true,
+    "data": [
+        {
+            "id": 80001,
+            "score": 12,
+            "style": "alternate",
+            "width": 600,
+            "height": 900,
+            "nsfw": false,
+            "humor": false,
+            "mime": "image/png",
+            "language": "en",
+            "url": "https://cdn2.steamgriddb.com/grid/aaaa.png",
+            "thumb": "https://cdn2.steamgriddb.com/thumb/aaaa.jpg",
+            "lock": false,
+            "epilepsy": false,
+            "upvotes": 12,
+            "downvotes": 0
+        },
+        {
+            "id": 80002,
+            "score": 3,
+            "style": "alternate",
+            "width": 600,
+            "height": 900,
+            "nsfw": false,
+            "humor": false,
+            "mime": "image/png",
+            "language": "en",
+            "url": "https://cdn2.steamgriddb.com/grid/bbbb.png",
+            "thumb": "https://cdn2.steamgriddb.com/thumb/bbbb.jpg",
+            "lock": false,
+            "epilepsy": false,
+            "upvotes": 3,
+            "downvotes": 0
+        }
+    ]
+}

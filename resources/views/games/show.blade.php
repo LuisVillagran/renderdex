@@ -12,8 +12,11 @@
         ? __('game.meta_description', ['title' => $game->title, 'technologies' => $technologyList])
         : __('game.meta_description_none', ['title' => $game->title]);
     // Para compartir conviene una imagen horizontal: el header de Steam o, sin AppID, la portada de la wiki.
+    $steamImage = fn (string $field, string $file) => $game->steam_artwork[$field]
+        ?? ($appid !== null && $game->steam_artwork === null ? "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$appid}/{$file}" : null);
+    $heroImage = $steamImage('hero', 'library_hero.jpg');
     $shareImage = match (true) {
-        $appid !== null => "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$appid}/header.jpg",
+        ($header = $steamImage('header', 'header.jpg')) !== null => $header,
         $game->cover_url !== null => PcgwCover::thumbnail($game->cover_url, 600),
         default => null,
     };
@@ -31,11 +34,11 @@
         </nav>
 
         <header class="relative isolate">
-            @if ($appid)
+            @if ($heroImage)
                 {{-- Banda con el arte panorámico de Steam; si no existe, se quita y queda solo el espacio. --}}
                 <div class="absolute inset-x-0 top-0 -z-10 h-44 overflow-hidden border border-line bg-raised sm:h-64" aria-hidden="true">
                     <img
-                        src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{{ $appid }}/library_hero.jpg"
+                        src="{{ $heroImage }}"
                         alt=""
                         class="size-full object-cover opacity-60"
                         onerror="this.parentElement.remove()"
@@ -44,9 +47,9 @@
                 </div>
             @endif
 
-            <div @class(['grid items-end gap-6 sm:grid-cols-[auto_1fr] sm:gap-10', 'pt-20 sm:px-8 sm:pt-32' => $appid])>
+            <div @class(['grid items-end gap-6 sm:grid-cols-[auto_1fr] sm:gap-10', 'pt-20 sm:px-8 sm:pt-32' => $heroImage])>
             <div class="frame w-fit self-start bg-canvas p-1.5 shadow-[0_0_0_6px_var(--rd-canvas)]" data-reveal>
-                <x-game-cover :appid="$appid" :cover="$game->cover_url" :title="$game->title" size="lg" :alt="__('game.cover_alt', ['title' => $game->title])" />
+                <x-game-cover :appid="$appid" :game="$game" :title="$game->title" size="lg" :alt="__('game.cover_alt', ['title' => $game->title])" />
             </div>
 
             <div class="flex flex-col gap-4 sm:pb-2">

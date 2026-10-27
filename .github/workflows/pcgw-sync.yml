@@ -43,6 +43,8 @@ jobs:
       DB_PASSWORD: postgres
       PCGW_BOT_USERNAME: ${{ secrets.PCGW_BOT_USERNAME }}
       PCGW_BOT_PASSWORD: ${{ secrets.PCGW_BOT_PASSWORD }}
+      # Opcional: sin el secret, covers:sync solo guarda el arte de Steam.
+      STEAMGRIDDB_API_KEY: ${{ secrets.STEAMGRIDDB_API_KEY }}
 
     steps:
       - uses: actions/checkout@v5
@@ -64,6 +66,11 @@ jobs:
 
       - name: Sync PCGamingWiki
         run: php artisan pcgw:sync
+
+      # Si falla, igual se publica lo que haya: las portadas son un complemento.
+      - name: Sync covers
+        continue-on-error: true
+        run: php artisan covers:sync
 
       - name: Summarize synced data
         if: always()
@@ -89,6 +96,10 @@ jobs:
             echo '```'
             $PSQL -c "SELECT count(*) FILTER (WHERE cover_url IS NOT NULL), count(*) FILTER (WHERE has_data AND cover_url IS NOT NULL), count(*) FILTER (WHERE has_data AND cover_url IS NOT NULL AND NOT EXISTS (SELECT 1 FROM game_steam_appids a WHERE a.game_id = games.id)) FROM games"
             $PSQL -c "SELECT cover_url FROM games WHERE cover_url IS NOT NULL ORDER BY pcgw_page_id LIMIT 3"
+            echo '```'
+            echo "## Portadas guardadas (arte de Steam con portada / SteamGridDB / sin ninguna imagen)"
+            echo '```'
+            $PSQL -c "SELECT count(*) FILTER (WHERE steam_artwork->>'cover' IS NOT NULL), count(*) FILTER (WHERE grid_cover_url IS NOT NULL), count(*) FILTER (WHERE steam_artwork->>'cover' IS NULL AND grid_cover_url IS NULL AND cover_url IS NULL) FROM games"
             echo '```'
             echo "## Soporte por tecnología (yes / no / unknown)"
             echo '```'

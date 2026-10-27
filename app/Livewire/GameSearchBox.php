@@ -54,6 +54,8 @@ class GameSearchBox extends Component
                     'title' => $game->title,
                     'appid' => $game->primarySteamAppid(),
                     'cover' => $game->cover_url,
+                    'steam_artwork' => $game->steam_artwork,
+                    'grid_thumb' => $game->grid_cover_thumb_url,
                     'hasData' => $game->has_data,
                     'supported' => $summary->labels($game),
                 ]);

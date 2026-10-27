@@ -1,22 +1,49 @@
 {{--
-    Portada vertical (2:3), como la caja del juego. Prueba en orden: la portada de la biblioteca
-    de Steam, la de PCGamingWiki y el header de Steam; si todas fallan (p. ej. juegos nuevos cuyas
-    imágenes Steam sirve en rutas con hash), queda el placeholder con las iniciales sobre el damero
-    de "textura faltante", que está detrás.
+    Portada vertical (2:3), como la caja del juego. Prueba en orden:
+    1. El arte de la tienda de Steam que guardó covers:sync (los juegos nuevos lo tienen en rutas
+       con hash) o, si todavía no se consultó, la URL fija library_600x900.jpg.
+    2. La portada de SteamGridDB.
+    3. La de PCGamingWiki (Cloudflare la bloquea desde algunas redes).
+    4. El header de Steam.
+    Si todas fallan, queda el placeholder con las iniciales sobre el damero de "textura faltante".
+    Con :game se toman del juego las portadas guardadas.
     wire:ignore evita que Livewire vuelva a la primera imagen en cada actualización.
 --}}
-@props(['appid' => null, 'cover' => null, 'title' => '', 'size' => 'sm', 'alt' => ''])
+@props([
+    'appid' => null,
+    'game' => null,
+    'cover' => null,
+    'steamArtwork' => null,
+    'gridCover' => null,
+    'gridThumb' => null,
+    'title' => '',
+    'size' => 'sm',
+    'alt' => '',
+])
 
 @php
     use App\Services\Pcgw\PcgwCover;
     use Illuminate\Support\Str;
 
+    $cover ??= $game?->cover_url;
+    $steamArtwork ??= $game?->steam_artwork;
+    $gridCover ??= $game?->grid_cover_url;
+    $gridThumb ??= $game?->grid_cover_thumb_url;
+
     $steam = fn (string $file) => "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$appid}/{$file}";
-    $sources = array_values(array_filter([
-        $appid ? $steam('library_600x900.jpg') : null,
+    $steamCover = in_array($size, ['card', 'lg'], true)
+        ? ($steamArtwork['cover_2x'] ?? $steamArtwork['cover'] ?? null)
+        : ($steamArtwork['cover'] ?? null);
+    // Sin arte guardado se prueba la URL fija; si Steam ya respondió sin portada, daría 404.
+    $guessSteamCover = $appid && $steamArtwork === null;
+
+    $sources = array_values(array_unique(array_filter([
+        $steamCover,
+        $guessSteamCover ? $steam('library_600x900.jpg') : null,
+        $size === 'lg' ? ($gridCover ?? $gridThumb) : ($gridThumb ?? $gridCover),
         $cover ? PcgwCover::thumbnail($cover, match ($size) { 'lg' => 480, 'card' => 300, default => 120 }) : null,
-        $appid ? $steam('header.jpg') : null,
-    ]));
+        $steamArtwork['header'] ?? ($appid ? $steam('header.jpg') : null),
+    ])));
 
     $initials = Str::of($title)
         ->replaceMatches('/[^\pL\pN\s]+/u', ' ')

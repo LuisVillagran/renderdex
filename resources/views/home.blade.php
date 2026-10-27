@@ -75,7 +75,7 @@
                             @php $labels = $summary->labels($appid->game); @endphp
                             <li class="animate-rise" style="--delay: {{ 150 + $loop->index * 70 }}ms">
                                 <a href="{{ $appid->game->url() }}" class="group focus-ring relative block overflow-hidden rounded-md ring-1 ring-line transition duration-200 hover:ring-fg/60" aria-label="{{ $appid->game->title }}">
-                                    <x-game-cover :appid="$appid->steam_appid" :cover="$appid->game->cover_url" :title="$appid->game->title" size="card" class="ring-0!" />
+                                    <x-game-cover :appid="$appid->steam_appid" :game="$appid->game" :title="$appid->game->title" size="card" class="ring-0!" />
                                     @if ($labels !== [])
                                         <span class="absolute inset-x-0 bottom-0 flex gap-1 overflow-hidden border-t border-line bg-canvas/90 px-1.5 py-1" aria-hidden="true">
                                             @foreach (array_slice($labels, 0, 2) as $label)

@@ -1,0 +1,17 @@
+{
+    "success": true,
+    "data": [
+        {
+            "id": 5001,
+            "name": "Euro Truck Simulator 2",
+            "types": ["steam"],
+            "verified": true
+        },
+        {
+            "id": 5002,
+            "name": "Euro Truck Simulator 2: Going East!",
+            "types": ["steam"],
+            "verified": true
+        }
+    ]
+}

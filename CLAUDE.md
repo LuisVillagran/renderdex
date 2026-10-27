@@ -71,9 +71,13 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
    - Primero por Steam AppID (`game_steam_appids`).
    - **Respaldo por nombre** para los que no coinciden: título exacto normalizado (`App\Services\TitleNormalizer`: minúsculas, sin ™ ® ©, apóstrofes/guiones unificados, espacios colapsados) contra `games.normalized_title`, **solo** entre juegos sin ningún AppID en la wiki y **solo** si hay un único candidato. Nunca coincidencias parciales ("Cyberpunk 2077" ≠ "Cyberpunk 2077: Ultimate Edition"). Cubre vacíos de la wiki como Euro Truck Simulator 2.
    - `LibraryMatcher::matchCached()` recuerda 1 hora qué juego corresponde a cada AppID (clave: hash del SteamID64 + la lista de AppIDs), así que cada clic de filtro solo carga esos juegos por ID.
-5. Portadas verticales 2:3 (`x-game-cover`, tamaños `xs`/`sm`/`md`/`lg`), con `loading="lazy"`. Cadena de respaldos en el navegador (`onerror`): `library_600x900.jpg` de Steam → portada de la wiki (`games.cover_url`, miniatura de MediaWiki vía `App\Services\Pcgw\PcgwCover`) → `header.jpg` de Steam → iniciales del título. Por qué: el 31% de los juegos con datos no tiene AppID, y en los juegos nuevos Steam sirve las imágenes en rutas con hash (las URLs fijas dan 404).
-   - La portada de la wiki sale del sync: `PcgwClient::gameFields()` detecta con `cargofields` el campo de portada de `Game` (`config('pcgw.game_fields.cover')`: `Cover_URL`, `Cover`). Es opcional: si no aparece, no se pide. **Pendiente:** confirmar el nombre real con una corrida del workflow (el resumen muestra cuántos juegos traen portada).
-   - Las imágenes de la wiki se cargan desde `images.pcgamingwiki.com` solo como respaldo, en miniatura (120 px en tablas, 480 px en la ficha).
+5. Portadas verticales 2:3 (`x-game-cover`, tamaños `xs`/`sm`/`md`/`card`/`lg`; con `:game` toma del juego las portadas guardadas), con `loading="lazy"`. Cadena de respaldos en el navegador (`onerror`): arte de la tienda de Steam guardado (`games.steam_artwork`) o, si todavía no se consultó, `library_600x900.jpg` → portada de SteamGridDB (`grid_cover_url`/`grid_cover_thumb_url`) → portada de la wiki (`games.cover_url`, miniatura de MediaWiki vía `App\Services\Pcgw\PcgwCover`) → header de Steam → iniciales sobre el damero de "textura faltante". Por qué: el 12% de los juegos no tiene AppID, y en los juegos nuevos Steam sirve las imágenes en rutas con hash (las URLs fijas dan 404).
+   - La portada de la wiki sale del sync: `PcgwClient::gameFields()` detecta con `cargofields` el campo de portada de `Game` (`config('pcgw.game_fields.cover')`: `Cover_URL`, `Cover`). Confirmado con el workflow (octubre de 2026): 55.503 de 55.808 juegos traen portada.
+   - Las imágenes de la wiki se cargan desde `images.pcgamingwiki.com` solo como respaldo, en miniatura (120 px en tablas, 480 px en la ficha). Cloudflare las bloquea (403) desde la máquina de desarrollo, y puede pasarle lo mismo a algunos visitantes: por eso van después de Steam y SteamGridDB.
+   - **`php artisan covers:sync`** (diario a las 05:00, después de `pcgw:sync`; `App\Services\Artwork\ArtworkSync`):
+     - **Arte de Steam:** `App\Services\Steam\SteamStoreClient` usa `IStoreBrowseService/GetItems/v1` (sin API key, no documentado oficialmente: cualquier respuesta rara es "no disponible"), 200 AppIDs por llamada. Guarda en `steam_artwork` (`cover`, `cover_2x`, `header`, `hero`) el arte del primer AppID, en el orden de la wiki, que tenga portada vertical. Se vuelve a pedir cada 7 días. La ficha usa `hero` y `header` (banda panorámica y `og:image`).
+     - **SteamGridDB:** `App\Services\Artwork\SteamGridDbClient`, solo para juegos sin portada vertical de Steam y solo con `STEAMGRIDDB_API_KEY`. Busca por AppID o, sin AppID, por título normalizado exacto con un único resultado. Solo portadas estáticas 600x900, sin NSFW, humor ni riesgo de epilepsia; toma la mejor votada. Hasta 2.000 juegos por ejecución, primero los que tienen datos; se vuelve a buscar cada 30 días. **Pendiente:** revisar los términos de SteamGridDB antes de publicar el sitio.
+     - Acepta `--limit` y `--fresh`. Nunca se llama durante una visita.
 
 ### 2a. Lista de deseados
 - Pestaña "Lista de deseados" en `/u/{steamid64}` (`?vista=wishlist`). Steam solo se consulta al abrirla.
@@ -262,7 +266,7 @@ Requisitos, sea cual sea:
 - Cron cada minuto para `schedule:run`.
 - Un worker de colas permanente.
 - HTTPS.
-- Variables de entorno: `STEAM_API_KEY`, `PCGW_BOT_USERNAME`, `PCGW_BOT_PASSWORD`, `APP_URL` y base de datos.
+- Variables de entorno: `STEAM_API_KEY`, `PCGW_BOT_USERNAME`, `PCGW_BOT_PASSWORD`, `STEAMGRIDDB_API_KEY` (opcional), `APP_URL` y base de datos.
 - Una IP de salida que PCGamingWiki no bloquee (las de data center funcionan; verificado desde GitHub Actions).
 - Ejecutar el sync inicial completo una vez, antes de abrir el sitio.
 
@@ -302,6 +306,7 @@ php artisan migrate
 php artisan pcgw:sync         # sincroniza la wiki
 php artisan pcgw:sync --limit=200   # para desarrollo
 php artisan pcgw:sync --fresh       # sync completo desde cero
+php artisan covers:sync            # arte de Steam y portadas de SteamGridDB
 php artisan test
 ./vendor/bin/pint
 ```

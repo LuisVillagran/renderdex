@@ -228,7 +228,7 @@
                                         @if ($entry->game)
                                             {{-- El título ya enlaza a la ficha: la portada es un atajo para el mouse. --}}
                                             <a href="{{ $entry->game->url() }}" tabindex="-1" aria-hidden="true" class="block transition hover:brightness-110">
-                                                <x-game-cover :appid="$entry->owned->appid" :cover="$entry->game->cover_url" :title="$entry->owned->name" />
+                                                <x-game-cover :appid="$entry->owned->appid" :game="$entry->game" :title="$entry->owned->name" />
                                             </a>
                                         @else
                                             <x-game-cover :appid="$entry->owned->appid" :title="$entry->owned->name" />

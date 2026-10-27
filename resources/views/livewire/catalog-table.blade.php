@@ -94,7 +94,7 @@
                                 <td class="py-3 pr-1 pl-3 align-top sm:pl-4">
                                     {{-- El título ya enlaza a la ficha: la portada es un atajo para el mouse. --}}
                                     <a href="{{ $game->url() }}" tabindex="-1" aria-hidden="true" class="block transition hover:brightness-110">
-                                        <x-game-cover :appid="$appid" :cover="$game->cover_url" :title="$game->title" />
+                                        <x-game-cover :appid="$appid" :game="$game" :title="$game->title" />
                                     </a>
                                 </td>
                                 <td class="px-3 py-3">

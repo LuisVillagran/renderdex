@@ -34,7 +34,7 @@
         ])
         @if ($game) aria-label="{{ $name }}" @else aria-hidden="true" tabindex="-1" @endif
     >
-        <x-game-cover :appid="$appid" :cover="$game?->cover_url" :title="$name" size="card" class="ring-0!" />
+        <x-game-cover :appid="$appid" :game="$game" :title="$name" size="card" class="ring-0!" />
 
         {{-- Franja sólida, sin degradado: se lee igual sobre cualquier portada. --}}
         <span class="absolute inset-x-0 bottom-0 flex items-center gap-1 overflow-hidden border-t border-line bg-canvas/90 px-2 py-1.5">

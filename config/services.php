@@ -40,6 +40,18 @@ return [
         'redirect' => env('STEAM_REDIRECT_URI'),
         // Rechaza respuestas de Steam cuyo return_to apunte a otro dominio.
         'allowed_hosts' => [parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)],
+        // Pausa entre llamadas a la tienda en covers:sync.
+        'store_pause_ms' => 1000,
+    ],
+
+    // Portadas de respaldo para lo que Steam no cubre (covers:sync). La key se genera en
+    // https://www.steamgriddb.com/profile/preferences; sin ella, ese paso se omite.
+    'steamgriddb' => [
+        'api_url' => 'https://www.steamgriddb.com/api/v2',
+        'key' => env('STEAMGRIDDB_API_KEY'),
+        // Juegos por ejecución: el resto sigue al día siguiente.
+        'per_run' => 2000,
+        'pause_ms' => 1000,
     ],
 
     'slack' => [

@@ -1,0 +1,56 @@
+{
+    "response": {
+        "store_items": [
+            {
+                "item_type": 0,
+                "id": 3059520,
+                "success": 1,
+                "visible": true,
+                "name": "F1® 25",
+                "appid": 3059520,
+                "type": 0,
+                "assets": {
+                    "asset_url_format": "steam/apps/3059520/${FILENAME}?t=1786646076",
+                    "header": "76dc8ac45f1bd6dec26e04434ca1c8814e7bb330/header.jpg",
+                    "library_capsule": "660d69e1717e93fcabc23f85100d123892ace85c/library_capsule.jpg",
+                    "library_capsule_2x": "660d69e1717e93fcabc23f85100d123892ace85c/library_capsule_2x.jpg",
+                    "library_hero": "1505fcf27524db87913a821864e270ce68ce4e62/library_hero.jpg"
+                }
+            },
+            {
+                "item_type": 0,
+                "id": 242050,
+                "success": 1,
+                "visible": true,
+                "name": "Assassin's Creed IV Black Flag",
+                "appid": 242050,
+                "type": 0,
+                "assets": {
+                    "asset_url_format": "steam/apps/242050/${FILENAME}?t=1777052740",
+                    "header": "header.jpg",
+                    "library_capsule": "library_600x900.jpg",
+                    "library_capsule_2x": "library_600x900_2x.jpg",
+                    "library_hero": "library_hero.jpg"
+                }
+            },
+            {
+                "item_type": 0,
+                "id": 4496490,
+                "success": 1,
+                "visible": true,
+                "name": "Black Flag Resynced Soundtrack",
+                "appid": 4496490,
+                "type": 0,
+                "assets": {
+                    "asset_url_format": "steam/apps/4496490/${FILENAME}?t=1786000000",
+                    "header": "aa11/header.jpg"
+                }
+            },
+            {
+                "item_type": 0,
+                "id": 9999990,
+                "success": 2
+            }
+        ]
+    }
+}

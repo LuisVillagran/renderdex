@@ -25,6 +25,11 @@ class Game extends Model
         'normalized_title',
         'search_title',
         'cover_url',
+        'steam_artwork',
+        'steam_artwork_synced_at',
+        'grid_cover_url',
+        'grid_cover_thumb_url',
+        'grid_checked_at',
         'dlss',
         'dlss_fg',
         'dlss_mfg',
@@ -105,6 +110,9 @@ class Game extends Model
             'ray_tracing' => Support::class,
             'has_data' => 'boolean',
             'synced_at' => 'datetime',
+            'steam_artwork' => 'array',
+            'steam_artwork_synced_at' => 'datetime',
+            'grid_checked_at' => 'datetime',
         ];
     }
 }

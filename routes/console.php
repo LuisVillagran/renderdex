@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Un sync completo toma unos minutos por el límite de 60 requests/minuto de la wiki.
 Schedule::command('pcgw:sync')->dailyAt('04:00')->withoutOverlapping();
+
+// Después del sync, para cubrir los juegos nuevos de la wiki.
+Schedule::command('covers:sync')->dailyAt('05:00')->withoutOverlapping();
