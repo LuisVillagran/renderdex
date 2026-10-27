@@ -124,11 +124,10 @@
             @endif
         @else
             <section class="frame flex flex-col items-start gap-3 p-6" aria-labelledby="no-data-title">
-                <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_NO_RENDER_DATA</p>
                 <h2 id="no-data-title" class="font-display text-xl font-semibold">{{ __('game.no_data.title') }}</h2>
                 <p class="max-w-2xl text-muted">{{ __('game.no_data.body') }}</p>
                 <a href="{{ $game->wikiEditUrl() }}" rel="noopener" class="focus-ring rounded bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:brightness-110">
-                    {{ __('game.no_data.edit') }} ↗
+                    {{ __('game.no_data.edit') }} <span class="font-narrow">↗</span>
                 </a>
             </section>
         @endif

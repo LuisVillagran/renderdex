@@ -100,7 +100,8 @@
                     role="option"
                     x-bind:aria-selected="active === {{ $loop->index }} ? 'true' : 'false'"
                     x-bind:class="active === {{ $loop->index }} && 'bg-raised shadow-[inset_2px_0_0_var(--rd-accent)]'"
-                    x-on:mouseenter="active = {{ $loop->index }}"
+                    {{-- Solo si el mouse se movió: al desplazarse la página con las flechas, la opción bajo el cursor no debe robar la selección. --}}
+                    x-on:mousemove="if ($event.movementX || $event.movementY) active = {{ $loop->index }}"
                 >
                     <a href="{{ $suggestion['url'] }}" tabindex="-1" class="flex items-center gap-3 px-3 py-2">
                         <x-game-cover :appid="$suggestion['appid']" :cover="$suggestion['cover']" :steam-artwork="$suggestion['steam_artwork']" :grid-thumb="$suggestion['grid_thumb']" :title="$suggestion['title']" size="xs" />

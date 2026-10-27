@@ -76,7 +76,7 @@ No agregar paquetes nuevos sin preguntar antes (los de esta tabla ya están apro
    - Las imágenes de la wiki se cargan desde `images.pcgamingwiki.com` solo como respaldo, en miniatura (120 px en tablas, 480 px en la ficha). Cloudflare las bloquea (403) desde la máquina de desarrollo, y puede pasarle lo mismo a algunos visitantes: por eso van después de Steam y SteamGridDB.
    - **`php artisan covers:sync`** (diario a las 05:00, después de `pcgw:sync`; `App\Services\Artwork\ArtworkSync`):
      - **Arte de Steam:** `App\Services\Steam\SteamStoreClient` usa `IStoreBrowseService/GetItems/v1` (sin API key, no documentado oficialmente: cualquier respuesta rara es "no disponible"), 200 AppIDs por llamada. Guarda en `steam_artwork` (`cover`, `cover_2x`, `header`, `hero`) el arte del primer AppID, en el orden de la wiki, que tenga portada vertical. Se vuelve a pedir cada 7 días. La ficha usa `hero` y `header` (banda panorámica y `og:image`).
-     - **SteamGridDB:** `App\Services\Artwork\SteamGridDbClient`, solo para juegos sin portada vertical de Steam y solo con `STEAMGRIDDB_API_KEY`. Busca por AppID o, sin AppID, por título normalizado exacto con un único resultado. Solo portadas estáticas 600x900, sin NSFW, humor ni riesgo de epilepsia; toma la mejor votada. Hasta 2.000 juegos por ejecución, primero los que tienen datos; se vuelve a buscar cada 30 días. **Pendiente:** revisar los términos de SteamGridDB antes de publicar el sitio.
+     - **SteamGridDB:** `App\Services\Artwork\SteamGridDbClient`, solo para juegos sin portada vertical de Steam y solo con `STEAMGRIDDB_API_KEY`. Busca por AppID o, sin AppID, por título normalizado exacto con un único resultado. Solo portadas estáticas 600x900, sin NSFW, humor ni riesgo de epilepsia; toma la mejor votada. Hasta 2.000 juegos por ejecución, primero los que tienen datos; se vuelve a buscar cada 30 días. Términos de SteamGridDB revisados (octubre de 2026): se mantiene la integración.
      - Acepta `--limit` y `--fresh`. Nunca se llama durante una visita.
 
 ### 2a. Lista de deseados
@@ -370,7 +370,8 @@ php artisan test
   - Novedades del sync (`/novedades`, feed Atom y marca "Novedad").
   - Lista de deseados.
   - Versión en inglés.
-  - **Pendiente de revisar a mano:** teclado en la vista previa del buscador (flechas, Enter, Esc, `/`), "Ver todas las tecnologías", el selector de generación con `localStorage`, el header con buscador + navegación + idioma + tema en anchos medianos, y la pestaña de lista de deseados con una cuenta real (el endpoint no está documentado).
+  - Revisado en Chrome (octubre de 2026): teclado del buscador, "Ver todas las tecnologías", selector de generación con `localStorage`, header en anchos medianos y modo claro.
+  - **Pendiente de revisar a mano:** la pestaña de lista de deseados con una cuenta real (el endpoint no está documentado).
 - [ ] Etapa 6: Publicación
 
 ===

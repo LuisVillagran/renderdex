@@ -64,24 +64,21 @@
 
     @if ($error === 'wishlist_private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_WISHLIST_EMPTY</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.wishlist.private.title') }}</h2>
             <p class="text-muted">{{ __('library.wishlist.private.body') }}</p>
         </section>
     @elseif ($error === 'private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_PRIVATE_PROFILE</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.private.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.private.body') }}</p>
             <p class="text-muted">{{ __('home.privacy_help.steps') }}</p>
         </section>
     @elseif ($error === 'unavailable')
         <section class="frame flex flex-col items-start gap-3 p-6" role="alert">
-            <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_STEAM_TIMEOUT</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.unavailable.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.unavailable.body') }}</p>
             <button type="button" wire:click="$refresh" class="focus-ring rounded bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:brightness-110">
-                {{ __('library.errors.unavailable.retry') }} ↻
+                {{ __('library.errors.unavailable.retry') }} <span class="font-narrow">↻</span>
             </button>
         </section>
     @else
