@@ -15,7 +15,7 @@
     <div class="flex flex-col gap-10">
         <header class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div class="flex max-w-2xl flex-col gap-3">
-                <p class="text-sm font-semibold text-accent"><x-decode :text="__('changes.eyebrow')" /></p>
+                <p class="text-sm font-medium text-muted"><x-decode :text="__('changes.eyebrow')" /></p>
                 <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('changes.heading') }}</h1>
                 <p class="text-muted">{{ __('changes.intro') }}</p>
             </div>
@@ -24,7 +24,7 @@
             </a>
         </header>
 
-        <nav aria-label="{{ __('changes.filter_label') }}" class="flex flex-wrap gap-1.5 border-y border-line py-4 font-mono text-xs">
+        <nav aria-label="{{ __('changes.filter_label') }}" class="flex flex-wrap gap-1.5 border-y border-line py-4 font-narrow text-xs">
             @foreach ([null, ...Capability::cases()] as $option)
                 @php $isActive = $capability === $option; @endphp
                 <a
@@ -59,7 +59,7 @@
                 </ul>
             </section>
         @empty
-            <p class="py-14 text-center font-mono text-sm text-muted"><span class="text-accent" aria-hidden="true">∅ </span>{{ __('changes.empty') }}</p>
+            <p class="py-14 text-center font-narrow text-sm text-muted"><span class="text-accent" aria-hidden="true">∅ </span>{{ __('changes.empty') }}</p>
         @endforelse
 
         {{ $changes->links() }}

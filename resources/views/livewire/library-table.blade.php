@@ -20,7 +20,7 @@
     {{-- Encabezado y selector "Mi GPU" --}}
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex flex-col gap-3">
-            <p class="text-sm font-semibold text-accent"><x-decode :text="__('library.eyebrow')" /></p>
+            <p class="text-sm font-medium text-muted"><x-decode :text="__('library.eyebrow')" /></p>
             <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ $isWishlist ? __('library.wishlist.heading') : __('library.heading') }}</h1>
             <div class="flex border-b border-line text-sm" role="group" aria-label="{{ __('library.tabs.label') }}">
                 @foreach (['library' => __('library.tabs.library'), 'wishlist' => __('library.tabs.wishlist')] as $option => $label)
@@ -39,7 +39,7 @@
                     </button>
                 @endforeach
             </div>
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-muted">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-narrow text-xs text-muted">
                 <span><span aria-hidden="true">steamid=</span><span class="sr-only">SteamID </span><span class="text-fg">{{ $steamId }}</span></span>
                 <button
                     type="button"
@@ -57,27 +57,27 @@
 
     @if ($isDemo)
         <p class="flex gap-3 border border-warn/50 bg-warn/10 px-4 py-3 text-sm" role="note">
-            <span class="shrink-0 font-mono text-xs leading-5 font-bold text-warn">DEMO</span>
+            <span class="shrink-0 font-narrow text-xs leading-5 font-bold text-warn">DEMO</span>
             <span>{{ __('library.demo') }}</span>
         </p>
     @endif
 
     @if ($error === 'wishlist_private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_WISHLIST_EMPTY</p>
+            <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_WISHLIST_EMPTY</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.wishlist.private.title') }}</h2>
             <p class="text-muted">{{ __('library.wishlist.private.body') }}</p>
         </section>
     @elseif ($error === 'private')
         <section class="frame flex flex-col gap-2 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_PRIVATE_PROFILE</p>
+            <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_PRIVATE_PROFILE</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.private.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.private.body') }}</p>
             <p class="text-muted">{{ __('home.privacy_help.steps') }}</p>
         </section>
     @elseif ($error === 'unavailable')
         <section class="frame flex flex-col items-start gap-3 p-6" role="alert">
-            <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_STEAM_TIMEOUT</p>
+            <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_STEAM_TIMEOUT</p>
             <h2 class="font-display text-xl font-semibold">{{ __('library.errors.unavailable.title') }}</h2>
             <p class="text-muted">{{ __('library.errors.unavailable.body') }}</p>
             <button type="button" wire:click="$refresh" class="focus-ring rounded bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:brightness-110">
@@ -92,7 +92,7 @@
                     <dt class="label">{{ __('library.stats.total') }}</dt>
                     <dd class="flex flex-col gap-3">
                         <span class="font-display text-5xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($stats['total']) }}</span>
-                        <span class="flex flex-col gap-1.5 font-mono text-xs text-muted">
+                        <span class="flex flex-col gap-1.5 font-narrow text-xs text-muted">
                             <span title="{{ __('library.stats.with_data_help') }}">{{ __('library.stats.with_data', ['count' => Number::format($stats['with_data'])]) }}</span>
                             <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($stats['with_data']) }}%"></span></span>
                         </span>
@@ -104,7 +104,7 @@
                     <div wire:key="stat-{{ $capability->value }}" @class(['flex flex-col gap-3 bg-panel p-4', 'col-span-2 sm:col-span-1' => $loop->last])>
                         <dt class="flex flex-col gap-0.5">
                             <span class="label">{{ __('library.capability.'.$capability->value.'.label') }}</span>
-                            <span @class(['font-mono text-[0.65rem]', 'text-accent' => $gpuProfile, 'text-muted' => ! $gpuProfile])>
+                            <span @class(['font-narrow text-[0.65rem]', 'text-accent' => $gpuProfile, 'text-muted' => ! $gpuProfile])>
                                 {{ $gpuProfile ? __('library.stats.on_gpu', ['gpu' => $gpuProfile->label()]) : __('library.stats.any_vendor') }}
                             </span>
                         </dt>
@@ -112,13 +112,13 @@
                             <span class="font-display text-4xl leading-none font-semibold tabular-nums" data-count-up>{{ Number::format($count) }}</span>
                             <span class="meter" aria-hidden="true"><span class="meter-fill" style="width: {{ $percent($count) }}%"></span></span>
                             @if ($breakdown[$capability->value] !== [])
-                                <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
+                                <span class="flex flex-wrap gap-x-3 font-narrow text-[0.7rem] text-muted">
                                     @foreach ($breakdown[$capability->value] as $technology)
                                         <span>{{ __('technologies.label.'.$technology->value) }} <span class="text-fg tabular-nums">{{ Number::format($stats['technologies'][$technology->value]) }}</span></span>
                                     @endforeach
                                 </span>
                             @else
-                                <span class="font-mono text-[0.7rem] text-muted">{{ __('library.stats.games_with', ['count' => Number::format($count), 'total' => Number::format($stats['total'])]) }}</span>
+                                <span class="font-narrow text-[0.7rem] text-muted">{{ __('library.stats.games_with', ['count' => Number::format($count), 'total' => Number::format($stats['total'])]) }}</span>
                             @endif
                         </dd>
                     </div>
@@ -175,7 +175,7 @@
                 <div class="relative" wire:loading.class="opacity-70">
                     <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
                     @if ($games->isEmpty())
-                        <p class="frame px-3 py-14 text-center font-mono text-sm text-muted">
+                        <p class="frame px-3 py-14 text-center font-narrow text-sm text-muted">
                             <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
                         </p>
                     @else
@@ -244,7 +244,7 @@
                                                 @else
                                                     <span class="font-medium">{{ $entry->owned->name }}</span>
                                                 @endif
-                                                <span class="flex flex-wrap gap-x-3 font-mono text-[0.7rem] text-muted">
+                                                <span class="flex flex-wrap gap-x-3 font-narrow text-[0.7rem] text-muted">
                                                     @if ($isWishlist)
                                                         <a href="https://store.steampowered.com/app/{{ $entry->owned->appid }}/" rel="noopener" aria-label="{{ __('catalog.store_link_label', ['name' => $entry->owned->name]) }}" class="focus-ring hover:text-accent">{{ __('catalog.store_link') }} ↗</a>
                                                     @else
@@ -266,7 +266,7 @@
                                         </div>
                                     </td>
                                     @unless ($isWishlist)
-                                        <td class="hidden px-3 py-3 text-right align-top font-mono text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
+                                        <td class="hidden px-3 py-3 text-right align-top font-narrow text-xs text-muted tabular-nums sm:table-cell lg:align-middle">
                                             {{ Number::format($entry->owned->playtimeMinutes / 60, maxPrecision: 1) }}
                                         </td>
                                     @endunless
@@ -274,7 +274,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ ($isWishlist ? 2 : 3) + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-mono text-sm text-muted">
+                                    <td colspan="{{ ($isWishlist ? 2 : 3) + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-narrow text-sm text-muted">
                                         <span class="text-accent" aria-hidden="true">∅ </span>{{ $stats['total'] === 0 ? __('library.empty') : __('library.no_results') }}
                                     </td>
                                 </tr>
@@ -299,9 +299,9 @@
                     @foreach ($missingData as $entry)
                         <li wire:key="missing-{{ $entry->owned->appid }}" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
                             <span class="flex items-baseline gap-3">
-                                <span class="font-mono text-xs text-accent" aria-hidden="true">{{ sprintf('%02d', $loop->iteration) }}</span>
+                                <span class="font-narrow text-xs text-accent" aria-hidden="true">{{ sprintf('%02d', $loop->iteration) }}</span>
                                 <span class="text-sm font-medium">{{ $entry->owned->name }}</span>
-                                <span class="font-mono text-xs text-muted">{{ $hours($entry->owned->playtimeMinutes) }}</span>
+                                <span class="font-narrow text-xs text-muted">{{ $hours($entry->owned->playtimeMinutes) }}</span>
                             </span>
                             <x-no-data :game="$entry->game" :name="$entry->owned->name" />
                         </li>

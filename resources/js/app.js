@@ -4,35 +4,6 @@
  */
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-/** Marcador en la regla del header que sigue al mouse, como el cursor de un osciloscopio. */
-function trackRulerCursor() {
-    const ruler = document.querySelector('[data-ruler]');
-
-    if (!ruler || window.matchMedia('(pointer: coarse)').matches) {
-        return;
-    }
-
-    let pending = null;
-
-    window.addEventListener(
-        'pointermove',
-        (event) => {
-            if (pending) {
-                return;
-            }
-
-            pending = requestAnimationFrame(() => {
-                ruler.style.setProperty('--cursor-x', `${event.clientX}px`);
-                ruler.dataset.active = '';
-                pending = null;
-            });
-        },
-        { passive: true },
-    );
-
-    document.documentElement.addEventListener('pointerleave', () => delete ruler.dataset.active);
-}
-
 /** Números que cuentan desde cero hasta el valor que ya trae el HTML. */
 function countUp() {
     const format = new Intl.NumberFormat(document.documentElement.lang);
@@ -89,7 +60,6 @@ function revealOnScroll() {
 }
 
 function start() {
-    trackRulerCursor();
     revealOnScroll();
 
     if (!reducedMotion.matches) {

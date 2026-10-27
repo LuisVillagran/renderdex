@@ -18,16 +18,16 @@
     @if ($summary['usable'] !== [])
         <ul class="flex flex-wrap gap-1" aria-label="{{ __('library.gpu.column', ['gpu' => $gpu->label()]) }}">
             @foreach ($summary['usable'] as $item)
-                <li class="inline-flex items-center rounded-sm border border-accent/60 bg-accent/12 px-1.5 font-mono text-[0.7rem] leading-[1.125rem] font-medium whitespace-nowrap text-accent">
+                <li class="inline-flex items-center rounded-sm border border-transparent bg-chip px-1.5 font-narrow text-xs leading-[1.125rem] font-semibold text-fg whitespace-nowrap">
                     {{ trim(__('technologies.label.'.$item['technology']->value).' '.$item['version']) }}
                 </li>
             @endforeach
         </ul>
     @elseif ($game?->has_data)
-        <span class="font-mono text-[0.7rem] text-muted">{{ __('library.gpu.nothing_usable') }}</span>
+        <span class="font-narrow text-[0.7rem] text-muted">{{ __('library.gpu.nothing_usable') }}</span>
     @endif
 
     @foreach ($notes as $note)
-        <span class="font-mono text-[0.65rem] leading-tight text-muted">{{ $note }}</span>
+        <span class="font-narrow text-[0.65rem] leading-tight text-muted">{{ $note }}</span>
     @endforeach
 </div>

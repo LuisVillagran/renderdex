@@ -65,13 +65,13 @@
                 ])
             >
             @if ($compact)
-                <kbd class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 border border-line-strong px-1.5 font-mono text-[0.65rem] text-muted" aria-hidden="true">/</kbd>
+                <kbd class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border border-line-strong px-1.5 font-narrow text-xs text-muted" aria-hidden="true">/</kbd>
             @endif
         </div>
 
         @unless ($compact)
-            <button type="submit" class="focus-ring rounded border border-accent px-5 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent hover:text-on-accent active:translate-y-px sm:-ml-px">
-                {{ __('search.submit') }} ↵
+            <button type="submit" class="focus-ring rounded border border-accent bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 active:translate-y-px sm:-ml-px">
+                {{ __('search.submit') }}
             </button>
         @endunless
     </div>
@@ -87,9 +87,9 @@
         <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
 
         @if ($throttled)
-            <p class="px-3 py-4 font-mono text-xs text-muted" role="status">{{ __('search.throttled') }}</p>
+            <p class="px-3 py-4 font-narrow text-xs text-muted" role="status">{{ __('search.throttled') }}</p>
         @elseif ($searching && $suggestions->isEmpty())
-            <p class="px-3 py-4 font-mono text-xs text-muted" role="status"><span class="text-accent" aria-hidden="true">∅ </span>{{ __('search.no_results', ['query' => trim($query)]) }}</p>
+            <p class="px-3 py-4 font-narrow text-xs text-muted" role="status"><span class="text-accent" aria-hidden="true">∅ </span>{{ __('search.no_results', ['query' => trim($query)]) }}</p>
         @endif
 
         <ul id="{{ $inputId }}-listbox" role="listbox" aria-label="{{ __('search.suggestions') }}" class="divide-y divide-line">
@@ -106,7 +106,7 @@
                         <x-game-cover :appid="$suggestion['appid']" :cover="$suggestion['cover']" :title="$suggestion['title']" size="xs" />
                         <span class="flex min-w-0 flex-col gap-0.5">
                             <span class="truncate text-sm font-medium"><x-highlight :text="$suggestion['title']" :query="$query" /></span>
-                            <span class="truncate font-mono text-[0.7rem]">
+                            <span class="truncate font-narrow text-[0.7rem]">
                                 @if ($suggestion['supported'] !== [])
                                     <span class="text-accent">{{ implode(' · ', $suggestion['supported']) }}</span>
                                 @elseif ($suggestion['hasData'])

@@ -18,8 +18,8 @@
         <meta name="robots" content="noindex">
     @endif
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#111419" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f4f3f8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1d1b24" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
 
     <meta property="og:type" content="website">
@@ -53,7 +53,7 @@
                 const theme = choice === 'light' || choice === 'dark' ? choice : (systemDark.matches ? 'dark' : 'light');
                 document.documentElement.dataset.theme = theme;
                 document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
-                    meta.content = theme === 'dark' ? '#111419' : '#eef1f5';
+                    meta.content = theme === 'dark' ? '#1d1b24' : '#f4f3f8';
                 });
             };
 
@@ -78,12 +78,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="relative isolate flex min-h-screen flex-col bg-canvas font-sans text-fg antialiased">
-    <a href="#main" class="sr-only z-50 bg-accent px-4 py-2 font-mono text-sm font-bold text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3">
+    <a href="#main" class="sr-only z-50 bg-accent px-4 py-2 font-narrow text-sm font-bold text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3">
         {{ __('layout.skip_to_content') }}
     </a>
 
 
-    <header class="sticky top-0 z-20 border-b border-line bg-panel">
+    <header class="sticky top-0 z-20 border-b border-line bg-panel/95 backdrop-blur-sm">
         <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
             <a href="{{ route('home') }}" class="focus-ring shrink-0" aria-label="{{ __('layout.header.home') }}">
                 <x-logo tagline />
@@ -100,7 +100,7 @@
                 <nav aria-label="{{ __('layout.header.nav') }}" class="flex items-center">
                     @foreach (['catalog' => __('layout.header.catalog'), 'changes.index' => __('layout.header.changes')] as $route => $label)
                         <a href="{{ route($route) }}" @class([
-                            'focus-ring rounded px-3 py-1.5 text-sm font-medium transition hover:bg-raised hover:text-fg',
+                            'focus-ring rounded px-2 py-1.5 text-sm font-medium transition hover:bg-raised hover:text-fg sm:px-3',
                             'bg-raised text-fg' => request()->routeIs($route),
                             'text-muted' => ! request()->routeIs($route),
                         ]) @if (request()->routeIs($route)) aria-current="page" @endif>
@@ -131,9 +131,6 @@
                 <x-theme-switcher />
             </div>
         </div>
-        <div class="ruler relative h-1.5" data-ruler aria-hidden="true">
-            <span class="ruler-cursor"></span>
-        </div>
     </header>
 
     <main id="main" tabindex="-1" class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 outline-none sm:py-14">
@@ -162,7 +159,7 @@
 
         {{-- Barra de estado, como la de un editor. --}}
         <div class="border-t border-line">
-            <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 font-mono text-[0.7rem] text-muted">
+            <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 font-narrow text-xs text-muted">
                 <p class="flex items-center gap-2">
                     <span @class(['size-1.5', 'bg-accent' => $lastSyncAt, 'bg-line-strong' => ! $lastSyncAt]) aria-hidden="true"></span>
                     @if ($lastSyncAt)
@@ -175,9 +172,8 @@
                 <p class="hidden sm:block sm:ml-auto" aria-hidden="true">
                     @if (defined('LARAVEL_START'))
                         {{-- Tiempo real que tardó el servidor en armar la página. --}}
-                        render {{ Number::format((microtime(true) - LARAVEL_START) * 1000, precision: 0) }} ms ·
+                        render {{ Number::format((microtime(true) - LARAVEL_START) * 1000, precision: 0) }} ms
                     @endif
-                    utf-8 · {{ app()->getLocale() }}
                 </p>
             </div>
         </div>

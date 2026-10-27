@@ -22,7 +22,7 @@
 
 <x-layout :title="$metaTitle" :description="$metaDescription" :image="$shareImage" :canonical="$game->url()" :noindex="! $game->has_data">
     <article class="flex flex-col gap-10">
-        <nav aria-label="{{ __('game.breadcrumb') }}" class="font-mono text-xs text-muted">
+        <nav aria-label="{{ __('game.breadcrumb') }}" class="font-narrow text-xs text-muted">
             <ol class="flex flex-wrap items-center gap-2">
                 <li><a href="{{ route('catalog') }}" class="focus-ring hover:text-accent">{{ __('layout.header.catalog') }}</a></li>
                 <li aria-hidden="true" class="text-accent">›</li>
@@ -50,7 +50,7 @@
             </div>
 
             <div class="flex flex-col gap-4 sm:pb-2">
-                <p class="text-sm font-semibold text-accent"><x-decode :text="__('game.eyebrow')" /></p>
+                <p class="text-sm font-medium text-muted"><x-decode :text="__('game.eyebrow')" /></p>
                 <h1 class="font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{{ $game->title }}</h1>
 
                 @if ($game->has_data)
@@ -60,8 +60,8 @@
                 @endif
 
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ $game->wikiUrl() }}" rel="noopener" class="focus-ring rounded border border-accent px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent hover:text-on-accent">
-                        {{ __('game.wiki_link') }} ↗
+                    <a href="{{ $game->wikiUrl() }}" rel="noopener" class="focus-ring rounded border border-accent bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:brightness-110">
+                        {{ __('game.wiki_link') }} <span class="font-narrow">↗</span>
                     </a>
                     @if ($appid)
                         <a href="https://store.steampowered.com/app/{{ $appid }}/" rel="noopener" class="focus-ring rounded border border-line-strong px-4 py-2 text-sm text-muted transition hover:border-fg hover:text-fg">
@@ -99,7 +99,7 @@
 
             <section aria-labelledby="raw-title" class="flex flex-col gap-4">
                 <h2 id="raw-title" class="label">{{ __('game.raw.title') }}</h2>
-                <dl class="grid gap-x-8 gap-y-3 font-mono text-sm sm:grid-cols-[auto_1fr]">
+                <dl class="grid gap-x-8 gap-y-3 font-narrow text-sm sm:grid-cols-[auto_1fr]">
                     @foreach (['upscaling' => $game->upscaling_tech, 'frame_gen' => $game->frame_gen_tech] as $field => $value)
                         <dt class="text-muted">{{ __('game.raw.'.$field) }}</dt>
                         <dd @class(['text-muted' => ! $value])>{{ $rawList($value) ?? __('game.raw.empty') }}</dd>
@@ -112,7 +112,7 @@
                     <ol class="flex flex-col gap-2 border-l border-line pl-4">
                         @foreach ($changes as $change)
                             <li class="flex flex-wrap items-center gap-3">
-                                <time datetime="{{ $change->detected_at->toDateString() }}" class="font-mono text-xs text-muted">{{ $change->detected_at->isoFormat('LL') }}</time>
+                                <time datetime="{{ $change->detected_at->toDateString() }}" class="font-narrow text-xs text-muted">{{ $change->detected_at->isoFormat('LL') }}</time>
                                 <x-change-label :change="$change" />
                             </li>
                         @endforeach
@@ -121,7 +121,7 @@
             @endif
         @else
             <section class="frame flex flex-col items-start gap-3 p-6" aria-labelledby="no-data-title">
-                <p class="font-mono text-xs text-accent" aria-hidden="true">ERR_NO_RENDER_DATA</p>
+                <p class="font-narrow text-xs text-accent" aria-hidden="true">ERR_NO_RENDER_DATA</p>
                 <h2 id="no-data-title" class="font-display text-xl font-semibold">{{ __('game.no_data.title') }}</h2>
                 <p class="max-w-2xl text-muted">{{ __('game.no_data.body') }}</p>
                 <a href="{{ $game->wikiEditUrl() }}" rel="noopener" class="focus-ring rounded bg-accent px-4 py-2 text-sm font-semibold text-on-accent hover:brightness-110">

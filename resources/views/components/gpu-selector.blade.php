@@ -44,7 +44,7 @@
     <legend class="label mb-2">{{ __('library.gpu.label') }}</legend>
     <div class="flex flex-col gap-2">
         {{-- gap-px sobre el color del borde: separadores que funcionan en 4 columnas y en 2×2. --}}
-        <div class="grid grid-cols-4 gap-px overflow-hidden rounded border border-line-strong bg-line-strong lg:grid-cols-2">
+        <div class="grid grid-cols-4 gap-px overflow-hidden rounded border border-line bg-line lg:grid-cols-2">
             @foreach (['nvidia', 'amd', 'intel', 'all'] as $option)
                 <button
                     type="button"
@@ -53,7 +53,7 @@
                     aria-pressed="{{ $gpu === $option ? 'true' : 'false' }}"
                     @class([
                         'focus-ring px-2 py-2 text-sm font-semibold transition active:translate-y-px',
-                        'bg-accent text-on-accent' => $gpu === $option,
+                        'segment-on' => $gpu === $option,
                         'bg-panel text-muted hover:bg-raised hover:text-fg' => $gpu !== $option,
                     ])
                 >

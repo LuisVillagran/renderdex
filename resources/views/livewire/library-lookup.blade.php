@@ -3,7 +3,7 @@
 
     <div class="flex flex-col gap-2 sm:flex-row sm:gap-0">
         <div class="relative flex min-w-0 flex-1">
-            <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 font-mono text-sm text-accent" aria-hidden="true">›</span>
+            <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 font-narrow text-sm text-accent" aria-hidden="true">›</span>
             <input
                 id="profile"
                 type="text"
@@ -13,7 +13,7 @@
                 spellcheck="false"
                 aria-describedby="profile-help @error('profile') profile-error @enderror"
                 @error('profile') aria-invalid="true" @enderror
-                class="w-full rounded border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-mono text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent aria-invalid:border-danger"
+                class="w-full rounded border border-line-strong bg-canvas py-2.5 pr-3 pl-7 font-narrow text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent aria-invalid:border-danger"
             >
         </div>
 
@@ -28,7 +28,7 @@
     </div>
 
     @error('profile')
-        <p id="profile-error" class="font-mono text-xs text-danger" role="alert"><span aria-hidden="true">✕ </span>{{ $message }}</p>
+        <p id="profile-error" class="font-narrow text-xs text-danger" role="alert"><span aria-hidden="true">✕ </span>{{ $message }}</p>
     @enderror
 
     <p id="profile-help" class="text-xs text-muted">{{ __('lookup.help') }}</p>

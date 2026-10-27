@@ -7,7 +7,7 @@
 
 <div class="flex flex-col gap-8">
     <div class="flex max-w-2xl flex-col gap-3">
-        <p class="text-sm font-semibold text-accent"><x-decode :text="__('catalog.eyebrow')" /></p>
+        <p class="text-sm font-medium text-muted"><x-decode :text="__('catalog.eyebrow')" /></p>
         <h1 class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{{ __('catalog.heading') }}</h1>
         <p class="text-muted">{{ __('catalog.intro') }}</p>
     </div>
@@ -29,7 +29,7 @@
     >
         <x-name-search :placeholder="__('catalog.search.placeholder')" />
 
-        <div class="flex flex-wrap items-baseline justify-between gap-2 font-mono text-xs text-muted">
+        <div class="flex flex-wrap items-baseline justify-between gap-2 font-narrow text-xs text-muted">
             <p role="status">
                 <span class="text-fg">{{ trans_choice('catalog.results', $games->total(), ['count' => Number::format($games->total())]) }}</span>
                 @if ($approximate && $games->total() > 0)
@@ -53,7 +53,7 @@
             <div class="relative" wire:loading.class="opacity-70">
                 <div wire:loading.delay class="loading-bar z-10" aria-hidden="true"></div>
                 @if ($games->isEmpty())
-                    <p class="frame px-3 py-14 text-center font-mono text-sm text-muted">
+                    <p class="frame px-3 py-14 text-center font-narrow text-sm text-muted">
                         <span class="text-accent" aria-hidden="true">∅ </span>{{ __('catalog.no_results') }}
                     </p>
                 @else
@@ -122,7 +122,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ 2 + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-mono text-sm text-muted">
+                                <td colspan="{{ 2 + ($gpuProfile ? 1 : 0) + count(Technology::byVendor()) }}" class="px-3 py-14 text-center font-narrow text-sm text-muted">
                                     <span class="text-accent" aria-hidden="true">∅ </span>{{ __('catalog.no_results') }}
                                 </td>
                             </tr>

@@ -9,13 +9,13 @@
         <section class="grid items-start gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
             <div class="flex flex-col gap-7">
                 @if ($gameCount > 0)
-                    <p class="text-sm font-semibold text-accent">
+                    <p class="text-sm font-medium text-muted">
                         <x-decode :text="__('home.eyebrow', ['count' => Number::format($gameCount)])" />
                     </p>
                 @endif
 
-                <h1 class="font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.5rem]">
-                    {!! __('home.title', ['technologies' => '<span class="text-accent">'.e(__('home.title_technologies')).'</span>']) !!}
+                <h1 class="font-display text-4xl leading-[1.02] font-extrabold tracking-[-0.025em] text-balance sm:text-5xl lg:text-[3.25rem]">
+                    {!! __('home.title', ['technologies' => e(__('home.title_technologies'))]) !!}
                 </h1>
                 <p class="max-w-xl text-lg text-muted">{{ __('home.intro') }}</p>
 
@@ -34,7 +34,7 @@
                 <div class="frame">
                     <p class="label flex items-center justify-between border-b border-line px-4 py-2">
                         <span>{{ __('home.access.label') }}</span>
-                        <span aria-hidden="true">steam · openid</span>
+                        
                     </p>
 
                     <div class="flex flex-col gap-4 p-4 sm:p-5">
@@ -74,12 +74,12 @@
                         @foreach ($showcase as $appid)
                             @php $labels = $summary->labels($appid->game); @endphp
                             <li class="animate-rise" style="--delay: {{ 150 + $loop->index * 70 }}ms">
-                                <a href="{{ $appid->game->url() }}" class="group focus-ring relative block overflow-hidden rounded-md ring-1 ring-line transition duration-200 hover:-translate-y-1 hover:ring-accent hover:shadow-[0_12px_24px_-12px_rgb(0_0_0/0.55)]" aria-label="{{ $appid->game->title }}">
+                                <a href="{{ $appid->game->url() }}" class="group focus-ring relative block overflow-hidden rounded-md ring-1 ring-line transition duration-200 hover:ring-fg/60" aria-label="{{ $appid->game->title }}">
                                     <x-game-cover :appid="$appid->steam_appid" :cover="$appid->game->cover_url" :title="$appid->game->title" size="card" class="ring-0!" />
                                     @if ($labels !== [])
                                         <span class="absolute inset-x-0 bottom-0 flex gap-1 overflow-hidden border-t border-line bg-canvas/90 px-1.5 py-1" aria-hidden="true">
                                             @foreach (array_slice($labels, 0, 2) as $label)
-                                                <span class="rounded-sm border border-accent/60 bg-accent/12 px-1 font-mono text-[0.6rem] leading-4 whitespace-nowrap text-accent">{{ $label }}</span>
+                                                <span class="chip text-[0.7rem] leading-4">{{ $label }}</span>
                                             @endforeach
                                         </span>
                                     @endif
@@ -87,8 +87,8 @@
                             </li>
                         @endforeach
                     </ul>
-                    <figcaption class="font-mono text-xs text-muted">
-                        <span class="text-accent" aria-hidden="true">↳</span> {{ __('home.preview.caption') }}
+                    <figcaption class="text-sm text-muted">
+                        {{ __('home.preview.caption') }}
                     </figcaption>
                 </figure>
             @endif
@@ -101,10 +101,10 @@
                     <li class="flex flex-col gap-3" data-reveal style="--delay: {{ $loop->index * 140 }}ms">
                         {{-- Nodo del pipeline: número y conector hacia el paso siguiente. --}}
                         <div class="flex items-center gap-3" aria-hidden="true">
-                            <span class="border border-accent px-1.5 font-mono text-xs text-accent">{{ sprintf('%02d', $loop->iteration) }}</span>
+                            <span class="border border-accent px-1.5 font-narrow text-xs text-accent">{{ sprintf('%02d', $loop->iteration) }}</span>
                             @unless ($loop->last)
                                 <span class="hidden h-px flex-1 border-t border-dashed border-line-strong sm:block" data-connector></span>
-                                <span class="hidden font-mono text-xs text-line-strong sm:block">▶</span>
+                                <span class="hidden font-narrow text-xs text-line-strong sm:block">▶</span>
                             @endunless
                         </div>
                         <h3 class="font-display text-xl font-semibold">{{ $step['title'] }}</h3>
@@ -122,7 +122,7 @@
                     [__('home.privacy_help.family_sharing_title'), __('home.privacy_help.family_sharing')],
                 ] as [$question, $answer])
                     <div data-reveal style="--delay: {{ $loop->index * 140 }}ms" @class(['flex flex-col gap-2 py-6 sm:px-6', 'border-b border-line sm:border-r sm:border-b-0 sm:pl-0' => $loop->first, 'sm:pr-0' => $loop->last])>
-                        <dt class="flex gap-3 font-display text-lg font-semibold"><span class="font-mono text-sm leading-7 text-accent" aria-hidden="true">Q.</span>{{ $question }}</dt>
+                        <dt class="flex gap-3 font-display text-lg font-semibold"><span class="font-narrow text-sm leading-7 text-accent" aria-hidden="true">Q.</span>{{ $question }}</dt>
                         <dd class="pl-8 text-sm text-muted">{{ $answer }}</dd>
                     </div>
                 @endforeach

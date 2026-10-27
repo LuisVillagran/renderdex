@@ -7,8 +7,8 @@
         <path d="M14 18 28.5 3.5" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" />
         <rect x="6" y="16" width="10" height="10" rx="1.5" class="fill-accent" />
     </svg>
-    <span class="flex flex-col leading-none">
-        <span class="font-display text-lg font-semibold tracking-tight">Renderdex</span>
+    <span @class(['flex-col leading-none', 'hidden sm:flex' => $tagline, 'flex' => ! $tagline])>
+        <span class="font-display text-lg font-extrabold tracking-tight">Renderdex</span>
         @if ($tagline)
             <span class="mt-0.5 hidden text-[0.7rem] text-muted xl:block">{{ __('layout.tagline') }}</span>
         @endif

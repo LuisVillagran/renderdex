@@ -1,7 +1,8 @@
 {{--
     Portada vertical (2:3), como la caja del juego. Prueba en orden: la portada de la biblioteca
     de Steam, la de PCGamingWiki y el header de Steam; si todas fallan (p. ej. juegos nuevos cuyas
-    imágenes Steam sirve en rutas con hash), queda el placeholder con las iniciales, que está detrás.
+    imágenes Steam sirve en rutas con hash), queda el placeholder con las iniciales sobre el damero
+    de "textura faltante", que está detrás.
     wire:ignore evita que Livewire vuelva a la primera imagen en cada actualización.
 --}}
 @props(['appid' => null, 'cover' => null, 'title' => '', 'size' => 'sm', 'alt' => ''])
@@ -29,7 +30,7 @@
 <span
     wire:ignore
     {{ $attributes->class([
-        'relative isolate block aspect-[2/3] shrink-0 overflow-hidden rounded-sm bg-raised ring-1 ring-line',
+        'missing-texture relative isolate block aspect-[2/3] shrink-0 overflow-hidden rounded-sm ring-1 ring-line',
         match ($size) {
             'xs' => 'w-8',
             'md' => 'w-14',
@@ -42,7 +43,7 @@
     <span
         aria-hidden="true"
         @class([
-            'absolute inset-0 flex items-center justify-center font-display font-semibold tracking-tight text-muted',
+            'absolute inset-0 flex items-center justify-center font-display font-extrabold tracking-tight text-fg/80',
             match ($size) {
                 'xs' => 'text-[0.6rem]',
                 'md' => 'text-base',

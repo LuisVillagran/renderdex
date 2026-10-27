@@ -29,8 +29,8 @@
     <a
         @if ($game) href="{{ $game->url() }}" @endif
         @class([
-            'focus-ring relative block overflow-hidden rounded-md outline-offset-2 ring-1 ring-line transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_12px_24px_-12px_rgb(0_0_0/0.55)]',
-            'hover:ring-accent' => $game,
+            'focus-ring relative block overflow-hidden rounded-md outline-offset-2 ring-1 ring-line transition duration-200 group-hover:ring-line-strong',
+            'hover:ring-fg/60' => $game,
         ])
         @if ($game) aria-label="{{ $name }}" @else aria-hidden="true" tabindex="-1" @endif
     >
@@ -39,9 +39,9 @@
         {{-- Franja sólida, sin degradado: se lee igual sobre cualquier portada. --}}
         <span class="absolute inset-x-0 bottom-0 flex items-center gap-1 overflow-hidden border-t border-line bg-canvas/90 px-2 py-1.5">
             @forelse ($visible as $chip)
-                <span class="rounded-sm border border-accent/60 bg-accent/12 px-1.5 font-mono text-[0.65rem] leading-[1.125rem] font-medium whitespace-nowrap text-accent">{{ $chip }}</span>
+                <span class="chip text-xs leading-5">{{ $chip }}</span>
             @empty
-                <span class="rounded-sm border border-dashed border-line-strong px-1.5 font-mono text-[0.65rem] leading-[1.125rem] whitespace-nowrap text-muted">
+                <span class="rounded-sm border border-dashed border-line-strong px-1.5 font-narrow text-xs leading-[1.125rem] whitespace-nowrap text-muted">
                     {{ match (true) {
                         ! $game => __('library.no_wiki_page'),
                         ! $hasData => __('library.no_data'),
@@ -51,19 +51,19 @@
                 </span>
             @endforelse
             @if ($hidden > 0)
-                <span class="font-mono text-[0.65rem] text-muted" title="{{ implode(' · ', array_slice($chips, 2)) }}">+{{ $hidden }}</span>
+                <span class="font-narrow text-xs font-semibold text-muted" title="{{ implode(' · ', array_slice($chips, 2)) }}">+{{ $hidden }}</span>
             @endif
         </span>
     </a>
 
     <div class="flex min-w-0 flex-col gap-1">
         @if ($game)
-            <a href="{{ $game->url() }}" tabindex="-1" class="line-clamp-2 text-sm leading-snug font-semibold text-balance decoration-accent underline-offset-4 group-hover:text-accent hover:underline"><x-highlight :text="$name" :query="$query" /></a>
+            <a href="{{ $game->url() }}" tabindex="-1" class="line-clamp-2 text-sm leading-snug font-semibold text-balance decoration-accent decoration-2 underline-offset-4 group-hover:underline"><x-highlight :text="$name" :query="$query" /></a>
         @else
             <span class="line-clamp-2 text-sm leading-snug font-semibold text-balance">{{ $name }}</span>
         @endif
 
-        <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[0.65rem] text-muted">
+        <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-narrow text-xs text-muted">
             {{ $meta ?? '' }}
             @unless ($hasData)
                 <x-no-data :game="$game" :name="$name" class="[&>span:first-child]:hidden" />

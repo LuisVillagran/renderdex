@@ -9,14 +9,11 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
             fonts: [
-                bunny('Chakra Petch', {
-                    weights: [500, 600, 700],
+                bunny('Archivo', {
+                    weights: [400, 500, 600, 700, 800],
                 }),
-                bunny('IBM Plex Sans', {
-                    weights: [400, 500, 600],
-                }),
-                bunny('JetBrains Mono', {
-                    weights: [400, 500, 700],
+                bunny('Archivo Narrow', {
+                    weights: [500, 600],
                 }),
             ],
         }),

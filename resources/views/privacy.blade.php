@@ -3,7 +3,7 @@
         <aside class="lg:sticky lg:top-28 lg:self-start">
             <nav aria-labelledby="privacy-contents" class="flex flex-col gap-3">
                 <h2 id="privacy-contents" class="label">{{ __('privacy.contents') }}</h2>
-                <ol class="flex flex-col gap-1.5 border-l border-line font-mono text-xs">
+                <ol class="flex flex-col gap-1.5 border-l border-line font-narrow text-xs">
                     @foreach (__('privacy.sections') as $section)
                         <li>
                             <a href="#{{ $section['id'] }}" class="focus-ring -ml-px flex gap-2 border-l border-transparent py-0.5 pl-3 text-muted hover:border-accent hover:text-fg">
@@ -18,16 +18,16 @@
 
         <article class="flex max-w-2xl flex-col gap-10">
             <header class="flex flex-col gap-4">
-                <p class="text-sm font-semibold text-accent"><x-decode :text="__('privacy.title')" /></p>
+                <p class="text-sm font-medium text-muted"><x-decode :text="__('privacy.title')" /></p>
                 <h1 class="font-display text-4xl font-semibold tracking-tight">{{ __('privacy.heading') }}</h1>
                 <p class="text-lg text-muted">{{ __('privacy.intro') }}</p>
-                <p class="font-mono text-xs text-muted">{{ __('privacy.updated') }}</p>
+                <p class="font-narrow text-xs text-muted">{{ __('privacy.updated') }}</p>
             </header>
 
             @foreach (__('privacy.sections') as $section)
                 <section id="{{ $section['id'] }}" class="flex scroll-mt-28 flex-col gap-4 border-t border-line pt-6" aria-labelledby="{{ $section['id'] }}-title">
                     <h2 id="{{ $section['id'] }}-title" class="flex items-baseline gap-3 font-display text-2xl font-semibold">
-                        <span class="font-mono text-sm text-accent" aria-hidden="true">§{{ $loop->iteration }}</span>
+                        <span class="font-narrow text-sm text-accent" aria-hidden="true">§{{ $loop->iteration }}</span>
                         {{ $section['title'] }}
                     </h2>
 
@@ -35,7 +35,7 @@
                         <ul class="flex flex-col gap-3">
                             @foreach ($section['items'] as $item)
                                 <li class="flex gap-3 text-muted">
-                                    <span class="font-mono text-accent" aria-hidden="true">–</span>
+                                    <span class="font-narrow text-accent" aria-hidden="true">–</span>
                                     <span>{{ $item }}</span>
                                 </li>
                             @endforeach

@@ -18,6 +18,6 @@
             autocomplete="off"
             class="w-full rounded border border-line-strong bg-panel py-2.5 pr-10 pl-9 text-sm placeholder:text-muted focus:border-accent focus:outline-2 focus:-outline-offset-1 focus:outline-accent"
         >
-        <kbd class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border border-line-strong px-1.5 font-mono text-[0.65rem] text-muted" aria-hidden="true">/</kbd>
+        <kbd class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-sm border border-line-strong px-1.5 font-narrow text-[0.65rem] text-muted" aria-hidden="true">/</kbd>
     </div>
 </div>

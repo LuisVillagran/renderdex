@@ -10,7 +10,7 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
     JS
     : '';
 
-$base = 'relative inline-flex items-center border font-mono text-xs font-medium leading-5';
+$base = 'relative inline-flex items-center border font-narrow text-xs font-medium leading-5';
 $link = $base.' focus-ring border-line-strong bg-panel text-fg hover:border-accent hover:text-accent focus-visible:z-10';
 $disabled = $base.' cursor-default border-line-strong bg-panel text-muted/50';
 $current = $base.' z-10 cursor-default border-accent bg-accent text-on-accent font-bold';
@@ -39,13 +39,13 @@ $current = $base.' z-10 cursor-default border-accent bg-accent text-on-accent fo
             </div>
 
             <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <p class="font-mono text-xs text-muted">
+                <p class="font-narrow text-xs text-muted">
                     {{ __('Showing') }}
-                    <span class="font-mono font-medium text-fg">{{ $paginator->firstItem() }}</span>
+                    <span class="font-narrow font-medium text-fg">{{ $paginator->firstItem() }}</span>
                     {{ __('to') }}
-                    <span class="font-mono font-medium text-fg">{{ $paginator->lastItem() }}</span>
+                    <span class="font-narrow font-medium text-fg">{{ $paginator->lastItem() }}</span>
                     {{ __('of') }}
-                    <span class="font-mono font-medium text-fg">{{ $paginator->total() }}</span>
+                    <span class="font-narrow font-medium text-fg">{{ $paginator->total() }}</span>
                     {{ __('results') }}
                 </p>
 
