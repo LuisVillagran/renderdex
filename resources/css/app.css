@@ -8,10 +8,10 @@
 }
 
 /*
- * Grafito y magenta. La base es un gris grafito con un toque violeta: tiene color propio,
- * como un lanzador de juegos, sin caer en el azul de Steam ni en los colores de NVIDIA, AMD
- * o Intel. La señal es el magenta de "textura faltante" que muestran los motores cuando no
- * carga una textura, y se usa poco: acción principal, foco y filtros activos.
+ * Grafito y violeta. La base es un gris grafito con un toque violeta: tiene color propio,
+ * como un lanzador de juegos. La señal es violeta, el único color que no usan Steam, NVIDIA,
+ * AMD ni Intel, y se usa poco: acción principal, foco y filtros activos. El violeta de la
+ * marca (#7c4dff, en el logo) es el mismo en los dos temas.
  *
  * El tema lo resuelve un script en el <head> (ver layout): pone data-theme="light|dark"
  * según la elección guardada o el sistema. La media query solo cubre a quien no tiene JS.
@@ -26,7 +26,7 @@
     --rd-line-strong: #8c859c;
     --rd-fg: #1d1a24;
     --rd-muted: #5c566a;
-    --rd-accent: #a3127f;
+    --rd-accent: #6a3fd8;
     --rd-on-accent: #ffffff;
     --rd-warn: #7a4f00;
     --rd-danger: #b42318;
@@ -43,8 +43,8 @@
         --rd-line-strong: #6a627c;
         --rd-fg: #eceaf2;
         --rd-muted: #a8a3b7;
-        --rd-accent: #ff5fd2;
-        --rd-on-accent: #1d1b24;
+        --rd-accent: #9d7bff;
+        --rd-on-accent: #16141c;
         --rd-warn: #f5c26b;
         --rd-danger: #ff8a7a;
     }
@@ -61,8 +61,8 @@
     --rd-line-strong: #6a627c;
     --rd-fg: #eceaf2;
     --rd-muted: #a8a3b7;
-    --rd-accent: #ff5fd2;
-    --rd-on-accent: #1d1b24;
+    --rd-accent: #9d7bff;
+    --rd-on-accent: #16141c;
     --rd-warn: #f5c26b;
     --rd-danger: #ff8a7a;
 }
@@ -157,14 +157,14 @@
 }
 
 /*
- * Portada que no cargó: el damero magenta y negro de "textura faltante", atenuado para que
- * las iniciales se lean encima.
+ * Portada que no cargó: el damero de "textura faltante" de los motores, en el violeta de la
+ * marca y atenuado para que las iniciales se lean encima.
  */
 @utility missing-texture {
     background-color: var(--rd-raised);
     background-image:
         linear-gradient(color-mix(in srgb, var(--rd-raised) 88%, transparent), color-mix(in srgb, var(--rd-raised) 88%, transparent)),
-        conic-gradient(#ff00dc 25%, #000 0 50%, #ff00dc 0 75%, #000 0);
+        conic-gradient(#7c4dff 25%, #000 0 50%, #7c4dff 0 75%, #000 0);
     background-size:
         100% 100%,
         2rem 2rem;

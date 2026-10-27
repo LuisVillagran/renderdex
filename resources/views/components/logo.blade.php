@@ -1,11 +1,16 @@
-{{-- Marca propia: un píxel chico proyectado a un cuadro grande, como un diagrama de reescalado. --}}
+{{--
+    Marca propia: una R cuya pierna se deshace en píxeles que se apagan, como un borde todavía
+    sin reescalar. El violeta de la marca es fijo en los dos temas (igual que public/favicon.svg).
+--}}
 @props(['tagline' => false])
 
 <span {{ $attributes->class(['inline-flex items-center gap-2.5']) }}>
-    <svg viewBox="0 0 32 32" fill="none" class="size-7 shrink-0" aria-hidden="true">
-        <rect x="3.5" y="3.5" width="25" height="25" rx="3" stroke="currentColor" stroke-width="1.5" />
-        <path d="M14 18 28.5 3.5" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" />
-        <rect x="6" y="16" width="10" height="10" rx="1.5" class="fill-accent" />
+    <svg viewBox="0 0 32 32" class="size-7 shrink-0" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="#7c4dff" />
+        <path d="M9 25V7.5h7a5 5 0 0 1 0 10H9" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round" />
+        <rect x="15" y="17" width="4" height="4" fill="#fff" />
+        <rect x="19" y="21" width="4" height="4" fill="#fff" opacity=".8" />
+        <rect x="23" y="25" width="3" height="3" fill="#fff" opacity=".55" />
     </svg>
     <span @class(['flex-col leading-none', 'hidden sm:flex' => $tagline, 'flex' => ! $tagline])>
         <span class="font-display text-lg font-extrabold tracking-tight">Renderdex</span>

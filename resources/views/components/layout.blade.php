@@ -20,7 +20,9 @@
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#f4f3f8" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1d1b24" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="48x48">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ config('app.name') }}">
